@@ -61,6 +61,8 @@ h1. 2. CHANGELOG
 +1.0.0+
 First stable release
 
++1.0.1+
+Attachments permission added because search_controller definitely needs it.
 
 h1. 3. KNOWN BUGS
 

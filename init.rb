@@ -15,7 +15,7 @@ Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
 	author 'Xabier Elkano'
 	description 'This plugin allows searches over attachments'
-	version '1.0.0'
+	version '1.0.1'
 
 	settings :partial => 'settings/redmine_xapian_settings',
     		:default => {
@@ -24,7 +24,7 @@ Redmine::Plugin.register :redmine_xapian do
 		'stemming_lang' => 'english'
     	}
 
-#	 permission :view_attachments, :public => true
+	 permission :view_attachments, :public => true
 end
 
 Redmine::Search.map do |search|
