@@ -1,0 +1,19 @@
+# English strings go here for Rails i18n
+en:
+  
+    label_enable_redmine_xapian: "Enable xapian engine to allow searchs on attachments"
+    label_index_database: "Index database location"
+    label_stemming_lang: "set the stemming language, the default is 'english'.
+                           Possible values: danish dutch english finnish french
+                           german german2 hungarian italian kraaij_pohlmann
+                           lovins norwegian porter portuguese romanian russian
+                           spanish swedish turkish (pass 'none' to disable
+                           stemming)"
+    label_search2: "Extended Search"
+    
+    text_search1: "This plugin does same redmine search plus searches into attachment. To enable xapian you have to build database with omindex utility and configure index database on plugin settings page"
+    label_document: "Document"
+    label_issue: "Issue"
+    label_wiki: "Wiki"
+    label_message: "Message"
+

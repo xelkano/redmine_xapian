@@ -1,0 +1,16 @@
+<p>
+  <%=content_tag(:label, l(:label_enable_redmine_xapian))%>
+  <%=check_box_tag 'settings[enable]', true, @settings['enable'] == "true" %>
+</p>
+
+<p>
+  <%=content_tag(:label, l(:label_index_database)) %>
+  <%=text_field_tag 'settings[index_database]', @settings['index_database'] %><br/>
+  (<%=l(:label_default)%>: /var/tmp)
+</p>
+
+<p>
+ <%=content_tag(:label, l(:label_stemming_lang)) %>
+  <%=text_field_tag 'settings[stemming_lang]', @settings['stemming_lang'] %><br/>
+  (<%=l(:label_default)%>: english )
+</p>

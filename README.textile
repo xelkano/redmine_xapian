@@ -1,0 +1,70 @@
+h1. Redmine Xapian search plugin
+
+A plugin to allow attachment searches by file name and content with xapian search engine.
+This plugin replaces search and acts_as_searchable methods.
+
+I've developed it on Redmine 1.0.0 and Ubuntu 10.04 server.
+
+h1. 1.  Installation and Setup
+
+A copy of the plugin can be downloaded from GitHub at http://github.com/xelkano/redmine_xapian
+
+h2. 1.1. Required packages
+
+To use "xapian":http://xapian.org search engine you must install libxapian-ruby1.8 and xapian-omega packages (on ubuntu). To index some files with omega you may have to install some other packages like xpdf, antiword, ...
+
+From Omega documentation:
+
+    * PDF (.pdf) if pdftotext is available (comes with xpdf)
+    * PostScript (.ps, .eps, .ai) if ps2pdf (from ghostscript) and pdftotext (comes with xpdf) are available
+    * OpenOffice/StarOffice documents (.sxc, .stc, .sxd, .std, .sxi, .sti, .sxm, .sxw, .sxg, .stw) if unzip is available
+    * OpenDocument format documents (.odt, .ods, .odp, .odg, .odc, .odf, .odb, .odi, .odm, .ott, .ots, .otp, .otg, .otc, .otf, .oti, .oth) if unzip is available
+    * MS Word documents (.doc, .dot) if antiword is available
+    * MS Excel documents (.xls, .xlb, .xlt) if xls2csv is available (comes with catdoc)
+    * MS Powerpoint documents (.ppt, .pps) if catppt is available (comes with catdoc)
+    * MS Office 2007 documents (.docx, .dotx, .xlsx, .xlst, .pptx, .potx, .ppsx) if unzip is available
+    * Wordperfect documents (.wpd) if wpd2text is available (comes with libwpd)
+    * MS Works documents (.wps, .wpt) if wps2text is available (comes with libwps)
+    * AbiWord documents (.abw)
+    * Compressed AbiWord documents (.zabw) if gzip is available
+    * Rich Text Format documents (.rtf) if unrtf is available
+    * Perl POD documentation (.pl, .pm, .pod) if pod2text is available
+    * TeX DVI files (.dvi) if catdvi is available
+    * DjVu files (.djv, .djvu) if djvutxt is available
+    * XPS files (.xps) if unzip is available
+
+h2. 1.2. Plugin installation
+
+Install redmine_xapian into vendor/plugins directory with:
+* ruby script/plugin install http://github.com/xelkano/redmine_xapian.git or download and extract tar or zip file.
+* rake db:migrate_plugins RAILS_ENV="production"
+* Restart web server
+
+Now you can see a new check box "files" on search screen, that allows you to search attachments.
+
+h2. 1.3. Setup
+
+Before use the plugin you have to index redmine files with omega:
+
+<pre>
+omindex -s english --db /var/www/xapian-index/ /var/www/redmine/files/
+</pre>
+
+use *omindex -h* for help.
+
+You can launch this command from crontab one or two times a day.
+After file indexing and plugin setup on settings you can search attachment by content.
+
+
+h1. 2. CHANGELOG
+
++1.0.0+
+First stable release
+
+
+h1. 3. KNOWN BUGS
+
+- When search is performed across redmine database and xapian database, results count is approximate and may not be accurate due to the required effort in database operations to determine this value.
+
+If you found a bug please notify me on github.
+
