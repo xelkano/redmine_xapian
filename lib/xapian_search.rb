@@ -13,7 +13,6 @@ module XapianSearch
   @@numattach=0
   
   def XapianSearch.search_attachments(tokens, limit_options, offset, projects_to_search, all_words )
-		filedocs = Array.new
 		xpattachments = Array.new
 		return xpattachments unless Setting.plugin_redmine_xapian['enable'] == "true"
 		database = Xapian::Database.new(Setting.plugin_redmine_xapian['index_database'].rstrip)
@@ -31,7 +30,11 @@ module XapianSearch
 		stemmer = Xapian::Stem.new(Setting.plugin_redmine_xapian['stemming_lang'].rstrip)
 		qp.stemmer = stemmer
 		qp.database = database
-		qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
+		case Setting.plugin_redmine_xapian['stemming_strategy'].rstrip
+		  when "STEM_NONE" then qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
+		  when "STEM_SOME" then qp.stemming_strategy = Xapian::QueryParser::STEM_SOME
+		  when "STEM_ALL" then qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
+		end
 		if all_words
 		  qp.default_op = Xapian::Query::OP_AND
 		else	
@@ -45,13 +48,12 @@ module XapianSearch
 		enquire.query = query
 		matchset = enquire.mset(0, 1000)
 	
-		return filedocs if matchset.nil?
+		return xpattachments if matchset.nil?
 
 		# Display the results.
 		#logger.debug "#{@matchset.matches_estimated()} results found."
 		Rails.logger.debug "DEBUG: Matches 1-#{matchset.size}:\n"
 
-		@record_info = Hash.new
 		matchset.matches.each {|m|
 		  #logger.debug "#{m.rank + 1}: #{m.percent}% docid=#{m.docid} [#{m.document.data}]\n"
 		  #logger.debug "DEBUG: m: " + m.document.data.inspect
@@ -62,57 +64,15 @@ module XapianSearch
 		    docattach=Attachment.find (:first, :conditions =>  find_conditions  )
 		    #logger.debug "docattach found" + docattach.inspect
 		    if not docattach.nil? then
-			dochash[:attachment]=docattach
-			@record_info[:attach_id]=docattach[:id]
-			@record_info[:doc_id]=docattach[:container_id]
-			@record_info[:user_id]=docattach[:author_id]
-			container=Document.find(:first, :conditions => ["id = ?", @record_info[:doc_id]]) if docattach[:container_type] == "Document"
-			container=Wiki_Page.find(:first, :conditions => ["id = ?", @record_info[:doc_id]]) if docattach[:container_type] == "WikiPage"
-			container=Message.find(:first, :conditions => ["id = ?", @record_info[:doc_id]]) if docattach[:container_type] == "Message"
-			container=Issue.find(:first, :conditions => ["id = ?", @record_info[:doc_id]]) if docattach[:container_type] == "Issue"
-			if not container.nil? then
-			  if ((docattach[:container_type] == "Document") || (docattach[:container_type] == "Issue")) then
-			    @record_info[:project_id]=container[:project_id]
-			  elsif docattach[:container_type] == "Message"
-			    board=Board.find(:first, :conditions => ["id = ?", container[:board_id]])
-			    @record_info[:project_id]=board[:project_id]
-			    @record_info[:board_id]=container[:board_id]
-			    @record_info[:topic_id]=container[:parent_id]
-			  elsif docattach[:container_type] == "WikiPage"
-			    wiki=Wiki.find(:first, :conditions => ["id = ?", container[:wiki_id]])
-			    @record_info[:project_id]=wiki[:project_id]
-			  end
-			unless container[:subject].nil?
-                          @record_info[:subject]=container[:subject]
-                        else
-                          @record_info[:subject]=container[:title]
-                        end
-			  project = Project.find ( :first, :conditions => ["id =?", @record_info[:project_id]] )
-			  allowed = User.current.allowed_to?("view_documents".to_sym, project )
-			  if ( allowed and project_included(project[:id], projects_to_search ) )
-			    #logger.debug "record_info: " + @record_info.inspect
-			    #filedoc = FileDoc.new (@record_info[:attach_id],
-			    #  @record_info[:project_id],
-			    #  @record_info[:subject],
-			    #  dochash["sample"],
-			    #  docattach[:created_on],
-			    #  docattach[:container_type],
-			    #  @record_info[:board_id],
-			    #  @record_info[:topic_id],
-			    #  @record_info[:doc_id],
-			    #  @record_info[:user_id],
-			    #  docattach[:filename] )	
-			    #Rails.logger.debug "DEBUG: filedoc" + filedoc.inspect
-			    #filedocs.push ( filedoc ) 
-			    docattach[:description]=dochash["sample"]
-			    xpattachments.push ( docattach )
-			    @record_info = Hash.new
-			  else
-			    Rails.logger.debug "DEBUG: user without permissions"
-			  end
-			else
-			  Rails.logger.debug "DEBUG: container not found"
-			end
+		      if not docattach.container.nil? then
+		        allowed = User.current.allowed_to?("view_documents".to_sym, docattach.container.project )
+		        if ( allowed and project_included(docattach.container.project.id, projects_to_search ) )
+			  docattach[:description]=dochash["sample"]
+			  xpattachments.push ( docattach )
+		        else
+		 	  Rails.logger.debug "DEBUG: user without permissions"
+		        end
+		      end
 		    end
 		  end
 		}	

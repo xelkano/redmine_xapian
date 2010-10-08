@@ -29,7 +29,43 @@ module AttachmentPatch
   end
 
   module InstanceMethods
-
+    def container_url
+	if container.is_a?(Issue)
+          container_url = "/issues/"+  container[:id].to_s
+        elsif container.is_a?(WikiPage)
+          container_url = "/projects/"+container.project.identifier.to_s+"/wiki/"+ container[:title]
+        elsif container.is_a?(Document)
+          container_url = "/documents/"+ container[:id].to_s
+        elsif container.is_a?(Message)
+          container_url = "/boards/" + container[:board_id].to_s + "/topics/" + container[:parent_id].to_s + "\#message-" + container[:id].to_s
+        end
+        container_url
+    end
+    def container_name
+	container_name = ": "
+	if container.is_a?(Issue)
+          container_name += container[:subject]
+        elsif container.is_a?(WikiPage)
+          container_name += container[:title].to_s
+        elsif container.is_a?(Document)
+          container_name += container[:title].to_s
+        elsif container.is_a?(Message)
+          container_name += container[:subject]
+        end
+        container_name
+    end
+    def container_type
+	if container.is_a?(Issue)
+          container_type = "Issue"
+        elsif container.is_a?(WikiPage)
+          container_type = "WikiPage"
+        elsif container.is_a?(Document)
+          container_type = "Document"
+        elsif container.is_a?(Message)
+          container_type = "Message"
+        end
+        container_type
+    end
   end
 end
 

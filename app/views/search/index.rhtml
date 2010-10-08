@@ -27,7 +27,26 @@
     <h3><%= l(:label_result_plural) %> (<%= @results_by_type.values.sum %>)</h3>
     <dl id="search-results">
       <% @results.each do |e| %>
-        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project %> <%= link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url %></dt>
+        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project %> 
+<% if e.event_type == "attachment" then %>
+<strong>
+<%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url	%>
+</strong>
+<%	if e.container_type == "Document" %>
+<%=		link_to truncate( l(:label_document)+e.container_name, :length => 255), e.container_url %>
+<%	elsif e.container_type == "Message" %>
+<%=		link_to truncate( l(:label_message)+e.container_name, :length => 255), e.container_url %>
+<%	elsif e.container_type == "WikiPage" %>
+<%=		link_to truncate( l(:label_wiki)+e.container_name, :length => 255), e.container_url	 %>	
+<%	elsif e.container_type == "Issue" %>
+<%=		link_to truncate( l(:label_issue)+e.container_name, :length => 255), e.container_url %>
+<%	end
+%>
+<% else %>
+<%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url %>
+<%end%>
+</dt>
+
         <dd><span class="description"><%= highlight_tokens(e.event_description, @tokens) %></span>
         <span class="author"><%= format_time(e.event_datetime) %></span></dd>
       <% end %>

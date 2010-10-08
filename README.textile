@@ -53,16 +53,15 @@ omindex -s english --db /var/www/xapian-index/ /var/www/redmine/files/
 use *omindex -h* for help.
 
 You can launch this command from crontab one or two times a day.
-After file indexing and plugin setup on settings you can search attachment by content.
+After file indexing and plugin setup on settings you can search attachment by name and content.
 
+To perform attachment searches view_attachment and permissions view_document are necessary. view_attachment permission is necesary because search controller looks for it to draw "files" checkbox on search screen.
 
 h1. 2. CHANGELOG
 
-+1.0.0+
-First stable release
-
-+1.0.1+
-Attachments permission added because search_controller definitely needs it.
+1.0.0 - First stable release
+1.0.1 - Attachments permission added because search_controller definitely needs it.
+1.1.0 - Enhanced search results view screen.
 
 h1. 3. KNOWN BUGS
 

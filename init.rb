@@ -15,13 +15,15 @@ Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
 	author 'Xabier Elkano'
 	description 'This plugin allows searches over attachments'
-	version '1.0.1'
+	version '1.1.0'
+	requires_redmine :version_or_higher => '1.0.0'
 
-	settings :partial => 'settings/redmine_xapian_settings',
+	settings :partial => 'settings/xapian_settings',
     		:default => {
-      		'enable' => 'true',
-     		'index_database' => '/var/tmp/',
-		'stemming_lang' => 'english'
+      		  'enable' => 'true',
+     		  'index_database' => '/var/tmp/',
+		  'stemming_lang' => 'english',
+		  'stemming_strategy' => 'STEM_NONE'
     	}
 
 	 permission :view_attachments, :public => true

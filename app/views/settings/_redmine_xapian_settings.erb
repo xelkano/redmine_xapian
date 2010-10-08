@@ -14,3 +14,20 @@
   <%=text_field_tag 'settings[stemming_lang]', @settings['stemming_lang'] %><br/>
   (<%=l(:label_default)%>: english )
 </p>
+
+
+<p>
+This controls how the query parser will apply the stemming algorithm. The default value is STEM_NONE. The possible values are:
+<br>
+    * STEM_NONE: Don't perform any stemming.<br>
+    * STEM_SOME: Search for stemmed forms of terms except for those which start with a capital letter, or are followed by certain characters (currently: (/@\<\>=*[{\" ), or are used with operators which need positional information. Stemmed terms are prefixed with 'Z'.<br>
+    * STEM_ALL: Search for stemmed forms of all words (note: no 'Z' prefix is added).<br>
+
+Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.<br>
+<br>
+  <%=content_tag(:label, "Stem strategy")%>
+  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', :checked=>true  %> Stem none (default)<br>
+  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME'  %> Stem some<br>
+  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL'  %> Stem all <br>
+</p>
+
