@@ -5,17 +5,25 @@
 #
 # $Id: init.rb,v 1.1 2008/04/23 13:33:50 francis Exp $
 
-require 'redmine'
-require File.dirname(__FILE__) + '/lib/attachment_patch'
-Attachment.send(:include, AttachmentPatch)
-require File.dirname(__FILE__) + '/lib/acts_as_searchable'
-ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
 
-Redmine::Plugin.register :redmine_xapian do
+begin
+    require 'xapian'
+    $xapian_bindings_available = true
+rescue LoadError
+    Rails.logger.info "REDMAIN_XAPIAN ERROR: No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby."
+    $xapian_bindings_available = false
+else
+    require 'redmine'
+    require File.dirname(__FILE__) + '/lib/attachment_patch'
+    require File.dirname(__FILE__) + '/lib/acts_as_searchable'
+    Attachment.send(:include, AttachmentPatch)
+    ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
+
+    Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
 	author 'Xabier Elkano'
 	description 'This plugin allows searches over attachments'
-	version '1.1.1'
+	version '1.1.2'
 	requires_redmine :version_or_higher => '1.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',
@@ -27,10 +35,9 @@ Redmine::Plugin.register :redmine_xapian do
     	}
 
 	 permission :view_attachments, :public => true
-end
+   end
 
-Redmine::Search.map do |search|
+   Redmine::Search.map do |search|
      search.register :attachments
+  end
 end
-
-

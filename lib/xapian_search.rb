@@ -1,12 +1,4 @@
 
-begin
-    require 'xapian'
-    $xapian_bindings_available = true
-rescue LoadError
-    Rails.logger.notice "No Ruby bindings for Xapian installed"
-    $xapian_bindings_available = false
-end
-
 
 module XapianSearch
   
