@@ -6,7 +6,7 @@ module XapianSearch
   
   def XapianSearch.search_attachments(tokens, limit_options, offset, projects_to_search, all_words )
 		xpattachments = Array.new
-		return xpattachments unless Setting.plugin_redmine_xapian['enable'] == "true"
+		return [xpattachments,0] unless Setting.plugin_redmine_xapian['enable'] == "true"
 		database = Xapian::Database.new(Setting.plugin_redmine_xapian['index_database'].rstrip)
 
 		# Start an enquire session.
