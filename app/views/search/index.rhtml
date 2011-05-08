@@ -40,7 +40,9 @@
 <%=		link_to truncate( l(:label_wiki)+e.container_name, :length => 255), e.container_url	 %>	
 <%	elsif e.container_type == "Issue" %>
 <%=		link_to truncate( l(:label_issue)+e.container_name, :length => 255), e.container_url %>
-<%	end
+<%      elsif e.container_type == "Article" %>
+<%=        	link_to truncate( l(:label_article)+e.container_name, :length => 255), e.container_url %>
+<%    	end
 %>
 <% else %>
 <%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url %>

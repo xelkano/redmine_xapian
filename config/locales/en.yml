@@ -16,4 +16,7 @@ en:
     label_issue: "Issue"
     label_wiki: "Wiki"
     label_message: "Message"
+    label_article: "Article"
+    label_article_plural: "Articles"
+
 

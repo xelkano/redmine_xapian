@@ -14,5 +14,7 @@ es:
     label_issue: "Petición"
     label_wiki: "Wiki"
     label_message: "Mensaje"
+    label_article: "Artículo"
+    label_article_plural: "Artículos"
     
     text_search1: "Este plugin, además de realizar las búsquedas habituales de redmine permite realizar búsquedas por contenido en los documentos adjuntos, ya sean páginas wiki, foros, documentos o peticiones.

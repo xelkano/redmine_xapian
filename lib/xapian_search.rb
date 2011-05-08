@@ -54,10 +54,10 @@ module XapianSearch
 		  if not dochash.nil? then
 		    find_conditions =  Attachment.merge_conditions (limit_options[:conditions],  :disk_filename => dochash.fetch('url') )
 		    docattach=Attachment.find (:first, :conditions =>  find_conditions  )
-		    #logger.debug "docattach found" + docattach.inspect
+		    #Rails.logger.debug "docattach found" + docattach.inspect
 		    if not docattach.nil? then
 		      if not docattach.container.nil? then
-		        allowed = User.current.allowed_to?("view_documents".to_sym, docattach.container.project )
+		        allowed = User.current.allowed_to?("view_documents".to_sym, docattach.container.project ) || docattach.container_type=="Article"
 		        if ( allowed and project_included(docattach.container.project.id, projects_to_search ) )
 			  docattach[:description]=dochash["sample"]
 			  xpattachments.push ( docattach )
