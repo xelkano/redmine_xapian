@@ -178,18 +178,20 @@ module Redmine
 		results+=results_issue
 		results_count+= results_count_issue
 		#Attachments on Articles
-		find_options_tmp=Hash.new
-        	find_options_tmp=find_options_tmp.merge(find_options)
-        	results_article = []
-       	 	results_count_article=0
-        	find_options_tmp[:conditions] = merge_conditions (find_options_tmp[:conditions], :container_type=>"Article" )
-        	find_options_tmp [:joins] =  "INNER JOIN kb_articles ON kb_articles.id=container_id "  
-                with_scope(:find => find_options_tmp) do
-                   results_count_article = count(:all)
-                    results_article = find(:all, limit_options)
-                end
-        	results +=results_article
-        	results_count += results_count_article
+		if Redmine::Search.available_search_types.include?("Article") 
+		  find_options_tmp=Hash.new
+        	  find_options_tmp=find_options_tmp.merge(find_options)
+        	  results_article = []
+       	 	  results_count_article=0
+        	  find_options_tmp[:conditions] = merge_conditions (find_options_tmp[:conditions], :container_type=>"Article" )
+        	  find_options_tmp [:joins] =  "INNER JOIN kb_articles ON kb_articles.id=container_id "  
+                  with_scope(:find => find_options_tmp) do
+                    results_count_article = count(:all)
+                     results_article = find(:all, limit_options)
+                  end
+        	  results +=results_article
+        	  results_count += results_count_article
+		end
 		# Search attachments over xapian
 		if !options[:titles_only] 
 		  xapianresults, xapianresults_count =  XapianSearch.search_attachments( tokens, limit_options, 

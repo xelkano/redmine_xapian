@@ -53,11 +53,14 @@ module XapianSearch
 		  dochash=Hash[*docdata.scan(/(url|sample|modtime|type|size)=\/?([^\n\]]+)/).flatten]
 		  if not dochash.nil? then
 		    find_conditions =  Attachment.merge_conditions (limit_options[:conditions],  :disk_filename => dochash.fetch('url') )
-		    docattach=Attachment.find (:first, :conditions =>  find_conditions  )
-		    #Rails.logger.debug "docattach found" + docattach.inspect
+		    docattach=Attachment.find (:first, :conditions =>  find_conditions )
+		    if docattach["container_type"] == "Article" and not Redmine::Search.available_search_types.include?("Article")
+			Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
+			docattach=nil
+		    end
 		    if not docattach.nil? then
 		      if not docattach.container.nil? then
-		        allowed = User.current.allowed_to?("view_documents".to_sym, docattach.container.project ) || docattach.container_type=="Article"
+		        allowed =  User.current.allowed_to?("view_documents".to_sym, docattach.container.project)  ||  (docattach.container_type=="Article" &&  Redmine::Search.available_search_types.include?("Article") )
 		        if ( allowed and project_included(docattach.container.project.id, projects_to_search ) )
 			  docattach[:description]=dochash["sample"]
 			  xpattachments.push ( docattach )

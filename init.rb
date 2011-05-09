@@ -23,7 +23,7 @@ else
 	name 'Xapian search plugin'
 	author 'Xabier Elkano'
 	description 'This plugin allows searches over attachments'
-	version '1.1.4'
+	version '1.1.5'
 	requires_redmine :version_or_higher => '1.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',

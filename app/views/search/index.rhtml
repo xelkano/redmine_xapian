@@ -25,9 +25,10 @@
     </div>
     
     <h3><%= l(:label_result_plural) %> (<%= @results_by_type.values.sum %>)</h3>
+    
     <dl id="search-results">
       <% @results.each do |e| %>
-        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project %> 
+        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project  %> 
 <% if e.event_type == "attachment" then %>
 <strong>
 <%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url	%>
