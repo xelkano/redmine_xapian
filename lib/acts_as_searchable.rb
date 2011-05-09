@@ -178,7 +178,8 @@ module Redmine
 		results+=results_issue
 		results_count+= results_count_issue
 		#Attachments on Articles
-		if Redmine::Search.available_search_types.include?("Article") 
+		if Redmine::Search.available_search_types.include?("articles")
+		  logger.debug "DEBUG: knowledgebase plugin installed"
 		  find_options_tmp=Hash.new
         	  find_options_tmp=find_options_tmp.merge(find_options)
         	  results_article = []
