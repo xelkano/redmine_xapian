@@ -40,26 +40,27 @@ module XapianSearch
 		enquire.query = query
 		matchset = enquire.mset(0, 1000)
 	
-		return xpattachments if matchset.nil?
+		return [xpattachments,0] if matchset.nil?
 
 		# Display the results.
 		#logger.debug "#{@matchset.matches_estimated()} results found."
 		Rails.logger.debug "DEBUG: Matches 1-#{matchset.size}:\n"
 
 		matchset.matches.each {|m|
-		  #logger.debug "#{m.rank + 1}: #{m.percent}% docid=#{m.docid} [#{m.document.data}]\n"
+		  #Rails.logger.debug "#{m.rank + 1}: #{m.percent}% docid=#{m.docid} [#{m.document.data}]\n"
 		  #logger.debug "DEBUG: m: " + m.document.data.inspect
 		  docdata=m.document.data{url}
 		  dochash=Hash[*docdata.scan(/(url|sample|modtime|type|size)=\/?([^\n\]]+)/).flatten]
 		  if not dochash.nil? then
 		    find_conditions =  Attachment.merge_conditions (limit_options[:conditions],  :disk_filename => dochash.fetch('url') )
 		    docattach=Attachment.find (:first, :conditions =>  find_conditions )
-		    if docattach["container_type"] == "Article" and not Redmine::Search.available_search_types.include?("articles")
-			Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
-			docattach=nil
-		    end
 		    if not docattach.nil? then
-		      if not docattach.container.nil? then
+		      article_ct=true
+		      if docattach["container_type"] == "Article" and not Redmine::Search.available_search_types.include?("articles")
+                        Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
+                        article_ct=false
+                      end
+		      if not docattach.container.nil? and article_ct then
 		        allowed =  User.current.allowed_to?("view_documents".to_sym, docattach.container.project)  ||  docattach.container_type=="Article"
 		        if ( allowed and project_included(docattach.container.project.id, projects_to_search ) )
 			  docattach[:description]=dochash["sample"]
