@@ -1,0 +1,16 @@
+
+1.0.0 - First stable release
+1.0.1 - Attachments permission added because search_controller definitely needs it.
+1.1.0 - Enhanced search results view screen.
+1.1.1 - Fix for issue #1
+1.1.2 - Fix for issue #2 and german localization added
+1.1.3 - Added support for article container to allow integration with knowledgebase plugin
+1.1.4 - Fix for issue #10
+1.1.5 - Fix issue when knowledgebase plugin is not installed
+1.1.6 - Fix issue on searches with article container
+1.2.0
+-----	
+	- Support for searches in multiple stemmed languages. 
+	- Tested in Redmine 1.2.1 and xapian packages 1.2.7.
+	- Bug fixes.
+
