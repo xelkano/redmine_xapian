@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module SearchHelper
-  def highlight_tokens(text, tokens)
+  def highlight_tokens1(text, tokens)
     return text unless text && tokens && !tokens.empty?
     re_tokens = tokens.collect {|t| Regexp.escape(t)}
     regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE    
@@ -28,7 +28,7 @@ module SearchHelper
         break
       end
       words = words.mb_chars
-  	#logger.debug "DEBUG: words: " + words.inspect + " i: " + i.to_s
+  	logger.debug "DEBUG: words: " + words.inspect + " i: " + i.to_s
       if i.even?
         result << h(words.length > 100 ? "#{words.slice(0..44)} ... #{words.slice(-45..-1)}" : words)
       else
@@ -43,7 +43,7 @@ module SearchHelper
     l("label_#{t.singularize}_plural")
   end
   
-  def project_select_tag
+  def project_select_tag1
     options = [[l(:label_project_all), 'all']]
     options << [l(:label_my_projects), 'my_projects'] unless User.current.memberships.empty?
     options << [l(:label_and_its_subprojects, @project.name), 'subprojects'] unless @project.nil? || @project.descendants.active.empty?
@@ -61,5 +61,12 @@ module SearchHelper
         links << link_to(text, :q => params[:q], :titles_only => params[:title_only], :all_words => params[:all_words], :scope => params[:scope], t => 1)
       end
     ('<ul>' + links.map {|link| content_tag('li', link)}.join(' ') + '</ul>') unless links.empty?
+  end
+
+  def stem_langs
+	# leer de settins??
+	@langs=["english", "spanish", "german "]
+	logger.debug "DEBUG langs en stem_langs: " + @langs.inspect
+	langs
   end
 end

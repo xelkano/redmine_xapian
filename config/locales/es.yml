@@ -1,9 +1,9 @@
 # English strings go here for Rails i18n
 es:
-  
-    label_enable_redmine_xapian: "Habilitar xapian para búsquedas en ficheros"
-    label_index_database: "Ubicación de la BD de índices"
-    label_stemming_lang: "set the stemming language, the default is 'english'.
+
+    label_enable_redmine_xapian: "Habilitar xapian para búsquedas en ficheros"  
+    label_index_database: "Directorio que contiene las BD de xapian"
+    label_stemming_text: "set the stemming language, the default is 'english'.
                            Possible values: danish dutch english finnish french
                            german german2 hungarian italian kraaij_pohlmann
                            lovins norwegian porter portuguese romanian russian
@@ -16,5 +16,16 @@ es:
     label_message: "Mensaje"
     label_article: "Artículo"
     label_article_plural: "Artículos"
+    text_search1: "Este plugin, además de realizar las búsquedas habituales de redmine permite realizar búsquedas por contenido en los documentos adjuntos, ya sean páginas wiki, foros, documentos o peticiones."
+    label_stemming_lang: "Stemming Language"
+    label_enable_xapian_on_search: "Habilitar configuración xapian en la búsqueda"
+    label_spanish: "Español"
+    label_english: "Inglés"
+    label_search_languages: "Stemming languages on search screen"
+    label_stemming_strategy: "Stemming strategy"
+    label_stem_none: "Stem none"
+    label_stem_some: "Stem some"
+    label_stem_all:  "Stem all"
+    label_default_stemming_lang: "Set default stemming lang"
+    label_default_stemming_strategy: "Set default stemming strategy"
     
-    text_search1: "Este plugin, además de realizar las búsquedas habituales de redmine permite realizar búsquedas por contenido en los documentos adjuntos, ya sean páginas wiki, foros, documentos o peticiones.

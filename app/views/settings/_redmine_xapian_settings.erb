@@ -8,15 +8,31 @@
   <%=text_field_tag 'settings[index_database]', @settings['index_database'] %><br/>
   (<%=l(:label_default)%>: /var/tmp)
 </p>
+<% @stem_langs = ["danish", "dutch", "english", "finnish", "french", "german",
+                "hungarian", "italian", "norwegian", "portuguese", "romanian",
+                "russian", "spanish", "swedish", "turkish"] %>
+
 
 <p>
- <%=content_tag(:label, l(:label_stemming_lang)) %>
-  <%=text_field_tag 'settings[stemming_lang]', @settings['stemming_lang'] %><br/>
-  (<%=l(:label_default)%>: english )
+<%= content_tag(:label, l(:label_enable_xapian_on_search))%> <%=radio_button_tag 'settings[stem_on_search]', 'true', @settings['stem_on_search'] == 'true', :checked=>true  %> yes <%=radio_button_tag 'settings[stem_on_search]', 'false', @settings['stem_on_search'] == 'false'  %> No
 </p>
 
 
 <p>
+ <%=content_tag(:label, l(:label_default_stemming_lang)) %>
+  <%=select_tag( "settings[stemming_lang]", 
+		options_for_select( @stem_langs, @settings['stemming_lang'] ))%><br/>
+  (<%=l(:label_default)%>: english )
+<p>
+<%=content_tag(:label, l(:label_search_languages)) %>
+
+
+<%= select_tag("settings[stem_langs]", 
+                   options_for_select( @stem_langs,  (@settings['stem_langs'].nil? ) ?  @settings['stemming_lang'] : @settings['stem_langs']),
+                   :multiple => true) %>
+</p>
+<p>
+<%=content_tag(:label, l(:label_default_stemming_strategy))%>
 This controls how the query parser will apply the stemming algorithm. The default value is STEM_NONE. The possible values are:
 <br>
     * STEM_NONE: Don't perform any stemming.<br>
@@ -25,9 +41,8 @@ This controls how the query parser will apply the stemming algorithm. The defaul
 
 Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.<br>
 <br>
-  <%=content_tag(:label, "Stem strategy")%>
-  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', :checked=>true  %> Stem none (default)<br>
-  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME'  %> Stem some<br>
-  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL'  %> Stem all <br>
+  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', :checked=>true  %> <%=l(:label_stem_none)%> (<%=l(:label_default)%>)<br>
+  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME'  %> <%=l(:label_stem_some)%><br>
+  <%=radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL'  %> <%=l(:label_stem_all)%> <br>
 </p>
 

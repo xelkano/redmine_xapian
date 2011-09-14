@@ -194,9 +194,16 @@ module Redmine
         	  results_count += results_count_article
 		end
 		# Search attachments over xapian
-		if !options[:titles_only] 
-		  xapianresults, xapianresults_count =  XapianSearch.search_attachments( tokens, limit_options, 
-								 options[:offset], projects, options[:all_words] )
+		if !options[:titles_only]
+		  begin 
+		    xapianresults, xapianresults_count =  XapianSearch.search_attachments( tokens, limit_options, 
+								 options[:offset], projects, options[:all_words], options[:user_stem_lang],
+								options[:user_stem_strategy] )
+		  rescue => error
+		    xapianresults=[]
+		    xapianresults_count=0
+		    raise error
+		  end
 		  results_count += xapianresults_count
 		  results=(results+xapianresults).uniq.sort_by{|x| x[:created_on] }
 		  logger.debug "DEBUG result_count: " + results_count.inspect

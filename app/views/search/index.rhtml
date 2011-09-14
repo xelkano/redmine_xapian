@@ -7,6 +7,7 @@
 <%= project_select_tag %>
 <label><%= check_box_tag 'all_words', 1, @all_words %> <%= l(:label_all_words) %></label>
 <label><%= check_box_tag 'titles_only', 1, @titles_only %> <%= l(:label_search_titles_only) %></label>
+
 </p>
 <p>
 <% @object_types.each do |t| %>
@@ -15,10 +16,24 @@
 <% end %>
 </p>
 <% logger.debug "DEBUG: object_types from search: " + Redmine::Search.available_search_types.inspect %>
+<% Setting.plugin_redmine_xapian['stem_langs'].push(Setting.plugin_redmine_xapian['stemming_lang']) unless Setting.plugin_redmine_xapian['stem_langs'].include?(Setting.plugin_redmine_xapian['stemming_lang']) %>
+
+<p>
+<% if  Setting.plugin_redmine_xapian['stem_on_search'] == "true" then %>
+ <label><%= content_tag (:label, l(:label_stemming_lang))%> <%= select_tag  "user_stem_lang", 
+                        options_for_select(  Setting.plugin_redmine_xapian['stem_langs'], Setting.plugin_redmine_xapian['stemming_lang'] ) %> 
+
+</label>
+  <%=content_tag(:label, l(:label_stemming_strategy))%>
+  <%=radio_button_tag 'user_stem_strategy', 'STEM_NONE', Setting.plugin_redmine_xapian['stemming_strategy'] == 'STEM_NONE' %> <%= l(:label_stem_none) %>
+  <%=radio_button_tag 'user_stem_strategy', 'STEM_SOME', Setting.plugin_redmine_xapian['stemming_strategy'] == 'STEM_SOME'  %> <%= l(:label_stem_some)%>
+  <%=radio_button_tag 'user_stem_strategy', 'STEM_ALL',  Setting.plugin_redmine_xapian['stemming_strategy'] == 'STEM_ALL'  %> <%= l(:label_stem_all)%>
+
+
+<%end%>
 <p><%= submit_tag l(:button_submit), :name => 'submit' %></p>
 <% end %>
 </div>
-
 <% if @results %>
     <div id="search-results-counts">
     <%= render_results_by_type(@results_by_type) unless @scope.size == 1 %>
@@ -49,8 +64,13 @@
 <%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url %>
 <%end%>
 </dt>
-
-        <dd><span class="description"><%= highlight_tokens(e.event_description, @tokens) %></span>
+<dd><span class="description">
+<% if e.event_type == "attachment" then %>
+        <%= highlight_tokens2(e.event_description, @tokens) %>
+<% else%>
+	<%= highlight_tokens(e.event_description, @tokens) %>
+<% end %>
+</span>
         <span class="author"><%= format_time(e.event_datetime) %></span></dd>
       <% end %>
     </dl>
