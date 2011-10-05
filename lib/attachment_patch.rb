@@ -31,15 +31,15 @@ module AttachmentPatch
   module InstanceMethods
     def container_url
 	if container.is_a?(Issue)
-          container_url = "/issues/"+  container[:id].to_s
+	  container_url = {:controller=>"issues", :id=>container[:id], :action=>"show"}
         elsif container.is_a?(WikiPage)
-          container_url = "/projects/"+container.project.identifier.to_s+"/wiki/"+ container[:title]
+	  container_url = {:controller=>"wiki", :project_id=>container.project.identifier, :id=>container[:title], :action=>"show"}
         elsif container.is_a?(Document)
-          container_url = "/documents/"+ container[:id].to_s
+	  container_url = {:controller=>"documents", :id=>container[:id], :action=>"show"}
         elsif container.is_a?(Message)
-          container_url = "/boards/" + container[:board_id].to_s + "/topics/" + container[:parent_id].to_s + "\#message-" + container[:id].to_s
+	  container_url = {:controller=>"messages", :board_id=>container[:board_id], :id=>container[:id], :action=>"show"}
 	elsif container.is_a?(Article)
-	  container_url = "/knowledgebase/articles/" + container[:id].to_s 
+	  container_url = {:controller=>"articles", :id=>container[:id], :action=>"show"}
         end
         container_url
     end
