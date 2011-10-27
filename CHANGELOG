@@ -14,4 +14,4 @@
 	- Tested in Redmine 1.2.1 and xapian packages 1.2.7.
 	- Bug fixes.
 1.2.1	- Fix Issue #16
-	
+1.2.2	- Fix for #14	

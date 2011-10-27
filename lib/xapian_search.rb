@@ -31,7 +31,7 @@ module XapianSearch
 		queryString = tokens.join(' ')
 		# Parse the query string to produce a Xapian::Query object.
 		qp = Xapian::QueryParser.new()
-		stemmer = Xapian::Stem.new($user_stem_lang)
+		stemmer = Xapian::Stem.new(user_stem_lang)
 		qp.stemmer = stemmer
 		qp.database = database
 		case @user_stem_strategy
