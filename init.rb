@@ -28,7 +28,7 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.2.3'
+	version '1.2.4'
 	requires_redmine :version_or_higher => '1.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',
@@ -41,7 +41,6 @@ else
 		  'stem_langs' => ["english", "spanish", "german"]
     	}
 
-	 permission :view_attachments, :public => true
    end
 
    Redmine::Search.map do |search|

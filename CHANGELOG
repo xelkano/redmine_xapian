@@ -16,3 +16,4 @@
 1.2.1	- Fix Issue #16
 1.2.2	- Fix for #14	
 1.2.3	- Tested in Redmine 1.3.0
+1.2.4	- Minor bug fixes. Remove attachment permission, it is no longer needed.

@@ -16,19 +16,21 @@
 <% end %>
 </p>
 <% logger.debug "DEBUG: object_types from search: " + Redmine::Search.available_search_types.inspect %>
-<% Setting.plugin_redmine_xapian['stem_langs'].push(Setting.plugin_redmine_xapian['stemming_lang']) unless Setting.plugin_redmine_xapian['stem_langs'].include?(Setting.plugin_redmine_xapian['stemming_lang']) %>
 
-<p>
+<% if @object_types.include?("attachments") %>
+  <% Setting.plugin_redmine_xapian['stem_langs'].push(Setting.plugin_redmine_xapian['stemming_lang']) unless Setting.plugin_redmine_xapian['stem_langs'].include?(Setting.plugin_redmine_xapian['stemming_lang']) %>
+
+  <p>
 <% if  Setting.plugin_redmine_xapian['stem_on_search'] == "true" then %>
  <label><%= content_tag (:label, l(:label_stemming_lang))%> <%= select_tag  "user_stem_lang", 
-                        options_for_select(  Setting.plugin_redmine_xapian['stem_langs'], Setting.plugin_redmine_xapian['stemming_lang'] ), 
-		  :selected => @user_stem_lang.to_s  %> 
-
-</label>
+                        options_for_select(  Setting.plugin_redmine_xapian['stem_langs'], @user_stem_lang )  %> 
+                          
+  </label>
   <%=content_tag(:label, l(:label_stemming_strategy))%>
   <%=radio_button_tag 'user_stem_strategy', 'STEM_NONE', 'STEM_NONE' == @user_stem_strategy %> <%= l(:label_stem_none)%>
   <%=radio_button_tag 'user_stem_strategy', 'STEM_SOME', 'STEM_SOME' == @user_stem_strategy %> <%= l(:label_stem_some)%>
   <%=radio_button_tag 'user_stem_strategy', 'STEM_ALL',  'STEM_ALL' == @user_stem_strategy %> <%= l(:label_stem_all)%>
+<%end%>
 
 
 <%end%>

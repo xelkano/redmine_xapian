@@ -48,8 +48,8 @@ module Redmine
           searchable_options[:order_column] ||= searchable_options[:date_column]
           
           # Permission needed to search this model
+	  logger.debug "DEBUG: searchable options on act: " + searchable_options.inspect if self.name == "Attachment"
           searchable_options[:permission] = "view_#{self.name.underscore.pluralize}".to_sym unless searchable_options.has_key?(:permission)
-          
           # Should we search custom fields on this model ?
           searchable_options[:search_custom_fields] = !reflect_on_association(:custom_values).nil?
           send :include, Redmine::Acts::Searchable::InstanceMethods
@@ -77,6 +77,7 @@ module Redmine
             if options[:offset]
               limit_options[:conditions] = "(#{searchable_options[:date_column]} " + (options[:before] ? '<' : '>') + "'#{connection.quoted_date(options[:offset])}')"
             end
+    	    logger.debug "DEBUG:  searchable_options search: " + searchable_options.inspect if  self.name == "Attachment"
             
             columns = searchable_options[:columns]
             columns = columns[0..0] if options[:titles_only]
