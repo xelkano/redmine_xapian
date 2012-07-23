@@ -18,14 +18,14 @@ module Redmine
             search_results = []
 
             if Redmine::Search.available_search_types.include?("articles")
-              search_results += [ search_for_articles_attachements(search_data) ]
+              search_results += [ search_for_articles_attachments(search_data) ]
             end
 
             search_results += [
               search_for_documents(search_data),
-              search_for_issues_attachements(search_data),
-              search_for_message_attachements(search_data),
-              search_for_wiki_page_attachements(search_data)
+              search_for_issues_attachments(search_data),
+              search_for_message_attachments(search_data),
+              search_for_wiki_page_attachments(search_data)
             ]
 
             values = search_results.map(&:first).flatten
@@ -43,7 +43,7 @@ module Redmine
           alias_method_chain :search, :attachments
 
           private
-            def search_for_articles_attachements(search_data)
+            def search_for_articles_attachments(search_data)
               query = "INNER JOIN kb_articles ON kb_articles.id = container_id"
               search_in_container(search_data, "Article", query)
             end
@@ -58,7 +58,7 @@ module Redmine
               search_in_projects_container(search_data, "Document", query)
             end
 
-            def search_for_issues_attachements(search_data)
+            def search_for_issues_attachments(search_data)
               query = <<-sql
                 INNER JOIN #{Issue.table_name} 
                   ON #{Issue.table_name}.id=container_id 
@@ -68,7 +68,7 @@ module Redmine
               search_in_projects_container(search_data, "Issue", query)
             end
 
-            def search_for_message_attachements(search_data)
+            def search_for_message_attachments(search_data)
               query = <<-sql
                 INNER JOIN #{Message.table_name} 
                   ON #{Message.table_name}.id=container_id  
@@ -80,7 +80,7 @@ module Redmine
               search_in_projects_container(search_data, "Message", query)
             end
 
-            def search_for_wiki_page_attachements(search_data)
+            def search_for_wiki_page_attachments(search_data)
               query = <<-sql
                 INNER JOIN #{WikiPage.table_name} 
                   ON #{WikiPage.table_name}.id=container_id  
