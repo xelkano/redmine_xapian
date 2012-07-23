@@ -64,8 +64,8 @@ module XapianSearch
 		  docdata=m.document.data{url}
 		  dochash=Hash[*docdata.scan(/(url|sample|modtime|type|size)=\/?([^\n\]]+)/).flatten]
 		  if not dochash.nil? then
-		    find_conditions =  Attachment.merge_conditions (limit_options[:conditions],  :disk_filename => dochash.fetch('url') )
-		    docattach=Attachment.find (:first, :conditions =>  find_conditions )
+		    find_conditions = Attachment.merge_conditions(limit_options[:conditions], :disk_filename => dochash.fetch('url'))
+		    docattach = Attachment.find(:first, :conditions =>  find_conditions)
 		    if not docattach.nil? then
 		      if docattach["container_type"] == "Article" and not Redmine::Search.available_search_types.include?("articles")
                         Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
@@ -87,17 +87,13 @@ module XapianSearch
 		[xpattachments, @@numattach]
 	end
 
-
-	def XapianSearch.project_included( project_id, projects_to_search )
+	def XapianSearch.project_included(project_id, projects_to_search)
 		return true if projects_to_search.nil?
-		found=false
-		projects_to_search.each {|x| 
-			found=true if x[:id] == project_id
-		}
-		found
+
+		projects_to_search.include?(project_id)
 	end
 
 	def XapianSearch.getDatabasePath(user_stem_lang)
-  	     return Setting.plugin_redmine_xapian['index_database'].rstrip + '/' + user_stem_lang
+  	Setting.plugin_redmine_xapian['index_database'].rstrip + '/' + user_stem_lang
 	end
 end

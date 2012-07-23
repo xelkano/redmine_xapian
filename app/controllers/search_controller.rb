@@ -51,7 +51,6 @@ class SearchController < ApplicationController
     # quick jump to an issue
     if @question.match(/^#?(\d+)$/) && Issue.visible.find_by_id($1.to_i)
       redirect_to :controller => "issues", :action => "show", :id => $1
-      return
     end
     
     @object_types = Redmine::Search.available_search_types.dup
@@ -61,7 +60,7 @@ class SearchController < ApplicationController
       # only show what the user is allowed to view
       @object_types = @object_types.select {|o| 
          o = "documents" if o == "attachments"
-	 User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
+   User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
       }
     end
       
@@ -82,22 +81,23 @@ class SearchController < ApplicationController
       @results_by_type = Hash.new {|h,k| h[k] = 0}
       
       limit = 10
+
       @scope.each do |s|
-	begin
+  begin
          r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
           :all_words => @all_words,
           :titles_only => @titles_only,
           :limit => (limit+1),
           :offset => offset,
           :before => params[:previous].nil?,
-	  :user_stem_lang => @user_stem_lang,
-	  :user_stem_strategy => @user_stem_strategy)
+          :user_stem_lang => @user_stem_lang,
+          :user_stem_strategy => @user_stem_strategy)
          @results += r
          @results_by_type[s] += c
-	rescue => error
-	  flash[:error] = "#{error}: #{l(:label_database_error)}"
-	end
-	
+  rescue => error
+    flash[:error] = "#{error}: #{l(:label_database_error)}"
+  end
+  
       end
       @results = @results.sort {|a,b| b.event_datetime <=> a.event_datetime}
       if params[:previous].nil?
