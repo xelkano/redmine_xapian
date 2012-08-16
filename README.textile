@@ -10,6 +10,8 @@ A copy of the plugin can be downloaded from  Github at https://github.com/xelkan
 
 h2. 1.1. Required packages
 
+Branch 1.3.X only compatible with Redmine 1.4.X 
+
 To use "xapian":http://xapian.org search engine you must install libxapian-ruby1.8 and xapian-omega packages (on ubuntu). To index some files with omega you may have to install some other packages like xpdf, antiword, ...
 
 From "Omega documentation":http://xapian.org/docs/omega/overview.html:

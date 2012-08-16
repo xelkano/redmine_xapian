@@ -22,8 +22,8 @@ Redmine::Plugin.register :redmine_xapian do
   author_url 'http://undefinederror.org'
 
   description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-  version '1.2.4'
-  requires_redmine :version_or_higher => '1.0.0'
+  version '1.3.0'
+  requires_redmine :version_or_higher => '1.4.0'
 
   default_settings = {
     'enable' => 'true',

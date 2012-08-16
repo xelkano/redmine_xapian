@@ -1,28 +1,26 @@
 de:
 
   label_enable_redmine_xapian: "aktiviere die Suche auch für Dateianhänge"
-  label_index_database: "Directory containing Xapian databases"
-  label_stemming_text: "Stelle die Stemming Sprache ein, der Standard ist 'english'.
-                       Zulässige Werte: danish dutch english finnish french
-                       german german2 hungarian italian kraaij_pohlmann
-                       lovins norwegian porter portuguese romanian russian
-                       spanish swedish turkish (pass 'none' to disable
-                       stemming)"
+  label_index_database: "Verzeichnis für den Datenbank-Index"
+  label_stemming_text: "Stelle die Stemming Sprache ein, der Standard ist 'english'. 
+			Zulässige Werte: danish dutch english finnish french
+			german german2 hungarian italian kraaij_pohlmann
+			lovins norwegian porter portuguese romanian russian
+			spanish swedish turkish (pass 'none' to disable
+			stemming)"
   label_search2: "Erweiterte Suche"
   text_search1: "Diese Erweiterung ermöglicht die Standard Suche sowie zusätzlich die Suche in Dateien. Um die Dateisuche zu aktivieren ist es notwendig eine Suchdatenbank mit dem omindex Indexieierungswerkzeug erstellen zu lassen, welche zuvor für bestimmte Verzeichnisse konfiguriert wird."
   label_document: "Dokument"
   label_issue: "Ticket"
   label_wiki: "Wiki"
   label_message: "Mitteilung"
-  label_stemming_lang: "Stemming Language"
-  label_default_stemming_lang: "Set default stemming lang"
-  label_stemming_lang: "Stemming Language"
-  label_enable_xapian_on_search: "Enable xapian config on search screen"
-  label_search_languages: "Stemming languages on search screen"
-  label_stemming_strategy: "Stemming strategy"
-  label_stem_none: "Stem none"
-  label_stem_some: "Stem some"
-  label_stem_all:  "Stem all"
-  label_default_stemming_lang: "Set default stemming lang"
-  label_default_stemming_strategy: "Set default stemming strategy"
+  label_stemming_lang: "Stemming Sprache"
+  label_default_stemming_lang: "Standard Stemming Sprache"
+  label_enable_xapian_on_search: "Zeige die Indizierungseinstellungen in der Suchmaske"
+  label_search_languages: "Zeige die Sprachauswahl für das Stemming in der Suchmaske"
+  label_stemming_strategy: "Stemming-Strategie"
+  label_default_stemming_strategy: "Standard Stemming-Strategie"
 
+  label_stem_none: "Stem abschalten"
+  label_stem_some: "Schnelles Stemming aktivieren"
+  label_stem_all: "Vollständiges Stemming aktivieren"
