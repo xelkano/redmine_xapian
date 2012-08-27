@@ -27,10 +27,24 @@ module SearchStrategies::SearchLogic
 
       search_options_tmp[:conditions] = merge_conditions(
         search_options_tmp[:conditions],
-        :container_type => container_type
+        tokens_condition(search_data),
+        :container_type => container_type,
       )
+
       search_options_tmp[:joins] = search_joins_query
 
       search_options_tmp
+    end
+
+    def tokens_condition(search_data)
+      options = search_data.find_options
+      columns = search_data.columns
+      tokens = search_data.tokens
+
+      columns = columns[0..0] if options[:titles_only]
+      
+      token_clauses = columns.collect {|column| "(LOWER(#{column}) LIKE ?)"}
+      sql = (['(' + token_clauses.join(' OR ') + ')'] * tokens.size).join(options[:all_words] ? ' AND ' : ' OR ')
+      [sql, * (tokens.collect {|w| "%#{w.downcase}%"} * token_clauses.size).sort]
     end
 end

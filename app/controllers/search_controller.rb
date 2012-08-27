@@ -21,9 +21,10 @@ class SearchController < ApplicationController
   helper :messages
   include MessagesHelper
 
-  def index
+  def index_with_xapian
     @question = params[:q] || ""
     @question.strip!
+
     @all_words = params[:all_words] ? params[:all_words].present? : true
     @titles_only = params[:titles_only] ? params[:titles_only].present? : false
     
@@ -31,7 +32,6 @@ class SearchController < ApplicationController
     @user_stem_strategy=params[:user_stem_strategy] ? params[:user_stem_strategy] : Setting.plugin_redmine_xapian['stemming_strategy']
     Rails.logger.debug "DEBUG: params[:user_stem_lang]" + params[:user_stem_lang].inspect + @user_stem_lang.inspect
     Rails.logger.debug "DEBUG: params[:user_stem_strategy]" + params[:user_stem_strategy].inspect + @user_stem_strategy.inspect
-
  
     projects_to_search =
       case params[:scope]
@@ -72,7 +72,7 @@ class SearchController < ApplicationController
     @tokens = @question.scan(%r{((\s|^)"[\s\w]+"(\s|$)|\S+)}).collect {|m| m.first.gsub(%r{(^\s*"\s*|\s*"\s*$)}, '')}
     # tokens must be at least 2 characters long
     @tokens = @tokens.uniq.select {|w| w.length > 1 }
-    
+
     if !@tokens.empty?
       # no more than 5 tokens to search for
       @tokens.slice! 5..-1 if @tokens.size > 5  
@@ -83,22 +83,22 @@ class SearchController < ApplicationController
       limit = 10
 
       @scope.each do |s|
-  begin
-         r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
-          :all_words => @all_words,
-          :titles_only => @titles_only,
-          :limit => (limit+1),
-          :offset => offset,
-          :before => params[:previous].nil?,
-          :user_stem_lang => @user_stem_lang,
-          :user_stem_strategy => @user_stem_strategy)
-         @results += r
-         @results_by_type[s] += c
-  rescue => error
-    flash[:error] = "#{error}: #{l(:label_database_error)}"
-  end
-  
+        #begin
+               r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
+                :all_words => @all_words,
+                :titles_only => @titles_only,
+                :limit => (limit+1),
+                :offset => offset,
+                :before => params[:previous].nil?,
+                :user_stem_lang => @user_stem_lang,
+                :user_stem_strategy => @user_stem_strategy)
+               @results += r
+               @results_by_type[s] += c
+        #rescue => error
+          #flash[:error] = "#{error}: #{l(:label_database_error)}"
+        #end
       end
+
       @results = @results.sort {|a,b| b.event_datetime <=> a.event_datetime}
       if params[:previous].nil?
         @pagination_previous_date = @results[0].event_datetime if offset && @results[0]

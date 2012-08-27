@@ -1,3 +1,4 @@
+# Encoding: UTF-8
 # Redmine - project management software
 # Copyright (C) 2006-2011  Jean-Philippe Lang
 #
@@ -18,8 +19,8 @@
 module SearchHelper
   def highlight_tokens(text, tokens)
     return text unless text && tokens && !tokens.empty?
-    re_tokens = tokens.collect {|t| Regexp.escape(t)}
-    regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE    
+
+    regexp = tokens_regexp(tokens)
     result = ''
     text.split(regexp).each_with_index do |words, i|
       if result.length > 1200
@@ -41,8 +42,9 @@ module SearchHelper
   def highlight_tokens2(text, tokens)
     logger.debug "DEBUG: helper text: " + text.inspect
     return text unless text && tokens && !tokens.empty?
-    re_tokens = tokens.collect {|t| Regexp.escape(t)}
-    regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE
+
+    regexp = tokens_regexp(tokens)
+
     result = ''
     text.split(regexp).each_with_index do |words, i|
       if result.length > 3000
@@ -60,6 +62,13 @@ module SearchHelper
       end
     end
     result
+  end
+
+  def tokens_regexp(tokens)
+    re_tokens = tokens.map do |token|
+      Regexp.escape(token)
+    end
+    regexp = Regexp.new("(#{re_tokens.join('|')})", Regexp::IGNORECASE)
   end
 
  

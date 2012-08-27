@@ -4,15 +4,13 @@
 # Email: francis@mysociety.org; WWW: http://www.mysociety.org/
 #
 # $Id: init.rb,v 1.1 2008/04/23 13:33:50 francis Exp $
-
-require 'xapian'
-
 require 'redmine'
 require File.dirname(__FILE__) + '/lib/attachment_patch'
 require File.dirname(__FILE__) + '/lib/acts_as_searchable_patch'
-#require File.dirname(__FILE__) + '/lib/search_controller_patch'
+require File.dirname(__FILE__) + '/lib/search_controller_patch'
+
 Attachment.send(:include, AttachmentPatch)
-#SearchController.send(:include, SearchControllerPatch)
+SearchController.send(:include, SearchControllerPatch)
 ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
 
 Redmine::Plugin.register :redmine_xapian do

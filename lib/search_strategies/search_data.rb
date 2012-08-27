@@ -18,23 +18,23 @@
 # @see acts_as_searchable/lib/acts_as_searchable.rb
 class SearchStrategies::SearchData
   attr_reader :tokens, :projects, :options,
-    :find_options, :limit_options,
+    :find_options, :limit_options, :columns,
     :scope, :project_conditions
 
   def initialize(context, tokens, projects, options)
     @context = context
 
     @tokens = tokens
-    @projects = projects
+    @projects = [] << projects unless projects.nil? || projects.is_a?(Array)
     @options = options
+    @columns = searchable_options[:columns]
 
-    init_find_options(options)
-    init_limit_options(options)
-    init_scope_and_projects_conditions(context, projects) 
+    init_find_options(@options)
+    init_limit_options(@options)
+    init_scope_and_projects_conditions(@context, @projects)
   end
 
   private
-
     def init_limit_options(options)
       limit_options = {}
       limit_options[:limit] = options[:limit] if options[:limit]
@@ -59,10 +59,11 @@ class SearchStrategies::SearchData
         ActiveSupport::Deprecation.warn "acts_as_searchable with implicit :permission option is deprecated. Add a visible scope to the #{context.name} model or use explicit :permission option."
         project_conditions << Project.allowed_to_condition(user, "view_#{context.name.underscore.pluralize}".to_sym)
       end
+
       # TODO: use visible scope options instead
       project_conditions << "#{searchable_options[:project_key]} IN (#{projects.collect(&:id).join(',')})" unless projects.nil?
       project_conditions = project_conditions.empty? ? nil : project_conditions.join(' AND ')
-    
+
       @scope = scope
       @project_conditions = project_conditions
     end

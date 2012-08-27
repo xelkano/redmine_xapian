@@ -52,7 +52,7 @@ module Redmine
               query = <<-sql
                 INNER JOIN #{Document.table_name} 
                   ON #{Document.table_name}.id=container_id 
-                LEFT JOIN #{Project.table_name}
+                INNER JOIN #{Project.table_name}
                   ON #{Document.table_name}.project_id=#{Project.table_name}.id
               sql
               search_in_projects_container(search_data, "Document", query)
@@ -62,7 +62,7 @@ module Redmine
               query = <<-sql
                 INNER JOIN #{Issue.table_name} 
                   ON #{Issue.table_name}.id=container_id 
-                LEFT JOIN #{Project.table_name} 
+                INNER JOIN #{Project.table_name} 
                   ON #{Issue.table_name}.project_id = #{Project.table_name}.id
               sql
               search_in_projects_container(search_data, "Issue", query)
