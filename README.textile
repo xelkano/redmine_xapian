@@ -50,6 +50,7 @@ On debian run:
 </pre>
 
 Now, go to redmine root directory and run bundle command to install required gem:
+
 <pre>
 # cd /var/www/redmine
 # bundle
