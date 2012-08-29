@@ -58,7 +58,7 @@ Now, go to redmine root directory and run bundle command to install required gem
 
 h2. 1.2. Plugin installation
 
-Install redmine_xapian into vendor/plugins directory with:
+Install redmine_xapian into plugins directory with:
 * ruby script/plugin install http://github.com/xelkano/redmine_xapian.git or download and extract tar or zip file into redmine plugins directory..
 * rake db:migrate_plugins RAILS_ENV="production"
 * Restart web server
