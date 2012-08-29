@@ -66,6 +66,12 @@ module Redmine
           # projects argument can be either nil (will search all projects), a project or an array of projects
           # Returns the results and the results count
           def search(tokens, projects=nil, options={})
+	    if projects.is_a?(Array) && projects.empty?
+              # no results
+              return [[], 0]
+            end
+	     # TODO: make user an argument
+            user = User.current
             tokens = [] << tokens unless tokens.is_a?(Array)
             projects = [] << projects unless projects.nil? || projects.is_a?(Array)
             
@@ -77,7 +83,6 @@ module Redmine
             if options[:offset]
               limit_options[:conditions] = "(#{searchable_options[:date_column]} " + (options[:before] ? '<' : '>') + "'#{connection.quoted_date(options[:offset])}')"
             end
-    	    logger.debug "DEBUG:  searchable_options search: " + searchable_options.inspect if  self.name == "Attachment"
             
             columns = searchable_options[:columns]
             columns = columns[0..0] if options[:titles_only]
@@ -98,108 +103,109 @@ module Redmine
             end
             
             sql = (['(' + token_clauses.join(' OR ') + ')'] * tokens.size).join(options[:all_words] ? ' AND ' : ' OR ')
+
             find_options[:conditions] = [sql, * (tokens.collect {|w| "%#{w.downcase}%"} * token_clauses.size).sort]
             
+	    scope = self
             project_conditions = []
-            project_conditions << (searchable_options[:permission].nil? ? Project.visible_condition(User.current) :
-                                                 Project.allowed_to_condition(User.current, searchable_options[:permission]))
+	    if searchable_options.has_key?(:permission)
+              project_conditions << Project.allowed_to_condition(user, searchable_options[:permission] || :view_project)
+            elsif respond_to?(:visible)
+              scope = scope.visible(user)
+            else
+              ActiveSupport::Deprecation.warn "acts_as_searchable with implicit :permission option is deprecated. Add a visible scope to the #{self.name} model or use explicit :permission option."
+              project_conditions << Project.allowed_to_condition(user, "view_#{self.name.underscore.pluralize}".to_sym)
+            end
+	     # TODO: use visible scope options instead
             project_conditions << "#{searchable_options[:project_key]} IN (#{projects.collect(&:id).join(',')})" unless projects.nil?
+            project_conditions = project_conditions.empty? ? nil : project_conditions.join(' AND ')
+
             results = []
             results_count = 0
 	    unless self.name == "Attachment" then
-              with_scope(:find => {:conditions => project_conditions.join(' AND ')}) do
-                with_scope(:find => find_options) do
-                  results_count = count(:all)
-                  results = find(:all, limit_options)
-                end
-              end
+	      scope = scope.scoped({:conditions => project_conditions}).scoped(find_options)
+              results_count = scope.count(:all)
+              results = scope.find(:all, limit_options)
 	    else
 		#Attahcment on documents
-		results_doc= []
-		results_count_doc=0
 		find_options_tmp=Hash.new
 		find_options_tmp=find_options_tmp.merge(find_options)
-		find_options_tmp[:conditions] = merge_conditions (find_options_tmp[:conditions], :container_type=>"Document" )
+		scope2 = scope
+		results_doc= []
+                results_count_doc=0
 		find_options_tmp [:joins] =  "INNER JOIN documents ON documents.id=container_id " +  "LEFT JOIN #{Project.table_name} ON #{Document.table_name}.project_id = #{Project.table_name}.id" 
-		with_scope(:find => {:conditions => project_conditions.join(' AND ')}) do
-	          with_scope(:find => find_options_tmp) do
-                    results_count_doc = count(:all)
-                    results_doc = find(:all, limit_options)
-                  end
-		end
+	 	scope2 = scope2.scoped({:conditions => project_conditions}).scoped(find_options_tmp)
+                scope2 = scope2.scoped( {:conditions => {  :container_type=>"Document"}} )
+                results_count_doc = scope2.count(:all)
+                results_doc = scope2.find(:all, limit_options)
 		results +=results_doc
                 results_count += results_count_doc
 		#Attachemnts on WikiPage
 		find_options_tmp=Hash.new
 		find_options_tmp=find_options_tmp.merge(find_options)
+		scope2 = scope
                 results_wiki= []
                 results_count_wiki=0
-		find_options_tmp[:conditions] =  merge_conditions (find_options_tmp[:conditions], :container_type=>"WikiPage" )
 		find_options_tmp [:joins] =  "INNER JOIN wiki_pages ON wiki_pages.id=container_id " +  
 					"INNER JOIN wikis ON wikis.id=wiki_pages.wiki_id " +
 					"INNER JOIN #{Project.table_name} ON #{Wiki.table_name}.project_id = #{Project.table_name}.id" 
-		with_scope(:find => {:conditions => project_conditions.join(' AND ')}) do
-	          with_scope(:find => find_options_tmp) do
-                    results_count_wiki = count(:all)
-                    results_wiki = find(:all, limit_options)
-                  end
-		end
+		scope2 = scope2.scoped({:conditions => project_conditions}).scoped(find_options_tmp)
+                scope2 = scope2.scoped( {:conditions => {  :container_type=>"WikiPage"}} )
+                results_count_wiki = scope2.count(:all)
+                results_wiki = scope2.find(:all, limit_options)
 		results+=results_wiki
 		results_count+= results_count_wiki
 		#Attachemnts on Message
 		find_options_tmp =Hash.new
 		find_options_tmp=find_options_tmp.merge(find_options)
+		scope2 = scope
                 results_message= []
                 results_count_message=0
-		find_options_tmp[:conditions] =  merge_conditions (find_options[:conditions], :container_type=>"Message" )
 		find_options_tmp [:joins] = "INNER JOIN messages ON messages.id=container_id " +  
 					"INNER JOIN boards ON boards.id=messages.board_id " +
 					"INNER JOIN #{Project.table_name} ON #{Board.table_name}.project_id = #{Project.table_name}.id" 
-		with_scope(:find => {:conditions => project_conditions.join(' AND ')}) do
-	          with_scope(:find => find_options_tmp) do
-                    results_count_message = count(:all)
-                    results_message = find(:all, limit_options)
-                  end
-		end
+		scope2 = scope2.scoped({:conditions => project_conditions}).scoped(find_options_tmp)
+                scope2 = scope2.scoped( {:conditions => {  :container_type=>"Message"}} )
+                results_count_message = scope2.count(:all)
+                results_message = scope2.find(:all, limit_options)
 		results+=results_message
 		results_count+= results_count_message
 		#Attachemnts on Issues
 		find_options_tmp =Hash.new
 		find_options_tmp=find_options_tmp.merge(find_options)
+		scope2 = scope
                 results_issue= []
                 results_count_issue=0
-		find_options_tmp[:conditions] =  merge_conditions (find_options[:conditions], :container_type=>"Issue" )
 		find_options_tmp [:joins] = "INNER JOIN issues ON issues.id=container_id " +  "LEFT JOIN #{Project.table_name} ON #{Issue.table_name}.project_id = #{Project.table_name}.id" 
-		with_scope(:find => {:conditions => project_conditions.join(' AND ')}) do
-	          with_scope(:find => find_options_tmp) do
-                    results_count_issue = count(:all)
-                    results_issue = find(:all, limit_options)
-                  end
-		end
+		scope2 = scope2.scoped({:conditions => project_conditions}).scoped(find_options_tmp)	
+		scope2 = scope2.scoped( {:conditions => {  :container_type=>"Issue"}} )
+                results_count_issue = scope2.count(:all)
+                results_issue = scope2.find(:all, limit_options)
 		results+=results_issue
 		results_count+= results_count_issue
 		#Attachments on Articles
 		if Redmine::Search.available_search_types.include?("articles")
+		  sope2 = scope
 		  logger.debug "DEBUG: knowledgebase plugin installed"
 		  find_options_tmp=Hash.new
         	  find_options_tmp=find_options_tmp.merge(find_options)
         	  results_article = []
        	 	  results_count_article=0
-        	  find_options_tmp[:conditions] = merge_conditions (find_options_tmp[:conditions], :container_type=>"Article" )
         	  find_options_tmp [:joins] =  "INNER JOIN kb_articles ON kb_articles.id=container_id "  
-                  with_scope(:find => find_options_tmp) do
-                    results_count_article = count(:all)
-                     results_article = find(:all, limit_options)
-                  end
+		  scope2 = scope2.scoped({:conditions => project_conditions}).scoped(find_options_tmp)
+                  scope2 = scope2.scoped( {:conditions => {  :container_type=>"Article"}} )
+                  results_count_article = scope2.count(:all)
+                  results_article = scope2.find(:all, limit_options)
         	  results +=results_article
         	  results_count += results_count_article
 		end
 		# Search attachments over xapian
+		logger.debug "DEBUG: results count before xapian " + results_count.inspect + results_count_issue.inspect + results_count_message.inspect + results_count_wiki.inspect + results_count_doc.inspect 
 		if !options[:titles_only]
 		  begin 
-		    xapianresults, xapianresults_count =  XapianSearch.search_attachments( tokens, limit_options, 
-								 options[:offset], projects, options[:all_words], options[:user_stem_lang],
-								options[:user_stem_strategy] )
+		    xapianresults, xapianresults_count = XapianSearch.search_attachments( tokens, limit_options, 
+								 options[:offset], projects, options[:all_words], 
+								options[:user_stem_lang], options[:user_stem_strategy] )
 		  rescue => error
 		    xapianresults=[]
 		    xapianresults_count=0

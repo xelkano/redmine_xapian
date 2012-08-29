@@ -64,11 +64,14 @@ module XapianSearch
 		  docdata=m.document.data{url}
 		  dochash=Hash[*docdata.scan(/(url|sample|modtime|type|size)=\/?([^\n\]]+)/).flatten]
 		  if not dochash.nil? then
-		    find_conditions =  Attachment.merge_conditions (limit_options[:conditions],  :disk_filename => dochash.fetch('url') )
-		    docattach=Attachment.find (:first, :conditions =>  find_conditions )
+		    Rails.logger.debug "DEBUG: dochash not nil.. "
+			Rails.logger.debug "DEBUG: limit_conditions " + limit_options[:limit].inspect
+			
+		    docattach=Attachment.where( :disk_filename => dochash.fetch('url') ).first
 		    if not docattach.nil? then
+			Rails.logger.debug "DEBUG: docattach not nil..:  " + docattach.inspect 
 		      if docattach["container_type"] == "Article" and not Redmine::Search.available_search_types.include?("articles")
-                        Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
+                        Rails.logger.debug "DEBUG: Knowledgebase plugin is not installed.."
                       elsif not docattach.container.nil? then
 			Rails.logger.debug "DEBUG: adding attach.. " 
 		        allowed =  User.current.allowed_to?("view_documents".to_sym, docattach.container.project)  ||  docattach.container_type == "Article"
@@ -82,6 +85,7 @@ module XapianSearch
 		    end
 		  end
 		}	
+		Rails.logger.debug "DEBUG: xapian searched"
 		@@numattach=xpattachments.size if offset.nil?
 		xpattachments=xpattachments.sort_by{|x| x[:created_on] }
 		[xpattachments, @@numattach]

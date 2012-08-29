@@ -1,13 +1,15 @@
 <h2><%= l(:label_search)%></h2>
 
 <div class="box">
-<% form_tag({}, :method => :get) do %>
+<%= form_tag({}, :method => :get) do %>
+<%= label_tag "search-input", l(:description_search), :class => "hidden-for-sighted" %>
 <p><%= text_field_tag 'q', @question, :size => 60, :id => 'search-input' %>
 <%= javascript_tag "Field.focus('search-input')" %>
 <%= project_select_tag %>
+<%= hidden_field_tag 'all_words', '', :id => nil %>
 <label><%= check_box_tag 'all_words', 1, @all_words %> <%= l(:label_all_words) %></label>
+<%= hidden_field_tag 'titles_only', '', :id => nil %>
 <label><%= check_box_tag 'titles_only', 1, @titles_only %> <%= l(:label_search_titles_only) %></label>
-
 </p>
 <p>
 <% @object_types.each do |t| %>
@@ -69,7 +71,7 @@
 </dt>
 <dd><span class="description">
 <% if e.event_type == "attachment" then %>
-        <%= highlight_tokens2(e.event_description, @tokens) %>
+        <%= SearchHelper2.highlight_tokens2(e.event_description, @tokens) %>
 <% else%>
 	<%= highlight_tokens(e.event_description, @tokens) %>
 <% end %>

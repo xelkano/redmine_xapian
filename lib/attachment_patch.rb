@@ -58,22 +58,22 @@ module AttachmentPatch
         end
         container_name
     end
-#    def container_type
-#	if container.is_a?(Issue)
-#          container_type = "Issue"
-#        elsif container.is_a?(WikiPage)
-#          container_type = "WikiPage"
-#        elsif container.is_a?(Document)
-#          container_type = "Document"
-#        elsif container.is_a?(Message)
-#          container_type = "Message"
-#	elsif ( defined?(Article) == 'constant' )
-#	  if container.is_a?(Article)
-#             container_type = "Article"
-#	  end
-#        end
-#        container_type
-#    end
+    def container_type
+	if container.is_a?(Issue)
+         container_type = "Issue"
+        elsif container.is_a?(WikiPage)
+          container_type = "WikiPage"
+        elsif container.is_a?(Document)
+          container_type = "Document"
+        elsif container.is_a?(Message)
+          container_type = "Message"
+	elsif ( defined?(Article) == 'constant' )
+	  if container.is_a?(Article)
+            container_type = "Article"
+	  end
+        end
+        container_type
+    end
   end
 end
 
