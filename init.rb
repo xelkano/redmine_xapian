@@ -13,7 +13,7 @@ rescue LoadError
     Rails.logger.info "REDMAIN_XAPIAN ERROR: No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby."
     $xapian_bindings_available = false
 else
-    Rails.logger.level = Logger::DEBUG
+    #Rails.logger.level = Logger::DEBUG
     require 'redmine'
     require File.dirname(__FILE__) + '/lib/attachment_patch'
     require File.dirname(__FILE__) + '/lib/acts_as_searchable'
