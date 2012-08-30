@@ -18,7 +18,7 @@ else
     require File.dirname(__FILE__) + '/lib/attachment_patch'
     require File.dirname(__FILE__) + '/lib/acts_as_searchable'
     require File.dirname(__FILE__) + '/lib/search_controller_patch'
-    require File.dirname(__FILE__) + '/lib/search_helper_patch'
+    #require File.dirname(__FILE__) + '/lib/search_helper_patch'
     Attachment.send(:include, AttachmentPatch)
     SearchController.send(:include, SearchControllerPatch)	
     ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
