@@ -15,13 +15,15 @@ rescue LoadError
 else
     #Rails.logger.level = Logger::DEBUG
     require 'redmine'
-    require File.dirname(__FILE__) + '/lib/attachment_patch'
-    require File.dirname(__FILE__) + '/lib/acts_as_searchable'
-    require File.dirname(__FILE__) + '/lib/search_controller_patch'
-    #require File.dirname(__FILE__) + '/lib/search_helper_patch'
+    Dir::foreach(File.join(File.dirname(__FILE__), 'lib')) do |file|
+      next unless /\.rb$/ =~ file
+      require file
+    end
+    
     Attachment.send(:include, AttachmentPatch)
     SearchController.send(:include, SearchControllerPatch)	
     ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
+    #SearchHelper.send(:include, SearchHelperPatch)
 
     Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
@@ -30,7 +32,7 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.4.1'
+	version '1.4.2'
 	requires_redmine :version_or_higher => '2.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',

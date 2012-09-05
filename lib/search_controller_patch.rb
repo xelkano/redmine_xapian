@@ -76,20 +76,20 @@ module SearchControllerPatch
       
           limit = 10
           @scope.each do |s|
-	  begin
-            r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
-            :all_words => @all_words,
-            :titles_only => @titles_only,
-            :limit => (limit+1),
-            :offset => offset,
-            :before => params[:previous].nil?,
-	    :user_stem_lang => @user_stem_lang,
-	    :user_stem_strategy => @user_stem_strategy)
-            @results += r
-            @results_by_type[s] += c
-	  rescue => error
-	    flash[:error] = "#{error}: #{l(:label_database_error)}"
-	  end
+	    begin
+              r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
+              :all_words => @all_words,
+              :titles_only => @titles_only,
+              :limit => (limit+1),
+              :offset => offset,
+              :before => params[:previous].nil?,
+	      :user_stem_lang => @user_stem_lang,
+	      :user_stem_strategy => @user_stem_strategy)
+              @results += r
+              @results_by_type[s] += c
+	    rescue => error
+	      flash[:error] = "#{error}: #{l(:label_database_error)}"
+	    end
 	
         end
         @results = @results.sort {|a,b| b.event_datetime <=> a.event_datetime}
@@ -108,7 +108,7 @@ module SearchControllerPatch
         end
       else
         @question = ""
-        flash.delete (:error)  
+        flash.delete(:error)  
       end
       render :layout => false if request.xhr?
     end
