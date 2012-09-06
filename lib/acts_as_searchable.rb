@@ -20,7 +20,7 @@ require 'xapian_search'
 module Redmine
   module Acts
     module Searchable
-      def self.included(base) 
+      def self.included(base)
         base.extend ClassMethods
       end 
 
@@ -32,6 +32,7 @@ module Redmine
         # * :sort_order - name of the column used to sort results (default to :date_column or created_on)
         # * :permission - permission required to search the model (default to :view_"objects")
         def acts_as_searchable(options = {})
+	  Rails.logger.debug "DEBUG: wrapped act_as_searchable"
           return if self.included_modules.include?(Redmine::Acts::Searchable::InstanceMethods)
   
           cattr_accessor :searchable_options
@@ -127,6 +128,7 @@ module Redmine
               results_count = scope.count(:all)
               results = scope.find(:all, limit_options)
 	    else
+		logger.debug "DEBUG: attachment search" 
 		#Attahcment on documents
 		find_options_tmp=Hash.new
 		find_options_tmp=find_options_tmp.merge(find_options)

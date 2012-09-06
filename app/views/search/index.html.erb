@@ -24,7 +24,7 @@
 
   <p>
 <% if  Setting.plugin_redmine_xapian['stem_on_search'] == "true" then %>
- <label><%= content_tag (:label, l(:label_stemming_lang))%> <%= select_tag  "user_stem_lang", 
+ <label><%= content_tag(:label, l(:label_stemming_lang))%> <%= select_tag "user_stem_lang", 
                         options_for_select(  Setting.plugin_redmine_xapian['stem_langs'], @user_stem_lang )  %> 
                           
   </label>

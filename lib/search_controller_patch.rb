@@ -27,16 +27,16 @@ module SearchControllerPatch
 
  
     	projects_to_search =
-      	case params[:scope]
-      	when 'all'
-          nil
-        when 'my_projects'
-          User.current.memberships.collect(&:project)
-        when 'subprojects'
-          @project ? (@project.self_and_descendants.active) : nil
-        else
-          @project
-        end
+      	  case params[:scope]
+      	  when 'all'
+            nil
+          when 'my_projects'
+            User.current.memberships.collect(&:project)
+          when 'subprojects'
+            @project ? (@project.self_and_descendants.active) : nil
+          else
+            @project
+          end
           
         offset = nil
         begin; offset = params[:offset].to_time if params[:offset]; rescue; end
@@ -49,12 +49,12 @@ module SearchControllerPatch
     
         @object_types = Redmine::Search.available_search_types.dup
         if projects_to_search.is_a? Project
-        # don't search projects
-        @object_types.delete('projects')
-        # only show what the user is allowed to view
-        @object_types = @object_types.select {|o| 
-         o = "documents" if o == "attachments"
-	 User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
+          # don't search projects
+          @object_types.delete('projects')
+          # only show what the user is allowed to view
+          @object_types = @object_types.select {|o| 
+	    o = "documents" if o == "attachments"
+	    User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
         }
         end
       
@@ -77,6 +77,7 @@ module SearchControllerPatch
           limit = 10
           @scope.each do |s|
 	    begin
+	      Rails.logger.debug "DEBUG: element: " + s.inspect
               r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
               :all_words => @all_words,
               :titles_only => @titles_only,

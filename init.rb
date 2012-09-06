@@ -13,16 +13,15 @@ rescue LoadError
     Rails.logger.info "REDMAIN_XAPIAN ERROR: No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby."
     $xapian_bindings_available = false
 else
-    #Rails.logger.level = Logger::DEBUG
     require 'redmine'
     Dir::foreach(File.join(File.dirname(__FILE__), 'lib')) do |file|
       next unless /\.rb$/ =~ file
-      require file
+      require File.dirname(__FILE__) + '/lib/' + file
     end
     
-    Attachment.send(:include, AttachmentPatch)
-    SearchController.send(:include, SearchControllerPatch)	
     ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
+    SearchController.send(:include, SearchControllerPatch)	
+    Attachment.send(:include, AttachmentPatch)
     #SearchHelper.send(:include, SearchHelperPatch)
 
     Redmine::Plugin.register :redmine_xapian do
@@ -32,7 +31,7 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.4.2'
+	version '1.4.3'
 	requires_redmine :version_or_higher => '2.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',

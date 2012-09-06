@@ -1,14 +1,13 @@
 #
 
 require_dependency 'attachment'
-require_dependency 'search_controller'
 
 # Patches Redmine's Attachments dynamically. Adds method acts_as_searchable
 module AttachmentPatch
   def self.included(base) # :nodoc:
     base.extend(ClassMethods)
 
-    base.send(:include, InstanceMethods)
+    base.send(:include, ExtendedMethods)
 
     # Same as typing in the class
     base.class_eval do
@@ -28,7 +27,7 @@ module AttachmentPatch
 
   end
 
-  module InstanceMethods
+  module ExtendedMethods
     def container_url
       if container.is_a?(Issue)
   	 container_url = {:controller=>"issues", :id=>container[:id], :action=>"show"}
