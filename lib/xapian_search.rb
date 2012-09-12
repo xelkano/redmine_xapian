@@ -92,8 +92,7 @@ module XapianSearch
 
   def XapianSearch.project_included(project_id, projects_to_search)
     return true if projects_to_search.nil?
-
-    projects_to_search.include?(project_id)
+    projects_to_search.any? { |p| p[:id] == project_id }
   end
 
   def XapianSearch.get_database_path(user_stem_lang)
