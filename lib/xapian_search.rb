@@ -82,9 +82,8 @@ module XapianSearch
     xpattachments=xpattachments.sort_by{|x| x[:created_on] }
     
     if RUBY_VERSION >= "1.9"
-      xpattachments = xpattachments.map do |attachment|
+      xpattachments.each do |attachment|
         attachment[:description].force_encoding('UTF-8')
-        attachment
       end
     end
 
