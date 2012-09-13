@@ -33,7 +33,7 @@ module Redmine
 
             if !options[:titles_only]
               xapian_values, xapian_values_count = SearchStrategies::XapianAttachmentsSearchService.search(search_data)
-              values = (values | xapian_values).sort_by { |x| x[:created_on] }
+              values = (xapian_values | values).sort_by { |x| x[:created_on] }
               values_count += xapian_values_count
             end
 
@@ -59,9 +59,12 @@ module Redmine
             end
 
             def search_for_issues_attachments(search_data)
+              user = User.current
+              user_ids = [user.id] + user.groups.map(&:id)
+
               query = <<-sql
-                INNER JOIN #{Issue.table_name} 
-                  ON #{Issue.table_name}.id=container_id 
+                INNER JOIN #{Issue.table_name}
+                  ON #{Issue.table_name}.id=container_id AND ((NOT #{Issue.table_name}.is_private) OR (#{Issue.table_name}.author_id=#{User.current.id}) OR #{Issue.table_name}.assigned_to_id IN (#{user_ids.join(',')}))
                 INNER JOIN #{Project.table_name} 
                   ON #{Issue.table_name}.project_id = #{Project.table_name}.id
               sql

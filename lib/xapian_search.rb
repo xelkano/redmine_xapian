@@ -61,14 +61,31 @@ module XapianSearch
       if not dochash.nil? then
         find_conditions = Attachment.merge_conditions(limit_options[:conditions], :disk_filename => dochash.fetch('url'))
         docattach = Attachment.find(:first, :conditions =>  find_conditions)
-        if not docattach.nil? then
-          if docattach["container_type"] == "Article" and not Redmine::Search.available_search_types.include?("articles")
-                        Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
-                      elsif not docattach.container.nil? then
-            Rails.logger.debug "DEBUG: adding attach.. " 
-            allowed =  User.current.allowed_to?("view_documents".to_sym, docattach.container.project)  ||  docattach.container_type == "Article"
-            if ( allowed and project_included(docattach.container.project.id, projects_to_search ) )
-              docattach[:description]=dochash["sample"]
+        if not docattach.nil?
+          container_type = docattach["container_type"]
+          if container_type == "Article" and not Redmine::Search.available_search_types.include?("articles")
+            Rails.logger.debug "DEBUG: Knowledgebase plugin in not installed.."
+          elsif docattach.container
+            Rails.logger.debug "DEBUG: adding attach.. "
+
+            user = User.current
+            project = docattach.container.project
+
+            can_view_docs = user.allowed_to?("view_documents".to_sym, project)
+            allowed = case container_type
+            when "Article"
+              true
+            when "Issue"
+              can_view_issue = Issue.find_by_id(docattach[:container_id]).visible?
+              allowed = can_view_docs && can_view_issue
+            else
+              container_permission = ("view_" + container_type.pluralize.downcase).to_sym
+              can_view_container = user.allowed_to(container_permission, project)
+              allowed = can_view_docs && can_view_container
+            end
+
+            if allowed && project_included(docattach.container.project.id, projects_to_search)
+              docattach[:description] = dochash["sample"]
               xpattachments.push ( docattach )
             else
               Rails.logger.debug "DEBUG: user without permissions"
