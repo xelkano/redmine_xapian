@@ -37,7 +37,7 @@ module SearchStrategies::SearchLogic
     end
 
     def tokens_condition(search_data)
-      options = search_data.find_options
+      options = search_data.options
       columns = search_data.columns
       tokens = search_data.tokens
 
