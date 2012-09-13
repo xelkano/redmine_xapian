@@ -11,7 +11,7 @@ module AttachmentPatch
       acts_as_searchable :columns => ["#{table_name}.filename", "#{table_name}.description"],
             :date_column => "#{table_name}.created_on",
             :permission => :view_documents,
-            :project_key => "container_id"
+            :project_key => "#{Project.table_name}.id"
     end
   end
 end
