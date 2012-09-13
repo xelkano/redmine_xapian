@@ -77,4 +77,8 @@ class SearchStrategies::SearchData
     def searchable_options
       @context.searchable_options
     end
+
+    def connection
+      @context.connection
+    end
 end
