@@ -74,7 +74,8 @@ module SearchControllerPatch
           @results = []
           @results_by_type = Hash.new {|h,k| h[k] = 0}
       
-          limit = 10
+          limit = 10	
+	  Rails.logger.debug "DEBUG: scope " + @scope.inspect
           @scope.each do |s|
 	    begin
 	      Rails.logger.debug "DEBUG: element: " + s.inspect

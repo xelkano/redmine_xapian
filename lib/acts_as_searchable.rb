@@ -209,6 +209,7 @@ module Redmine
 								 options[:offset], projects, options[:all_words], 
 								options[:user_stem_lang], options[:user_stem_strategy] )
 		  rescue => error
+		    logger.debug "DEBUG: error raised on xapiansearch"
 		    xapianresults=[]
 		    xapianresults_count=0
 		    raise error

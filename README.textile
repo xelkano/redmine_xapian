@@ -6,7 +6,7 @@ This plugin replaces search controller, its view and search and acts_as_searchab
 
 h1. 1.  Installation and Setup
 
-A copy of the plugin can be downloaded from  Github at https://github.com/xelkano/redmine_xapian or from http://undefinederror.org/redmine-xapian-search-plugin.
+A copy of the plugin can be downloaded from  Github at https://github.com/xelkano/redmine_xapian/downloads
 
 h2. 1.1. Required packages
 
