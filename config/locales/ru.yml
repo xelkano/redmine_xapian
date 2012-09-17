@@ -1,6 +1,6 @@
 # Russian strings go here for Rails i18n
 ru:
-  
+
     label_enable_redmine_xapian: "Включить поисковую систему xapian, чтобы разрешить поиск в присоединённых файлах"
     label_index_database: "Каталог, содержащий базы данных Xapian"
     label_stemming_text: "Установите язык стемминга, по умолчанию 'english'.
@@ -15,6 +15,7 @@ ru:
     label_wiki: "Вики"
     label_message: "Сообщение"
     label_article: "Статья"
+    label_file: "Файл"
     label_article_plural: "Статьи"
     label_stemming_lang: "Язык стемминга"
     label_enable_xapian_on_search: "Разрешить конфигурирование xapian на экране поиска"
