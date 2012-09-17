@@ -88,9 +88,9 @@ module RedmineXapian
 
       def process_attachment(projects_to_search, dochash)
         docattach = Attachment.where( :disk_filename => dochash.fetch('url') ).first
-        Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
-        Rails.logger.debug "DEBUG: attach project" + docattach.project.inspect
         if docattach
+          Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
+          Rails.logger.debug "DEBUG: attach project" + docattach.project.inspect
           Rails.logger.debug "DEBUG: docattach not nil..:  " + docattach.inspect
           if docattach["container_type"] == "Article" && !Redmine::Search.available_search_types.include?("articles")
             Rails.logger.debug "DEBUG: Knowledgebase plugin is not installed.."
