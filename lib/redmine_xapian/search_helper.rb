@@ -4,7 +4,7 @@ module RedmineXapian
       case attachment.container_type
       when "Document"
         link_to(truncate( l(:label_document)+attachment.container_name, :length => 255), attachment.container_url)
-      when "label_message"
+      when "Message"
         link_to(truncate( l(:label_message)+attachment.container_name, :length => 255), attachment.container_url)
       when "WikiPage"
         link_to(truncate( l(:label_wiki)+attachment.container_name, :length => 255), attachment.container_url)
