@@ -108,9 +108,9 @@ module RedmineXapian
               true
             when "Issue"
               can_view_issue = Issue.find_by_id(docattach[:container_id]).visible?
-              allowed = can_view_container && can_view_issue
+              can_view_container && can_view_issue
             else
-              allowed = can_view_container
+              can_view_container
             end
 
             if allowed && project_included(docattach.container.project.id, projects_to_search)
