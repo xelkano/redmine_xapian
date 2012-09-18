@@ -14,15 +14,9 @@ rescue LoadError
     $xapian_bindings_available = false
 else
     require 'redmine'
-    Dir::foreach(File.join(File.dirname(__FILE__), 'lib')) do |file|
-      next unless /\.rb$/ =~ file
-      require File.dirname(__FILE__) + '/lib/' + file
-    end
-    
-    ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
-    SearchController.send(:include, SearchControllerPatch)	
-    Attachment.send(:include, AttachmentPatch)
-    #SearchHelper.send(:include, SearchHelperPatch)
+    require 'redmine_xapian/acts_as_searchable_patch'
+    SearchController.send(:include, RedmineXapian::SearchControllerPatch)
+    Attachment.send(:include, RedmineXapian::AttachmentPatch)
 
     Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
