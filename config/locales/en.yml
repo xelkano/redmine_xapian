@@ -1,6 +1,5 @@
 # English strings go here for Rails i18n
 en:
-  
     label_enable_redmine_xapian: "Enable xapian engine to allow searches on attachments"
     label_index_database: "Directory containing Xapian databases"
     label_stemming_text: "set the stemming language, the default is 'english'.
@@ -27,4 +26,18 @@ en:
     label_default_stemming_lang: "Set default stemming lang"
     label_default_stemming_strategy: "Set default stemming strategy"
     label_database_error: "database error, please configure xapian"
-
+    #label_no_results_found: "No results found"
+    #label_one_result_found: "Showing 1 result"
+    #label_show_all_results: "Showing %{offsetfirst} - %{offsetlast} of a %{total_entries} total results"
+    will_paginate:
+      page_entries_info:
+        single_page:
+          zero:  "No results found"
+          one:   "Displaying 1 result"
+          other: "Displaying %{count} results"
+        single_page_html:
+          zero:  "No results found"
+          one:   "Displaying <b>1</b> results"
+          other: "Displaying <b>all&nbsp;%{count}</b> results"
+        multi_page: "Displaying results %{from} - %{to} of %{count} in total"
+        multi_page_html: "Displaying results <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
