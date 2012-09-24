@@ -18,13 +18,11 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
-require 'action_view'
-include ERB::Util
-include ActionView::Helpers::TagHelper 
 
-module SearchHelper2
+module XapianHelper
 
-  def self.highlight_tokens2(text, tokens)
+  def highlight_tokens2(text, tokens)
+    Rails.logger.debug "DEBUG: highlight_tokens2 "
     return text unless text && tokens && !tokens.empty?
     re_tokens = tokens.collect {|t| Regexp.escape(t)}
     regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE
@@ -38,13 +36,27 @@ module SearchHelper2
       end
       words = words.mb_chars
       if i.even?
-        result << h(words)
+        result << words
       else
         t = (tokens.index(words.downcase) || 0) % 6
-        result << content_tag('span', h(words), :class => "highlight token-#{t}")
+        result << content_tag('span', words, :class => "highlight token-#{t}")
       end
     end
     result.html_safe
   end
+
+   def page_entries_info2(collection)
+     unless collection.nil?
+       case collection.size
+       when 0
+         l(:label_no_results_found)
+       when 1
+         l(:label_one_result_found)
+       else
+         l(:label_show_all_results, :total_entries=>"#{collection.total_entries}", :offsetfirst=>"#{collection.offset + 1}", :offsetlast=>"#{collection.offset + collection.length}" )
+       end
+     end
+   end
+
 
 end
