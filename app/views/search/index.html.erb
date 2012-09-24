@@ -19,7 +19,7 @@
 </p>
 <% logger.debug "DEBUG: object_types from search: " + Redmine::Search.available_search_types.inspect %>
 
-<% if @object_types.include?("attachments") %>
+<% if @object_types.include?("attachments") || @object_types.include?("repofiles") %>
   <% Setting.plugin_redmine_xapian['stem_langs'].push(Setting.plugin_redmine_xapian['stemming_lang']) unless Setting.plugin_redmine_xapian['stem_langs'].include?(Setting.plugin_redmine_xapian['stemming_lang']) %>
 
   <p>
@@ -45,7 +45,7 @@
     </div>
     
     <h3><%= l(:label_result_plural) %> (<%= @results_by_type.values.sum %>)</h3>
-    
+<% logger.debug "DEBUG: antes1 " %>
     <dl id="search-results">
       <% @results.each do |e| %>
         <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project  %> 
@@ -70,8 +70,8 @@
 <%end%>
 </dt>
 <dd><span class="description">
-<% if e.event_type == "attachment" then %>
-        <%= SearchHelper2.highlight_tokens2(e.event_description, @tokens) %>
+<% if e.event_type == "attachment" || e.event_type == "subversion" || e.event_type == "git" then %>
+        <%= highlight_tokens2(e.event_description, @tokens) %>
 <% else%>
 	<%= highlight_tokens(e.event_description, @tokens) %>
 <% end %>
@@ -82,16 +82,31 @@
 <% end %>
 
 <p><center>
-<% if @pagination_previous_date %>
-<%= link_to_content_update("\xc2\xab " + l(:label_previous),
+<div class="pagination">
+  <div class="page_info">
+      <%#= page_entries_info2 @results unless @results.nil? %>
+    <%= page_entries_info @results, :model=>"Item" unless @results.nil? %>
+  </div>
+  <%#= will_paginate(@results, :container=>false, :previous_label => "&#8592; #{l(:label_previous)}", :next_label => "#{l(:label_next)} &#8594;") if @results %>
+  <%= will_paginate(@results, :container=>false) if @results %>
+  <br />
+</div>
+
+<%# if @pagination_previous_date %>
+<%# link_to_content_update("\xc2\xab " + l(:label_previous),
       params.merge(:previous => 1,
-                   :offset => @pagination_previous_date.strftime("%Y%m%d%H%M%S"))) %>&nbsp;
-<% end %>
-<% if @pagination_next_date %>
-<%= link_to_content_update(l(:label_next) + " \xc2\xbb",
+                   :offset => @pagination_previous_date.strftime("%Y%m%d%H%M%S"))) %>
+<%# end %>
+<%# if @pagination_next_date %>
+<%# link_to_content_update(l(:label_next) + " \xc2\xbb",
       params.merge(:previous => nil,
                    :offset => @pagination_next_date.strftime("%Y%m%d%H%M%S"))) %>
-<% end %>
+<%# end %>
 </center></p>
 
 <% html_title(l(:label_search)) -%>
+
+<% content_for :header_tags do %>
+    <%= stylesheet_link_tag 'redmine_xapian', 'pagination', :plugin => 'redmine_xapian' %>
+<% end %>
+

@@ -17,6 +17,7 @@ module AttachmentPatch
 			#:include => {:board => :project},
                      	:project_key => 'project_id',
 			:date_column => "#{table_name}.created_on",
+			:xapianfile => "attachfile",
 			:permission => :view_documents
     end
 

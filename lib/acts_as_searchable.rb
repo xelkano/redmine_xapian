@@ -123,11 +123,11 @@ module Redmine
 
             results = []
             results_count = 0
-	    unless self.name == "Attachment" then
+	    if searchable_options[:xapianfile].nil?
 	      scope = scope.scoped({:conditions => project_conditions}).scoped(find_options)
               results_count = scope.count(:all)
               results = scope.find(:all, limit_options)
-	    else
+	    elsif searchable_options[:xapianfile] == "attachfile"
 		logger.debug "DEBUG: attachment search" 
 		#Attahcment on documents
 		find_options_tmp=Hash.new
@@ -207,9 +207,10 @@ module Redmine
 		  begin 
 		    xapianresults, xapianresults_count = XapianSearch.search_attachments( tokens, limit_options, 
 								 options[:offset], projects, options[:all_words], 
-								options[:user_stem_lang], options[:user_stem_strategy] )
+								 options[:user_stem_lang], options[:user_stem_strategy],
+								 searchable_options[:xapianfile])
 		  rescue => error
-		    logger.debug "DEBUG: error raised on xapiansearch"
+		    logger.debug "DEBUG: error raised on xapiansearch searching attachfile"
 		    xapianresults=[]
 		    xapianresults_count=0
 		    raise error
@@ -219,6 +220,22 @@ module Redmine
 		  logger.debug "DEBUG result_count: " + results_count.inspect
 		  logger.debug "DEBUG results: " + results.size.to_s
 		end
+	    elsif searchable_options[:xapianfile] == "repofile"
+	      begin
+                xapianresults, xapianresults_count = XapianSearch.search_attachments( tokens, limit_options,
+                                                                 options[:offset], projects, options[:all_words],
+                                                                 options[:user_stem_lang], options[:user_stem_strategy],
+								 searchable_options[:xapianfile] )
+                rescue => error
+                  logger.debug "DEBUG: error raised on xapiansearch searching repofiles"
+                  xapianresults=[]
+                  xapianresults_count=0
+                  raise error
+              end
+              results_count += xapianresults_count
+              results=(results+xapianresults).uniq.sort_by{|x| x[:created_on] }
+              logger.debug "DEBUG result_count: " + results_count.inspect
+              logger.debug "DEBUG results: " + results.size.to_s
 	    end
             [results, results_count]
           end

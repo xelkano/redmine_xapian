@@ -1,15 +1,26 @@
+# encoding: utf-8
 
 require_dependency 'search_controller'
+require 'will_paginate/array'
 
 module SearchControllerPatch
+
+  extend ActiveSupport::Concern
+
   def self.included(base) # :nodoc:
     base.send(:include, InstanceMethods)
 
     base.class_eval do
-      alias_method_chain :index, :xapian
+      begin
+        alias_method_chain :index, :xapian
+	helper XapianHelper
+	#helper :all
       #def get_user_xapian_settings
       #  [@user_stem_lang, @user_stem_strategy]
       #end
+      rescue => error
+	Rails.logger.debug "Error detected: #{error}"
+      end
     end
   end
   
@@ -53,11 +64,16 @@ module SearchControllerPatch
           @object_types.delete('projects')
           # only show what the user is allowed to view
           @object_types = @object_types.select {|o| 
-	    o = "documents" if o == "attachments"
-	    User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
-        }
+	    if o == "attachments"
+	      p="view_documents"
+	    elsif o == "repofiles"
+	      p="browse_repository"
+	    else
+	      p="view_#{o}"
+	    end
+	    User.current.allowed_to?(p.to_sym, projects_to_search)
+          }
         end
-      
         @scope = @object_types.select {|t| params[t]}
         @scope = @object_types if @scope.empty?
     
@@ -71,11 +87,11 @@ module SearchControllerPatch
           # no more than 5 tokens to search for
           @tokens.slice! 5..-1 if @tokens.size > 5  
       
-          @results = []
+          @sresults = []
+	  @results = []
           @results_by_type = Hash.new {|h,k| h[k] = 0}
       
-          limit = 10	
-	  Rails.logger.debug "DEBUG: scope " + @scope.inspect
+          limit = 20	
           @scope.each do |s|
 	    begin
 	      Rails.logger.debug "DEBUG: element: " + s.inspect
@@ -87,27 +103,40 @@ module SearchControllerPatch
               :before => params[:previous].nil?,
 	      :user_stem_lang => @user_stem_lang,
 	      :user_stem_strategy => @user_stem_strategy)
-              @results += r
+	  
+              @sresults += r
               @results_by_type[s] += c
 	    rescue => error
-	      flash[:error] = "#{error}: #{l(:label_database_error)}"
+	      #flash[:error] = "#{error}: #{l(:label_database_error)}"
+	      flash[:error] = "#{error}: searching model"
 	    end
 	
         end
-        @results = @results.sort {|a,b| b.event_datetime <=> a.event_datetime}
-        if params[:previous].nil?
-          @pagination_previous_date = @results[0].event_datetime if offset && @results[0]
-          if @results.size > limit
-            @pagination_next_date = @results[limit-1].event_datetime 
-            @results = @results[0, limit]
-          end
-        else
-          @pagination_next_date = @results[-1].event_datetime if offset && @results[-1]
-          if @results.size > limit
-            @pagination_previous_date = @results[-(limit)].event_datetime 
-            @results = @results[-(limit), limit]
-          end
-        end
+	
+        @sresults = @sresults.sort {|a,b| b.event_datetime <=> a.event_datetime}
+ 	current_page = params[:page]
+	#per_page = params[:per_page] # could be configurable or fixed in your app
+  	per_page=10
+	@results = @sresults.paginate( :page=>current_page, :per_page=>per_page)
+	#@results = @sresults.paginate( :per_page=>per_page)
+        # if params[:previous].nil?
+        #   @pagination_previous_date = @results[0].event_datetime if offset && @results[0]
+        #   if @sresults.size > limit
+        #     @pagination_next_date = @results[limit-1].event_datetime 
+           # @sresults = @sresults[0, limit]
+        #   end
+        #   Rails.logger.debug "DEBUG: A pagination: previous: " + @pagination_previous_date.inspect
+	#   Rails.logger.debug "DEBUG: A pagination: nexdate: " + @pagination_next_date.inspect
+        # else
+        #   @pagination_next_date = @results[-1].event_datetime if offset && @results[-1]
+        #   if @results.size > limit
+        #     @pagination_previous_date = @sresults[-(limit)].event_datetime 
+        #   #  @sresults = @sresults[-(limit), limit]
+        #   end
+	#   Rails.logger.debug "DEBUG: B pagination: previous: " + @pagination_previous_date.inspect
+        #   Rails.logger.debug "DEBUG: B pagination: nexdate: " + @pagination_next_date.inspect
+
+        # end
       else
         @question = ""
         flash.delete(:error)  

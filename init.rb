@@ -22,7 +22,16 @@ else
     ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
     SearchController.send(:include, SearchControllerPatch)	
     Attachment.send(:include, AttachmentPatch)
-    #SearchHelper.send(:include, SearchHelperPatch)
+    #SearchHelper.send(:include, RedmineXapian::SearchHelperPatch)
+    #unless ApplicationHelper.included_modules.include? (RedmineWikiExtensions::ApplicationHelperPatch)	
+    #  ApplicationHelper.send(:include, RedmineWikiExtensions::ApplicationHelperPatch)	
+    #end
+
+    Rails.configuration.to_prepare do
+      unless ActionView::Base.included_modules.include? (XapianHelper)
+        ActionView::Base.send(:include, XapianHelper)
+      end
+    end
 
     Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
@@ -31,7 +40,7 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.4.3'
+	version '1.5.0_prev1'
 	requires_redmine :version_or_higher => '2.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',
@@ -48,5 +57,6 @@ else
 
    Redmine::Search.map do |search|
      search.register :attachments
+     search.register :repofiles
   end
 end
