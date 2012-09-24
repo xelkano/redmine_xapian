@@ -24,9 +24,9 @@
 
   <p>
 <% if  Setting.plugin_redmine_xapian['stem_on_search'] == "true" then %>
- <label><%= content_tag(:label, l(:label_stemming_lang))%> <%= select_tag "user_stem_lang", 
-                        options_for_select(  Setting.plugin_redmine_xapian['stem_langs'], @user_stem_lang )  %> 
-                          
+ <label><%= content_tag(:label, l(:label_stemming_lang))%> <%= select_tag "user_stem_lang",
+                        options_for_select(  Setting.plugin_redmine_xapian['stem_langs'], @user_stem_lang )  %>
+
   </label>
   <%=content_tag(:label, l(:label_stemming_strategy))%>
   <%=radio_button_tag 'user_stem_strategy', 'STEM_NONE', 'STEM_NONE' == @user_stem_strategy %> <%= l(:label_stem_none)%>
@@ -43,28 +43,21 @@
     <div id="search-results-counts">
     <%= render_results_by_type(@results_by_type) unless @scope.size == 1 %>
     </div>
-    
+
     <h3><%= l(:label_result_plural) %> (<%= @results_by_type.values.sum %>)</h3>
+<<<<<<< HEAD
 <% logger.debug "DEBUG: antes1 " %>
+=======
+
+>>>>>>> 93e208ddb01d83bf175395f333440564db3de990
     <dl id="search-results">
       <% @results.each do |e| %>
-        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project  %> 
+        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project  %>
 <% if e.event_type == "attachment" then %>
 <strong>
 <%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url	%>
 </strong>
-<%	if e.container_type == "Document" %>
-<%=		link_to truncate( l(:label_document)+e.container_name, :length => 255), e.container_url %>
-<%	elsif e.container_type == "Message" %>
-<%=		link_to truncate( l(:label_message)+e.container_name, :length => 255), e.container_url %>
-<%	elsif e.container_type == "WikiPage" %>
-<%=		link_to truncate( l(:label_wiki)+e.container_name, :length => 255), e.container_url	 %>	
-<%	elsif e.container_type == "Issue" %>
-<%=		link_to truncate( l(:label_issue)+e.container_name, :length => 255), e.container_url %>
-<%      elsif e.container_type == "Article" %>
-<%=        	link_to truncate( l(:label_article)+e.container_name, :length => 255), e.container_url %>
-<%    	end
-%>
+<%= link_to_container(e) %>
 <% else %>
 <%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url %>
 <%end%>
