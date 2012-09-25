@@ -2,7 +2,7 @@
 class Repofile < ActiveRecord::Base
  
   has_no_table
- 
+
   #rescue_from Exception :with => :show_error
 
   def show_error (exception)
@@ -45,11 +45,10 @@ class Repofile < ActiveRecord::Base
 
 
   acts_as_searchable :xapianfile => "repofile",
-		     :columns => ["#{table_name}.filename", "#{table_name}.description"],
-                      #:include => {:board => :project},
-                      # :project_key => 'project_id',
-			:xapianfile => "repofile",
-                      :date_column =>  Proc.new {|o| o.event_datetime },
+                     :columns => ["#{table_name}.filename", "#{table_name}.description"],
+#                      #:include => {:board => :project},
+#                      # :project_key => 'project_id',
+#                      :date_column =>  Proc.new {|o| o.event_datetime },
                        :permission => :browse_repository
 
 

@@ -1,4 +1,5 @@
 require_dependency 'search_controller'
+require 'will_paginate/array'
 
 module RedmineXapian
   module SearchControllerPatch
@@ -55,7 +56,7 @@ module RedmineXapian
             @object_types.delete('projects')
             # only show what the user is allowed to view
             @object_types = @object_types.select do |o|
-              if o == "attachments"
+              if o == "attachments" || o == "repofiles"
                 true
               else
                 User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
@@ -77,6 +78,7 @@ module RedmineXapian
             @tokens.slice! 5..-1 if @tokens.size > 5
 
             @results = []
+ 	    @rresults = []
             @results_by_type = Hash.new {|h,k| h[k] = 0}
 
             limit = 10
@@ -90,29 +92,20 @@ module RedmineXapian
                 :limit => (limit+1),
                 :offset => offset,
                 :before => params[:previous].nil?,
-          :user_stem_lang => @user_stem_lang,
-          :user_stem_strategy => @user_stem_strategy)
-                @results += r
+          	:user_stem_lang => @user_stem_lang,
+          	:user_stem_strategy => @user_stem_strategy)
+                @rresults += r
                 @results_by_type[s] += c
         rescue => error
-          flash[:error] = "#{error}: #{l(:label_database_error)}"
+          flash[:error] = "#{error}: searching model #{s.inspect}"
         end
 
           end
-          @results = @results.sort {|a,b| b.event_datetime <=> a.event_datetime}
-          if params[:previous].nil?
-            @pagination_previous_date = @results[0].event_datetime if offset && @results[0]
-            if @results.size > limit
-              @pagination_next_date = @results[limit-1].event_datetime
-              @results = @results[0, limit]
-            end
-          else
-            @pagination_next_date = @results[-1].event_datetime if offset && @results[-1]
-            if @results.size > limit
-              @pagination_previous_date = @results[-(limit)].event_datetime
-              @results = @results[-(limit), limit]
-            end
-          end
+          @rresults = @rresults.sort {|a,b| b.event_datetime <=> a.event_datetime}
+          current_page = params[:page]
+          #per_page = params[:per_page] # could be configurable or fixed in your app
+          per_page=10
+          @results = @rresults.paginate( :page=>current_page, :per_page=>per_page)
         else
           @question = ""
           flash.delete(:error)

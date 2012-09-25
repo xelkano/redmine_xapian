@@ -14,30 +14,20 @@ rescue LoadError
     $xapian_bindings_available = false
 else
     require 'redmine'
-<<<<<<< HEAD
-    Dir::foreach(File.join(File.dirname(__FILE__), 'lib')) do |file|
-      next unless /\.rb$/ =~ file
-      require File.dirname(__FILE__) + '/lib/' + file
-    end
-    
-    ActiveRecord::Base.send(:include, Redmine::Acts::Searchable)
-    SearchController.send(:include, SearchControllerPatch)	
-    Attachment.send(:include, AttachmentPatch)
-    #SearchHelper.send(:include, RedmineXapian::SearchHelperPatch)
-    #unless ApplicationHelper.included_modules.include? (RedmineWikiExtensions::ApplicationHelperPatch)	
-    #  ApplicationHelper.send(:include, RedmineWikiExtensions::ApplicationHelperPatch)	
+    #Dir::foreach(File.join(File.dirname(__FILE__), 'lib')) do |file|
+    #  next unless /\.rb$/ =~ file
+    #  require File.dirname(__FILE__) + '/lib/' + file
     #end
-
-    Rails.configuration.to_prepare do
-      unless ActionView::Base.included_modules.include? (XapianHelper)
-        ActionView::Base.send(:include, XapianHelper)
-      end
-    end
-=======
     require 'redmine_xapian/acts_as_searchable_patch'
     SearchController.send(:include, RedmineXapian::SearchControllerPatch)
     Attachment.send(:include, RedmineXapian::AttachmentPatch)
->>>>>>> 93e208ddb01d83bf175395f333440564db3de990
+    #ActionView::Base.send(:include, RedmineXapian::XapianHelper)
+
+    #Rails.configuration.to_prepare do
+    #  unless ActionView::Base.included_modules.include? (RedmineXapian::XapianHelper)
+    #    ActionView::Base.send(:include, RedmineXapian::XapianHelper)
+    #  end
+    #end
 
     Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'

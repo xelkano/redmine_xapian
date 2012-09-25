@@ -1,7 +1,7 @@
 module RedmineXapian
   module SearchStrategies
     module XapianSearch
-      def search_attachments(tokens, limit_options, offset, projects_to_search, all_words, user_stem_lang, user_stem_strategy )
+      def xapian_search(tokens, limit_options, offset, projects_to_search, all_words, user_stem_lang, user_stem_strategy, xapian_file )
         xpattachments = Array.new
         return [xpattachments,0] unless Setting.plugin_redmine_xapian['enable'] == "true"
         Rails.logger.debug "DEBUG: global settings dump" + Setting.plugin_redmine_xapian.inspect
@@ -62,18 +62,19 @@ module RedmineXapian
           if dochash
             Rails.logger.debug "DEBUG: dochash not nil.. " + dochash.fetch('url').to_s
             Rails.logger.debug "DEBUG: limit_conditions " + limit_options[:limit].inspect
-            if dochash["url"].to_s =~ /^repos\// then
+            if dochash["url"].to_s =~ /^repos\// and xapian_file == "Repofile" then
+	      Rails.logger.debug "DEBUG: searching for repofiles" 
               if repo_file = process_repo_file(projects_to_search, dochash)
                 xpattachments << repo_file
               end
-            else
+            elsif xapian_file == "Attachment"
+	      Rails.logger.debug "DEBUG: searching for attachments"
               if attachment = process_attachment(projects_to_search, dochash)
                 xpattachments << attachment
               end
             end
           end
         end
-        Rails.logger.debug "DEBUG: xapian searched"
         xpattachments = xpattachments.sort_by{|x| x[:created_on] }
 
         if RUBY_VERSION >= "1.9"
@@ -81,7 +82,7 @@ module RedmineXapian
             attachment[:description].force_encoding('UTF-8')
           end
         end
-
+	Rails.logger.debug "DEBUG: xapian searched"
         [xpattachments, xpattachments.size]
       end
     private
@@ -128,18 +129,20 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: repo file: " + dochash.fetch('url').inspect
         dochash2=Hash[ [:project_identifier, :repo_identifier, :file ].zip(dochash.fetch('url').split('/',4).drop(1)) ]
         project=Project.where(:identifier => dochash2[:project_identifier]).first
-        repository=Repository.where( :project_id=>project.id, :identifier=>dochash2[:repo_identifier] ).first
+        repository=Repository.where( :project_id=>project.id, :identifier=>dochash2[:repo_identifier] ).first unless project.nil?
         Rails.logger.debug "DEBUG: repository found " + repository.inspect
         if repository
           allowed = User.current.allowed_to?(:browse_repository, repository.project)
-          Rails.logger.debug "DEBUG: allowed: " + allowed.inspect + " to project: " + repository.project.inspect
           if ( allowed and project_included( project.id, projects_to_search ) )
-            docattach=Repofile.new(:filename=>dochash2[:file], :created_on=>"2012-08-23 22:34:50", :project_id=>project.id,
-              :repository_id=>repository.id)
-            #docattach.attributes( :description=>dochash["sample"], :created_on=>"2012-08-23 22:34:50")
-            Rails.logger.debug "DEBUG: push attach" + docattach.inspect
-                  docattach[:description]=dochash["sample"]
-            docattach[:created_on]="2012-08-23 22:34:50"
+            fmtime=file_timestamp(dochash2[:file], project.identifier, repository.identifier)
+	    docattach=Repofile.new( :filename=>dochash2[:file],
+                                      :created_on=>fmtime,
+                                      :project_id=>project.id,
+                                      :description=>dochash["sample"],
+                                      :repository_id=>repository.id)
+	    Rails.logger.debug "DEBUG: push attach" + docattach.inspect
+            docattach[:description]=dochash["sample"]
+            docattach[:created_on]=fmtime
             docattach[:project_id]=project.id
             docattach[:repository_id]=repository.id
             docattach[:filename]=dochash2[:file]
@@ -147,11 +150,10 @@ module RedmineXapian
               #load 'acts_as_event.rb'
             docattach[:project_id]=project.id
             Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
-            Rails.logger.debug "DEBUG: ok created"
             Rails.logger.debug "DEBUG: push attach" + docattach.inspect
             docattach
           else
-            Rails.logger.debug "DEBUG: user without permissions"
+            Rails.logger.debug "DEBUG: user without :browse_repository permissions"
             nil
           end
         end
@@ -170,6 +172,14 @@ module RedmineXapian
           user_stem_lang
         )
       end
+
+      def file_timestamp( filename, project_name, repo_identifier )
+        repositoryfile = File.join(Rails.root, "files", "repos", project_name, repo_identifier, filename )
+        Rails.logger.debug "DEBUG: file_timestamp #{repositoryfile}"
+        Rails.logger.debug "DEBUG: File mtime: #{File.new(repositoryfile).mtime}"
+        File.new(repositoryfile).mtime.in_time_zone
+      end
+
     end
   end
 end

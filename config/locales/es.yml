@@ -27,19 +27,19 @@ es:
     label_stem_all:  "Stem all"
     label_default_stemming_lang: "Set default stemming lang"
     label_default_stemming_strategy: "Set default stemming strategy"
-    #label_no_results_found: "No se han encontrado resultados"
-    #label_one_result_found: "Mostrando 1 resultado"
-    #label_show_all_results: "Mostrando %{offsetfirst} - %{offsetlast} de un total de %{total_entries} resultados"
     will_paginate:
       page_entries_info:
         single_page:
           zero:  "No se han encontrado resultados"
-          one:   "Displaying 1 %{model}"
-          other: "Displaying all %{count} %{model}"
+          one:   "Mostrando 1 resultado"
+          other: "Mostrando %{count} resultados"
         single_page_html:
-          zero:  "No %{model} found"
-          one:   "Displaying <b>1</b> %{model}"
-          other: "Displaying <b>all&nbsp;%{count}</b> %{model}"
-        multi_page: "Displaying %{model} %{from} - %{to} of %{count} in total"
-        multi_page_html: "Displaying %{model} <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
+          zero:  "No se han encontrado resultados"
+          one:   "Mostrando <b>1</b> resultado"
+          other: "Mostrando <b>all&nbsp;%{count}</b> resultados"
+        multi_page: "Mostrando resultados %{from} - %{to} of %{count} in total"
+        multi_page_html: "Mostrando <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> en total"
+    label_repofile: Repositorio
+    label_repofile_plural: Repositorios
+
 

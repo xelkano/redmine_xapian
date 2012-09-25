@@ -45,11 +45,6 @@
     </div>
 
     <h3><%= l(:label_result_plural) %> (<%= @results_by_type.values.sum %>)</h3>
-<<<<<<< HEAD
-<% logger.debug "DEBUG: antes1 " %>
-=======
-
->>>>>>> 93e208ddb01d83bf175395f333440564db3de990
     <dl id="search-results">
       <% @results.each do |e| %>
         <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project  %>
@@ -85,16 +80,6 @@
   <br />
 </div>
 
-<%# if @pagination_previous_date %>
-<%# link_to_content_update("\xc2\xab " + l(:label_previous),
-      params.merge(:previous => 1,
-                   :offset => @pagination_previous_date.strftime("%Y%m%d%H%M%S"))) %>
-<%# end %>
-<%# if @pagination_next_date %>
-<%# link_to_content_update(l(:label_next) + " \xc2\xbb",
-      params.merge(:previous => nil,
-                   :offset => @pagination_next_date.strftime("%Y%m%d%H%M%S"))) %>
-<%# end %>
 </center></p>
 
 <% html_title(l(:label_search)) -%>

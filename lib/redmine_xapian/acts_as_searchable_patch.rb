@@ -8,39 +8,46 @@ module Redmine
           include RedmineXapian::SearchStrategies::SearchLogic
 
           def search_with_attachments(tokens, projects = nil, options = {})
-            unless name == "Attachment"
+            unless name == "Attachment" || name == "Repofile"
               return search_without_attachments(tokens, projects, options)
             end
-
             search_data = RedmineXapian::SearchStrategies::SearchData.new(
               self,
               tokens,
               projects,
-              options
+              options,
+	      name
             )
 
             search_results = []
+	    values = []
+	    values_count = 0
 
             if Redmine::Search.available_search_types.include?("articles")
               search_results += [ search_for_articles_attachments(search_data) ]
             end
-
-            search_results += [
-              search_for_documents_attachments(search_data),
-              search_for_issues_attachments(search_data),
-              search_for_message_attachments(search_data),
-              search_for_wiki_page_attachments(search_data),
-              search_for_project_files(search_data)
-            ]
-
-            values = search_results.map(&:first).flatten
-            values_count = search_results.map(&:last).inject(0, :+)
+	
+	    unless name == "Repofile"
+	    # Does not have table
+              search_results += [
+                search_for_documents_attachments(search_data),
+                search_for_issues_attachments(search_data),
+                search_for_message_attachments(search_data),
+                search_for_wiki_page_attachments(search_data),
+                search_for_project_files(search_data)
+              ]
+            
+	
+              values = search_results.map(&:first).flatten
+              values_count = search_results.map(&:last).inject(0, :+)
+	    end
 
             if !options[:titles_only]
+	      Rails.logger.debug "DEBUG: call xapian search service for #{name.inspect}"
               xapian_values, xapian_values_count = \
-                RedmineXapian::SearchStrategies::XapianAttachmentsSearchService \
+                RedmineXapian::SearchStrategies::XapianSearchService \
                   .search(search_data)
-
+	      Rails.logger.debug "DEBUG: call xapian search service for  #{name.inspect} completed"
               values = (xapian_values | values).sort_by { |x| x[:created_on] }
               values_count += xapian_values_count
             end
