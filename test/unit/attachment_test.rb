@@ -87,7 +87,7 @@ class AttachmentTest < ActiveSupport::TestCase
   def search_results_for(tokens_query, projects_to_search, container_type)
     tokens = tokens_query.split
 
-    RedmineXapian::SearchStrategies::XapianAttachmentsSearchService \
+    RedmineXapian::SearchStrategies::XapianSearchService \
       .stubs(:search) \
       .returns([[], 0])
 

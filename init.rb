@@ -14,20 +14,11 @@ rescue LoadError
     $xapian_bindings_available = false
 else
     require 'redmine'
-    #Dir::foreach(File.join(File.dirname(__FILE__), 'lib')) do |file|
-    #  next unless /\.rb$/ =~ file
-    #  require File.dirname(__FILE__) + '/lib/' + file
-    #end
     require 'redmine_xapian/acts_as_searchable_patch'
     SearchController.send(:include, RedmineXapian::SearchControllerPatch)
     Attachment.send(:include, RedmineXapian::AttachmentPatch)
     #ActionView::Base.send(:include, RedmineXapian::XapianHelper)
 
-    #Rails.configuration.to_prepare do
-    #  unless ActionView::Base.included_modules.include? (RedmineXapian::XapianHelper)
-    #    ActionView::Base.send(:include, RedmineXapian::XapianHelper)
-    #  end
-    #end
 
     Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
@@ -36,7 +27,7 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.5.0_prev1'
+	version '1.5.0_prev2'
 	requires_redmine :version_or_higher => '2.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',

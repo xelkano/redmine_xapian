@@ -26,4 +26,18 @@ eu:
     label_stem_all:  "Stem all"
     label_default_stemming_lang: "Set default stemming lang"
     label_default_stemming_strategy: "Set default stemming strategy"
+    will_paginate:
+      page_entries_info:
+        single_page:
+          zero:  "No results found"
+          one:   "Displaying 1 result"
+          other: "Displaying %{count} results"
+        single_page_html:
+          zero:  "No results found"
+          one:   "Displaying <b>1</b> results"
+          other: "Displaying <b>all&nbsp;%{count}</b> results"
+        multi_page: "Displaying results %{from} - %{to} of %{count} in total"
+        multi_page_html: "Displaying results <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
+    label_repofile: Repository
+    label_repofile_plural: Repositories
 
