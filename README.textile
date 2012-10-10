@@ -63,7 +63,7 @@ Install redmine_xapian into plugins directory with:
 * cd into [redmine_root]
 * run command "bundle install --without development test"
 * cd into [redmine_root]/plugins/
-* run "git clone http://github.com/xelkano/redmine_xapian.git ." or download and extract tar or zip file into redmine plugins directory..
+* run command "git clone http://github.com/xelkano/redmine_xapian.git" or download and extract tar or zip file into redmine plugins directory..
 * rake db:migrate_plugins RAILS_ENV="production"
 * Restart web server
 
