@@ -175,9 +175,15 @@ module RedmineXapian
 
       def file_timestamp( filename, project_name, repo_identifier )
         repositoryfile = File.join(Rails.root, "files", "repos", project_name, repo_identifier, filename )
-        Rails.logger.debug "DEBUG: file_timestamp #{repositoryfile}"
-        Rails.logger.debug "DEBUG: File mtime: #{File.new(repositoryfile).mtime}"
-        File.new(repositoryfile).mtime.in_time_zone
+        Rails.logger.debug "DEBUG: file_timestamp for #{repositoryfile}"
+	begin
+          time_stamp=File.new(repositoryfile).mtime.in_time_zone
+	rescue
+	  Rails.logger.info "Redmine_xapian: Error getting #{repositoryfile} timestamp."
+	  time_stamp=time_stamp=Time.at(0)
+	end
+	Rails.logger.debug "DEBUG: File mtime: #{time_stamp.inspect}"
+	time_stamp
       end
 
     end
