@@ -1,3 +1,5 @@
+require 'uri'
+
 module RedmineXapian
   module SearchStrategies
     module XapianSearch
@@ -59,6 +61,7 @@ module RedmineXapian
           Rails.logger.debug "DEBUG: m: " + m.document.data.inspect
           docdata = m.document.data{url}
           dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size)=\/?([^\n\]]+)/).flatten]
+	  dochash["url"]=URI.unescape(dochash["url"].to_s)
           if dochash
             Rails.logger.debug "DEBUG: dochash not nil.. " + dochash.fetch('url').to_s
             Rails.logger.debug "DEBUG: limit_conditions " + limit_options[:limit].inspect
