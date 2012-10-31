@@ -10,8 +10,8 @@ module XapianSearch
     Rails.logger.debug "DEBUG: global settings dump" + Setting.plugin_redmine_xapian.inspect
     Rails.logger.debug "DEBUG: user_stem_lang: " + user_stem_lang.inspect
     Rails.logger.debug "DEBUG: user_stem_strategy: " + user_stem_strategy.inspect
-    Rails.logger.debug "DEBUG: databasepath: " + getDatabasePath(user_stem_lang)
-    databasepath = getDatabasePath(user_stem_lang)
+    Rails.logger.debug "DEBUG: databasepath: " + get_database_path(user_stem_lang)
+    databasepath = get_database_path(user_stem_lang)
 
     begin
       database = Xapian::Database.new(databasepath)
@@ -27,14 +27,14 @@ module XapianSearch
     # Combine the rest of the command line arguments with spaces between
     # them, so that simple queries don't have to be quoted at the shell
     # level.
-    #queryString = ARGV[1..-1].join(' ')
-    queryString = tokens.join(' ')
+    #query_string = ARGV[1..-1].join(' ')
+    query_string = tokens.join(' ')
     # Parse the query string to produce a Xapian::Query object.
     qp = Xapian::QueryParser.new()
     stemmer = Xapian::Stem.new(user_stem_lang)
     qp.stemmer = stemmer
     qp.database = database
-    case @user_stem_strategy
+    case user_stem_strategy
       when "STEM_NONE" then qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
       when "STEM_SOME" then qp.stemming_strategy = Xapian::QueryParser::STEM_SOME
       when "STEM_ALL" then qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
@@ -44,8 +44,8 @@ module XapianSearch
     else	
       qp.default_op = Xapian::Query::OP_OR
     end
-    query = qp.parse_query(queryString)
-    Rails.logger.debug "DEBUG queryString is: #{queryString}"
+    query = qp.parse_query(query_string)
+    Rails.logger.debug "DEBUG query_string is: #{query_string}"
     Rails.logger.debug "DEBUG: Parsed query is: #{query.description()} "
 
     # Find the top 100 results for the query.
@@ -103,12 +103,16 @@ end
     return true if projects_to_search.nil?
     found=false
     projects_to_search.each {|x| 
-      found=true if x[:id] == project_id
+      if x.is_a?(ActiveRecord::Relation)
+        found = true if x.first.id == project_id        
+      else
+        found = true if x[:id] == project_id
+      end
     }
     found
   end
 
-  def XapianSearch.getDatabasePath(user_stem_lang)
+  def XapianSearch.get_database_path(user_stem_lang)
     return Setting.plugin_redmine_xapian['index_database'].rstrip + '/' + user_stem_lang
   end
 
