@@ -1,0 +1,30 @@
+# Czech strings go here for Rails i18n
+cs:
+  
+    label_enable_redmine_xapian: "Povolit Xapian engine pro vyhledávání v souborech"
+    label_index_database: "Adresář obsahující databázi Xapianu"
+    label_stemming_text: "nastav jazyk pro stemming, výchozí je 'english'.
+                           Možné hodnoty: danish dutch english finnish french
+                           german german2 hungarian italian kraaij_pohlmann
+                           lovins norwegian porter portuguese romanian russian
+                           spanish swedish turkish (vyber 'none' pro vypnutí
+                           stemmingu)"
+    label_search2: "Rozšířené vyhledávání"
+    text_search1: "Tento plugin přidá je standardnímu vyhledávání Redminu vzhledávaní v souborech. Pro povolení Xapianu je potřeba vytvořit databázi pomocí utility omindex a tu pak nastavit v konfiguraci pluginu."
+    label_document: "Dokument"
+    label_issue: "Úkol"
+    label_wiki: "Wiki"
+    label_message: "Zpráva"
+    label_article: "Článek"
+    label_article_plural: "Články"
+    label_stemming_lang: "Jazyk pro stemming"
+    label_enable_xapian_on_search: "Povol konfiguraci Xapianu na vyhledávacím formuláři"
+    label_search_languages: "Jazyk pro stemming na vyhledávacím formuláři"
+    label_stemming_strategy: "Strategie stemmingu"
+    label_stem_none: "Stem none"
+    label_stem_some: "Stem some"
+    label_stem_all:  "Stem all"
+    label_default_stemming_lang: "Nastav výchozí jazyk pro stemming"
+    label_default_stemming_strategy: "Nastav výchozí strategii pro stemming"
+    label_database_error: "chyba databáze, zkonfigurujte, prosím, Xapian"
+
