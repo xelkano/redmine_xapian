@@ -35,7 +35,7 @@ ru:
           other: "Displaying %{count} results"
         single_page_html:
           zero:  "No results found"
-          one:   "Displaying <b>1</b> results"
+          one:   "Displaying <b>1</b> result"
           other: "Displaying <b>all&nbsp;%{count}</b> results"
         multi_page: "Displaying results %{from} - %{to} of %{count} in total"
         multi_page_html: "Displaying results <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
