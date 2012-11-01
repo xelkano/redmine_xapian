@@ -166,7 +166,13 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: project id: " + project_id.inspect
         Rails.logger.debug "DEBUG: projects to search: " + projects_to_search.inspect
         return true if projects_to_search.nil?
-        projects_to_search.any? { |x| x[:id] == project_id }
+        projects_to_search.any? do |x| 
+          if x.is_a?(ActiveRecord::Relation)
+  	        x.first.id == project_id        
+          else
+            x[:id] == project_id
+          end
+        end
       end
 
       def get_database_path(user_stem_lang)
