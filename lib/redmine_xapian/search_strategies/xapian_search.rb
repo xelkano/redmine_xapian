@@ -25,14 +25,14 @@ module RedmineXapian
         # Combine the rest of the command line arguments with spaces between
         # them, so that simple queries don't have to be quoted at the shell
         # level.
-        #queryString = ARGV[1..-1].join(' ')
-        queryString = tokens.join(' ')
+        #query_string = ARGV[1..-1].join(' ')
+        query_string = tokens.join(' ')
         # Parse the query string to produce a Xapian::Query object.
         qp = Xapian::QueryParser.new()
         stemmer = Xapian::Stem.new(user_stem_lang)
         qp.stemmer = stemmer
         qp.database = database
-        case @user_stem_strategy
+        case user_stem_strategy
           when "STEM_NONE" then qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
           when "STEM_SOME" then qp.stemming_strategy = Xapian::QueryParser::STEM_SOME
           when "STEM_ALL" then qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
@@ -42,8 +42,8 @@ module RedmineXapian
         else
           qp.default_op = Xapian::Query::OP_OR
         end
-        query = qp.parse_query(queryString)
-        Rails.logger.debug "DEBUG queryString is: #{queryString}"
+        query = qp.parse_query(query_string)
+        Rails.logger.debug "DEBUG query_string is: #{query_string}"
         Rails.logger.debug "DEBUG: Parsed query is: #{query.description()} "
 
         # Find the top 100 results for the query.
@@ -166,7 +166,13 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: project id: " + project_id.inspect
         Rails.logger.debug "DEBUG: projects to search: " + projects_to_search.inspect
         return true if projects_to_search.nil?
-        projects_to_search.any? { |x| x[:id] == project_id }
+        projects_to_search.any? do |x| 
+          if x.is_a?(ActiveRecord::Relation)
+  	        x.first.id == project_id        
+          else
+            x[:id] == project_id
+          end
+        end
       end
 
       def get_database_path(user_stem_lang)
