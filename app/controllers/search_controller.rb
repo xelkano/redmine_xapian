@@ -115,7 +115,7 @@ class SearchController < ApplicationController
       end
     else
       @question = ""
-      flash.delete (:error)  
+      flash.delete(:error)  
     end
     render :layout => false if request.xhr?
   end

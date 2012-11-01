@@ -203,7 +203,7 @@ module Redmine
 		end
 		# Search attachments over xapian
 		logger.debug "DEBUG: results count before xapian " + results_count.inspect + results_count_issue.inspect + results_count_message.inspect + results_count_wiki.inspect + results_count_doc.inspect 
-		if !options[:titles_only]
+		unless options[:titles_only]
 		  begin 
 		    xapianresults, xapianresults_count = XapianSearch.search_attachments( tokens, limit_options, 
 								 options[:offset], projects, options[:all_words], 
