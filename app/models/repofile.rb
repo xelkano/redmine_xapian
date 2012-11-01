@@ -5,7 +5,7 @@ class Repofile < ActiveRecord::Base
 
   #rescue_from Exception :with => :show_error
 
-  def show_error (exception)
+  def show_error(exception)
     Rails.logger.debug "DEBUG: exection " + exeption.inspect
   end
 
@@ -41,7 +41,7 @@ class Repofile < ActiveRecord::Base
   column :project_id,   :integer
   column :filename, 	:string
   column :repository_id, :integer
-  validates_presence_of :created_on, :filename, :repository_id
+  validates :created_on, :filename, :repository_id, presence => true
 
 
   acts_as_searchable :xapianfile => "repofile",
