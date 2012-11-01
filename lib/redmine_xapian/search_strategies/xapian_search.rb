@@ -32,7 +32,7 @@ module RedmineXapian
         stemmer = Xapian::Stem.new(user_stem_lang)
         qp.stemmer = stemmer
         qp.database = database
-        case @user_stem_strategy
+        case user_stem_strategy
           when "STEM_NONE" then qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
           when "STEM_SOME" then qp.stemming_strategy = Xapian::QueryParser::STEM_SOME
           when "STEM_ALL" then qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
