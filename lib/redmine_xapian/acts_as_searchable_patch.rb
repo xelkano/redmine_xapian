@@ -59,8 +59,13 @@ module Redmine
 
           private
             def search_for_articles_attachments(search_data)
-              query = "INNER JOIN kb_articles ON kb_articles.id = container_id"
-              search_in_container(search_data, "Article", query)
+              query = <<-sql
+			    INNER JOIN kb_articles 
+				  ON kb_articles.id = container_id 
+			    INNER JOIN #{Project.table_name} 
+				  ON #{KbArticle.table_name}.project_id=#{Project.table_name}.id
+			  sql
+              search_in_container(search_data, "KbArticle", query)
             end
 
             def search_for_documents_attachments(search_data)
