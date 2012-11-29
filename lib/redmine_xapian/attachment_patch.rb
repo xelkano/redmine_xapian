@@ -27,8 +27,8 @@ module RedmineXapian
           container_url = {:controller=>"messages", :board_id=>container[:board_id], :id=>container[:id], :action=>"show"}
         elsif container.is_a?(Version)
           container_url = {:controller=>"files", :project_id=>container[:project_id], :action=>"index"}
-        elsif defined?(Article) && container.is_a?(Article)
-          container_url = {:controller=>"articles", :id=>container[:id], :action=>"show"}
+        elsif defined?(KbArticle) && container.is_a?(KbArticle)
+          container_url = {:controller=>"articles", :id=>container[:id], :project_id=>container[:project_id], :action=>"show"}
         else
           nil
         end
@@ -47,7 +47,7 @@ module RedmineXapian
           container_name += container[:subject].to_s
         elsif container.is_a?(Version)
           container_name += container[:name].to_s
-        elsif defined?(Article) && container.is_a?(Article)
+        elsif defined?(KbArticle) && container.is_a?(KbArticle)
           container_name += container[:title].to_s
         end
 

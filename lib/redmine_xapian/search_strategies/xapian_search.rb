@@ -96,7 +96,7 @@ module RedmineXapian
           Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
           Rails.logger.debug "DEBUG: attach project" + docattach.project.inspect
           Rails.logger.debug "DEBUG: docattach not nil..:  " + docattach.inspect
-          if docattach["container_type"] == "Article" && !Redmine::Search.available_search_types.include?("articles")
+          if docattach["container_type"] == "KbArticle" && !Redmine::Search.available_search_types.include?("kb_articles")
             Rails.logger.debug "DEBUG: Knowledgebase plugin is not installed.."
           elsif docattach.container
             Rails.logger.debug "DEBUG: adding attach.. "
@@ -108,7 +108,7 @@ module RedmineXapian
             can_view_container = user.allowed_to?(container_permission, project)
 
             allowed = case container_type
-            when "Article"
+            when "KbArticle"
               true
             when "Issue"
               can_view_issue = Issue.find_by_id(docattach[:container_id]).visible?
