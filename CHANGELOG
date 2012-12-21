@@ -21,4 +21,4 @@
 1.4.0	- Compatibility for redmine 2, tested on Redmine 2.0.3 + Ruby 1.8.7 + Rails 3.2.6
 1.4.1	- Set logger to info
 1.4.3 	- Compatibility for ruby1.9, tested on Redmine 2.0.3 + Ruby 1.9.2 + Rails 3.2.6
-1.5.0 	- Repository search feature based in a working copy + new pagination.
+1.5.0 	- New permission model + bug fixes + code cleaning + new pagination.
