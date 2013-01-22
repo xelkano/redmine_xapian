@@ -48,7 +48,7 @@
     
     <dl id="search-results">
       <% @results.each do |e| %>
-        <dt class="<%= e.event_type %>"><%= content_tag('span', h(e.project), :class => 'project') unless @project == e.project  %> 
+        <dt class="<%= e.event_type %>"><%= content_tag('span', link_to(e.project.name, project_path(e.project)), :class => 'project') unless @project == e.project  %> 
 <% if e.event_type == "attachment" then %>
 <strong>
 <%=	link_to highlight_tokens(truncate(e.event_title, :length => 255), @tokens), e.event_url	%>
