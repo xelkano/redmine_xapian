@@ -41,7 +41,7 @@ class Repofile < ActiveRecord::Base
   column :project_id,   :integer
   column :filename, 	:string
   column :repository_id, :integer
-  validates :created_on, :filename, :repository_id, presence => true
+  validates_presence_of :created_on, :filename, :repository_id
 
 
   acts_as_searchable :xapianfile => "repofile",

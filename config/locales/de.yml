@@ -17,6 +17,7 @@ de:
   label_stemming_lang: "Stemming Sprache"
   label_default_stemming_lang: "Standard Stemming Sprache"
   label_enable_xapian_on_search: "Zeige die Indizierungseinstellungen in der Suchmaske"
+  label_repository_search: "Enable repository search"
   label_search_languages: "Zeige die Sprachauswahl für das Stemming in der Suchmaske"
   label_stemming_strategy: "Stemming-Strategie"
   label_default_stemming_strategy: "Standard Stemming-Strategie"

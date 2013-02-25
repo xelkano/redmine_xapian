@@ -59,7 +59,8 @@
 </dt>
 <dd><span class="description">
 <% if e.event_type == "attachment" || e.event_type == "subversion" || e.event_type == "git" then %>
-        <%= highlight_tokens2(e.event_description, @tokens) %>
+		<%Rails.logger.debug "DEBUG description" + e.description.inspect %>	
+        <%= highlight_tokens2(e.event_description, @tokens) %>        
 <% else%>
 	<%= highlight_tokens(e.event_description, @tokens) %>
 <% end %>

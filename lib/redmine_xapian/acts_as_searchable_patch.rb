@@ -23,6 +23,7 @@ module Redmine
 	    values = []
 	    values_count = 0
 
+
             if Redmine::Search.available_search_types.include?("articles")
               search_results += [ search_for_articles_attachments(search_data) ]
             end

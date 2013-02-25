@@ -27,22 +27,23 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.5.0'
+	version '1.6.0'
 	requires_redmine :version_or_higher => '2.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',
     		:default => {
-      		  'enable' => 'true',
+      		'enable' => 'true',
      		  'index_database' => '/var/tmp',
-		  'stemming_lang' => 'english',
-		  'stemming_strategy' => 'STEM_NONE',
-		  'stem_on_search' => 'false',
-		  'stem_langs' => ["english", "spanish", "german"]
-    	}
+     		  'script_index' => '/usr/bin/scriptindex',
+		      'stemming_lang' => 'english',
+		      'stemming_strategy' => 'STEM_NONE',
+		      'stem_on_search' => 'false',
+		      'stem_langs' => ["english", "spanish", "german"] }
 
    end
 
    Redmine::Search.map do |search|
      search.register :attachments
+     search.register :repofiles
   end
 end

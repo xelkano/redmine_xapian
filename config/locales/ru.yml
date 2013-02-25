@@ -19,6 +19,7 @@ ru:
     label_article_plural: "Статьи"
     label_stemming_lang: "Язык стемминга"
     label_enable_xapian_on_search: "Разрешить конфигурирование xapian на экране поиска"
+    label_repository_search: "Enable repository search"
     label_search_languages: "Языки стемминга на экране поиска"
     label_stemming_strategy: "Стратегия стемминга"
     label_stem_none: "Выключить стемминг"
