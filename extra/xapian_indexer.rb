@@ -16,7 +16,7 @@ $scriptindex  = "/usr/bin/scriptindex"
 # omindex binary path
 $omindex      = "/usr/bin/omindex"
 
-# Directory containint xapian databases for omindex (Attachments indexing)
+# Directory containing xapian databases for omindex (Attachments indexing)
 $dbrootpath   = "/var/www/xapian-index"
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
@@ -47,7 +47,7 @@ $verbose      = 0
 $stem_langs	= ['english']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
-$projects	= ['registrar', 'noatach' ]
+$projects	= ['prj_id2', 'prj_id1' ]
 
 ################################################################################################
 # END Configuration parameters
@@ -398,17 +398,21 @@ end
 
 # Indexing files
 if not $onlyrepos then
+  if not File.exist?($omindex) then
+    log("- ERROR! #{$omindex} does not exist, exiting...")
+    exit 1
+  end
   $stem_langs.each do | lang |
     $filespath=File.join($redmine_root, "files")
     if not File.directory?($filespath) then
-      log("ERROR accessing #{$filespath}, exiting ...")
+      log("- ERROR accessing #{$filespath}, exiting ...")
       exit 1
     end
     dbpath=File.join($dbrootpath,lang)
     if not File.directory?(dbpath)
-      log("ERROR! #{dbpath} does not exist, creating ...")
+      log("- ERROR! #{dbpath} does not exist, creating ...")
       if not create_dir(dbpath) then
-        log("ERROR! #{dbpath} can not be created!, exiting ...")
+        log("- ERROR! #{dbpath} can not be created!, exiting ...")
         exit 1
       end
     end
@@ -420,6 +424,10 @@ end
 
 # Indexing repositories
 if not $onlyfiles then
+  if not File.exist?($scriptindex) then
+    log("- ERROR! #{$scriptindex} does not exist, exiting...")
+    exit 1
+  end
   $databasepath = File.join( $dbrootpath.rstrip, "repodb" )
   if not File.directory?($databasepath)
     log("Db directory #{$databasepath} does not exist, creating...")
