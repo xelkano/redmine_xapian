@@ -24,26 +24,7 @@ $verbose      = 0
 
 # Define stemmed languages to index attachments Ej [ 'english', 'italian', 'spanish' ]
 # Repository database will be always indexed in english
-# Available languages:  
-#    danish (da)
-#    dutch (nl)
-#    english (en) - Martin Porter's 2002 revision of his stemmer
-#    english_lovins (lovins) - Lovin's stemmer
-#    english_porter (porter) - Porter's stemmer as described in his 1980 paper
-#    finnish (fi)
-#    french (fr)
-#    german (de)
-#    german2 - Normalises umlauts and ß
-#    hungarian (hu)
-#    italian (it)
-#    kraaij_pohlmann - A different Dutch stemmer
-#    norwegian (nb, nn, no)
-#    portuguese (pt)
-#    romanian (ro)
-#    russian (ru)
-#    spanish (es)
-#    swedish (sv)
-#    turkish (tr)
+# Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
 $stem_langs	= ['english']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
@@ -331,7 +312,7 @@ def add_or_update_index(repository, identifier, entry, action)
     Rails.logger.debug "TEXT #{itext.path} generated " 
     #@rwdb.close #Closing because of use of scriptindex
     Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
-    system_or_raise("#{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path} " )
+    system_or_raise("#{$scriptindex} -s enlish #{$databasepath} #{$indexconf.path} #{itext.path} " )
     itext.unlink
     Rails.logger.info ("New doc added to xapian database")
     rescue Exception => e  
