@@ -14,7 +14,7 @@
 
 
 <p>
-<%= content_tag(:label, l(:label_repository_search))%> <%=radio_button_tag 'settings[repository_search]', 'true', @settings['repository_search'] == 'true', :checked=>true  %> yes <%=radio_button_tag 'settings[repository_search]', 'false', @settings['repository_search'] == 'false'  %> No
+<%= content_tag(:label, l(:label_enable_xapian_on_search))%> <%=radio_button_tag 'settings[stem_on_search]', 'true', @settings['stem_on_search'] == 'true', :checked=>true  %> yes <%=radio_button_tag 'settings[stem_on_search]', 'false', @settings['stem_on_search'] == 'false'  %> No
 </p>
 
 

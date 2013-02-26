@@ -36,7 +36,7 @@ else
      		  'index_database' => '/var/tmp',
      		  'script_index' => '/usr/bin/scriptindex',
 		      'stemming_lang' => 'english',
-		      'stemming_strategy' => 'STEM_NONE',
+		      'stemming_strategy' => 'STEM_SOME',
 		      'stem_on_search' => 'false',
 		      'stem_langs' => ["english", "spanish", "german"] }
 
