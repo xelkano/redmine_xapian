@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby -W0
+#!/usr/bin/ruby -W0
 # encoding: UTF-8
 
 
@@ -25,10 +25,10 @@ $verbose      = 0
 # Define stemmed languages to index attachments Ej [ 'english', 'italian', 'spanish' ]
 # Repository database will be always indexed in english
 # Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
-$stem_langs	= ['english']
+$stem_langs	= ['english', 'spanish']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
-$projects	= ['prj_id2', 'prj_id1' ]
+$projects	= ['sysadmin', 'clasificados', 'divendo', 'registrar', 'ehdms' ]
 
 ################################################################################################
 # END Configuration parameters
@@ -41,7 +41,6 @@ $repositories=nil
 $onlyfiles=nil
 $onlyrepos=nil
 $env='production'
-
 
 
 require 'optparse'
@@ -87,7 +86,7 @@ STATUS_FAIL = -1
 ADD_OR_UPDATE = 1
 DELETE = 0
 
-MAIN_REPOSITORY_IDENTIFIER = '[main]'
+MAIN_REPOSITORY_IDENTIFIER = 'main'
 
 
 
@@ -98,19 +97,21 @@ class IndexingError < StandardError; end
 
      
 def indexing(repository)
+    $repository=repository
     Rails.logger.info("Fetch changesets: %s - %s" % [$project.name,(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
-    repository.fetch_changesets
-    repository.reload.changesets.reload
+    log("- Fetch changesets: #{$project.name} - #{$repository.identifier}", :level=>1)
+    $repository.fetch_changesets
+    $repository.reload.changesets.reload
 
-    latest_changeset = repository.changesets.find(:first)
+    latest_changeset = $repository.changesets.find(:first)
     return if not latest_changeset
 
     Rails.logger.debug("Latest revision: %s - %s - %s" % [
       $project.name,
-      (repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
+      ($repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
       latest_changeset.revision])
     #latest_indexed = Indexinglog.find_by_repository_id_and_status( repository.id, STATUS_SUCCESS, :first)
-    latest_indexed = Indexinglog.where("repository_id=#{repository.id} AND status=#{STATUS_SUCCESS}").last
+    latest_indexed = Indexinglog.where("repository_id=#{$repository.id} AND status=#{STATUS_SUCCESS}").last
     #latest_indexed = nil
     Rails.logger.debug "Debug latest_indexed " + latest_indexed.inspect
     begin
@@ -120,22 +121,22 @@ def indexing(repository)
       $indexconf.write "date: field=date\n"
       $indexconf.close
       if not latest_indexed
-        Rails.logger.debug "DEBUG:  repo #{repository.identifier} not indexed, indexing all"
-        log("\t>repo #{repository.identifier} not indexed, indexing all", :level=>1)
-        indexing_all(repository)
+        Rails.logger.debug "DEBUG:  repo #{$repository.identifier} not indexed, indexing all"
+        log("\t>repo #{$repository.identifier} not indexed, indexing all", :level=>1)
+        indexing_all($repository)
       else
-        Rails.logger.debug "DEBUG:  repo #{repository.identifier} indexed, indexing diff"
-        log("\t>repo #{repository.identifier} already indexed, indexing only diff", :level=>1)
-        indexing_diff(repository, latest_indexed.changeset, latest_changeset)
+        Rails.logger.debug "DEBUG:  repo #{$repository.identifier} indexed, indexing diff"
+        log("\t>repo #{$repository.identifier} already indexed, indexing only diff", :level=>1)
+        indexing_diff($repository, latest_indexed.changeset, latest_changeset)
       end
       $indexconf.unlink
     rescue IndexingError => e
-      add_log(repository, latest_changeset, STATUS_FAIL, e.message)
+      add_log($repository, latest_changeset, STATUS_FAIL, e.message)
     else
-      add_log(repository, latest_changeset, STATUS_SUCCESS)
+      add_log($repository, latest_changeset, STATUS_SUCCESS)
       Rails.logger.info("Successfully indexed: %s - %s - %s" % [
         $project.name,
-        (repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
+        ($repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
         latest_changeset.revision])
     end
 end
@@ -283,10 +284,11 @@ def add_or_update_index(repository, identifier, entry, action)
   text = repository.cat(entry.path, identifier)
   #return delete_doc(uri) unless text
   return  unless text
-  #Rails.logger.debug "generated uri: " + uri.inspect
+  Rails.logger.debug "generated uri: " + uri.inspect
+  log("\t>Generated uri: #{uri.inspect}", :level=>1)
   Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', entry.path)
   #print "\t>rev: " + identifier.inspect
-  puts "\t>Indexing: #{entry.path}"
+  log("\t>Indexing: #{entry.path}", :level=>1)
   begin
     itext = Tempfile.new( "filetoindex.tmp", "/tmp" )       
     itext.write("url=#{uri.to_s}\n")
@@ -312,7 +314,7 @@ def add_or_update_index(repository, identifier, entry, action)
     Rails.logger.debug "TEXT #{itext.path} generated " 
     #@rwdb.close #Closing because of use of scriptindex
     Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
-    system_or_raise("#{$scriptindex} -s enlish #{$databasepath} #{$indexconf.path} #{itext.path} " )
+    system_or_raise("#{$scriptindex} -s english #{$databasepath} #{$indexconf.path} #{itext.path} " )
     itext.unlink
     Rails.logger.info ("New doc added to xapian database")
     rescue Exception => e  
@@ -429,7 +431,11 @@ if not $onlyfiles then
       log("- Indexing repositories for #{$project.name} ...")
       $repositories = $project.repositories.select { |repository| repository.supports_cat? }
       $repositories.each do |repository|
-        indexing(repository)
+	if repository.identifier.nil? then
+	  log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier")
+	else
+          indexing(repository)
+	end
       end
     rescue ActiveRecord::RecordNotFound
       log("- ERROR project identifier #{proj} not found, ignoring...", :level => 1)
