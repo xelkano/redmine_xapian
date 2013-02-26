@@ -9,13 +9,15 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: global settings dump" + Setting.plugin_redmine_xapian.inspect
         Rails.logger.debug "DEBUG: user_stem_lang: " + user_stem_lang.inspect
         Rails.logger.debug "DEBUG: user_stem_strategy: " + user_stem_strategy.inspect
-        Rails.logger.debug "DEBUG: databasepath: " + get_database_path(user_stem_lang)
-        databasepath = get_database_path(user_stem_lang)
+        Rails.logger.debug "DEBUG: databasepath: " + get_database_path(user_stem_lang, xapian_file)
+        databasepath = get_database_path(user_stem_lang, xapian_file)
 
         begin
           database = Xapian::Database.new(databasepath)
         rescue => error
-          raise databasepath
+          #raise databasepath
+	  Rails.logger.error "ERROR: xapian database #{$databasepath} cannot be open #{error.inspect}"
+ 	  return [xpattachments,0]
         end
 
         # Start an enquire session.
@@ -211,11 +213,14 @@ module RedmineXapian
         end
       end
 
-      def get_database_path(user_stem_lang)
-        File.join(
-          Setting.plugin_redmine_xapian['index_database'].rstrip,
-          user_stem_lang
-        )
+      def get_database_path(user_stem_lang, xapian_file)
+	path=nil
+	if xapian_file == "Repofile" then
+	  path=File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, "repodb" )
+ 	else
+          path=File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, user_stem_lang )
+	end
+  	path
       end
 
       def file_timestamp( filename, project_name, repo_identifier )
