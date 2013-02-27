@@ -428,11 +428,11 @@ if not $onlyfiles then
       scope = Project.active.has_module(:repository)
       $project = scope.find_by_identifier(proj)
       raise ActiveRecord::RecordNotFound unless $project
-      log("- Indexing repositories for #{$project.name} ...")
+      log("- Indexing repositories for #{$project.name} ...", :level=>1)
       $repositories = $project.repositories.select { |repository| repository.supports_cat? }
       $repositories.each do |repository|
 	if repository.identifier.nil? then
-	  log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier")
+	  log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier", :level=>1)
 	else
           indexing(repository)
 	end
