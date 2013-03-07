@@ -28,7 +28,7 @@ $verbose      = 0
 $stem_langs	= ['english', 'spanish']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
-$projects	= ['sysadmin', 'clasificados', 'divendo', 'registrar', 'ehdms' ]
+$projects	= [ 'prj_id1', 'prj_id2' ]
 
 ################################################################################################
 # END Configuration parameters
@@ -216,18 +216,24 @@ def indexing_diff(repository, diff_from, diff_to)
       Rails.logger.debug "DEBUG: changeset changes for #{changeset.id} " + changeset.filechanges.inspect
       next unless changeset.filechanges
       changeset.filechanges.each do |change|
+	#log( "change.path: #{change.path.inspect}", :level=>1 ) if change.path.include? "/trunk/Sites/divendo/System/cron/api/clasificado"
         if change.action == 'D'
           actions[change.path] = DELETE
+	  #entry = repository.entry(change.path, identifier)
+	  #add_or_update_index(repository, identifier, entry, DELETE )
         else
           actions[change.path] = ADD_OR_UPDATE
+	  #entry = repository.entry(change.path, identifier)
+	  #add_or_update_index(repository, identifier, entry, ADD_OR_UPDATE )
         end
       end
     end
     return unless actions
     actions.each do |path, action|
       entry = repository.entry(path, identifier)
+      log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil?
       Rails.logger.debug "DEBUG: entry to index " + entry.inspect
-      add_or_update_index(repository, identifier, entry, action )
+      add_or_update_index(repository, identifier, entry, action ) unless entry.nil?
     end
   end
 
@@ -285,7 +291,7 @@ def add_or_update_index(repository, identifier, entry, action)
   #return delete_doc(uri) unless text
   return  unless text
   Rails.logger.debug "generated uri: " + uri.inspect
-  log("\t>Generated uri: #{uri.inspect}", :level=>1)
+  #log("\t>Generated uri: #{uri.inspect}", :level=>1)
   Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', entry.path)
   #print "\t>rev: " + identifier.inspect
   log("\t>Indexing: #{entry.path}", :level=>1)
