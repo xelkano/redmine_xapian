@@ -216,7 +216,6 @@ def indexing_diff(repository, diff_from, diff_to)
       Rails.logger.debug "DEBUG: changeset changes for #{changeset.id} " + changeset.filechanges.inspect
       next unless changeset.filechanges
       changeset.filechanges.each do |change|
-	#log( "change.path: #{change.path.inspect}", :level=>1 ) if change.path.include? "/trunk/Sites/divendo/System/cron/api/clasificado"
         if change.action == 'D'
           actions[change.path] = DELETE
 	  #entry = repository.entry(change.path, identifier)
@@ -234,54 +233,54 @@ def indexing_diff(repository, diff_from, diff_to)
       log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil?
       Rails.logger.debug "DEBUG: entry to index " + entry.inspect
       add_or_update_index(repository, identifier, entry, action ) unless entry.nil?
-    end
-  end
+      end
+      end
 
-  if diff_from.id >= diff_to.id
-    Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
-            (repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
-    log("\t>Already indexed: #{repository.identifier} (from #{diff_from.id} to #{diff_to.id})", :level=>1)
-    return
-  end
+      if diff_from.id >= diff_to.id
+	Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
+			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
+	log("\t>Already indexed: #{repository.identifier} (from #{diff_from.id} to #{diff_to.id})", :level=>1)
+	return
+	end
 
-  Rails.logger.info("Indexing diff: %s (from: %s to %s)" % [
-          (repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
-  Rails.logger.info("Indexing all: %s" % [
-          (repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
-  if repository.branches
-    repository.branches.each do |branch|
-      Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
-      walk(repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
-               .select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+	Rails.logger.info("Indexing diff: %s (from: %s to %s)" % [
+			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
+	Rails.logger.info("Indexing all: %s" % [
+			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
+	if repository.branches
+	repository.branches.each do |branch|
+	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
+	walk(repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
+			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 
-    end
-  else
-    Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
-    walk(repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
-             .select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
-  end
-  if repository.tags
-    repository.tags.each do |tag|
-      Rails.logger.debug("Walking in tag: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
-      walk(repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
-               .select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
-    end
-  end
-end
+	end
+	else
+	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
+	walk(repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
+			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+	end
+	if repository.tags
+	repository.tags.each do |tag|
+	Rails.logger.debug("Walking in tag: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
+	walk(repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
+			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+	end
+	end
+	end
 
 def generate_uri(repository, identifier, path)
-  return url_for(:controller => 'repositories',
-                    :action => 'entry',
-                    :id => $project,
-                    :repository_id => repository.identifier,
-                    :rev => identifier,
-                    :path => repository.relative_path(path),
-                    :only_path => true)
-end
+	return url_for(:controller => 'repositories',
+			:action => 'entry',
+			:id => $project,
+			:repository_id => repository.identifier,
+			:rev => identifier,
+			:path => repository.relative_path(path),
+			:only_path => true)
+	end
 
 def print_and_flush(str)
-  print str
-  $stdout.flush
+	print str
+	$stdout.flush
 end
 
 def add_or_update_index(repository, identifier, entry, action)
@@ -334,7 +333,8 @@ end
 
 def log(text, options={})
   level = options[:level] || 0
-  puts text unless $quiet or level > $verbose
+  dtext=Time.now.asctime.to_s + ": #{text}"
+  puts dtext unless $quiet or level > $verbose
   exit 1 if options[:exit]
 end
 

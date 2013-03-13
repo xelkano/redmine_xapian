@@ -64,6 +64,7 @@ class Repofile < ActiveRecord::Base
   attr_accessor :repository_id
 
   def event_title
+    Rails.logger.debug "DEBUG: event title: " +  self[:filename].inspect
     self[:filename]
   end
 

@@ -158,9 +158,13 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: repo file: " + dochash.fetch('url').inspect
         Rails.logger.debug "DEBUG: repo date: " + dochash.fetch('date').inspect
         arrt=dochash.fetch('url').split('/',6)
-        arrt.delete('entry')
+	entrystr=dochash.fetch('url')[/[\w\_\-]+\/[\w\_\-]+\/[\w\-\_]+\/[\w\-\_]+\/(\w+)\//,1]
+        arrt.delete(entrystr)
         arrt.delete('repository')
         arrt.delete('projects')
+ 	if arrt.last =~ /[\w\-\_]+\/entry\/(.*)/ then
+	  arrt[arrt.length-1]=$1
+	end
         Rails.logger.debug "DEBUG: sample field: " + dochash.fetch('sample').inspect
         dochash2=Hash[ [:project_identifier, :repo_identifier, :file ].zip(arrt) ]
         project=Project.where(:identifier => dochash2[:project_identifier]).first
