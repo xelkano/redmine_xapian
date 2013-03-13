@@ -81,7 +81,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_url
-    {:controller => 'repositories', :action => 'changes', :id => self[:project_id], 
+    {:controller => 'repositories', :action => 'entry', :id => self[:project_id], 
 	:repository_id => self[:repository_id], :rev => nil, :path => self[:filename]} 
   end
 
