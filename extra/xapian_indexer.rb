@@ -297,8 +297,9 @@ def add_or_update_index(repository, identifier, entry, action)
   begin
     itext = Tempfile.new( "filetoindex.tmp", "/tmp" )       
     itext.write("url=#{uri.to_s}\n")
+    sdate = entry.lastrev.time || Time.at(0).in_time_zone
     if action != DELETE then
-      itext.write("date=#{entry.lastrev.time.to_s}\n")
+      itext.write("date=#{sdate.to_s}\n")
       body=nil
       text.force_encoding('UTF-8')
       text.each_line do |line|

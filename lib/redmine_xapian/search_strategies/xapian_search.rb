@@ -63,6 +63,7 @@ module RedmineXapian
           Rails.logger.debug "DEBUG: m: " + m.document.data.inspect
           docdata = m.document.data{url}
           dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size|date)=\/?([^\n\]]+)/).flatten]
+	  dochash["date"]=Time.at(0).in_time_zone  if dochash["date"].nil? # default timestamp
 	  dochash["url"]=URI.unescape(dochash["url"].to_s)
           if dochash
             Rails.logger.debug "DEBUG: dochash not nil.. " + dochash.fetch('url').to_s
@@ -182,16 +183,10 @@ module RedmineXapian
                                       :repository_id=>repository.id)
 	          Rails.logger.debug "DEBUG: push attach" + docattach.inspect
             docattach[:description]=dochash["sample"]
-            if dochash["date"].nil? then
-              docattach[:created_on]=Time.at(0).in_time_zone # default timestamp
-            else
-              docattach[:created_on]=dochash["date"].to_datetime # Time.at(0).in_time_zone # default timestamp
-            end
+	    docattach[:created_on]=dochash["date"]
             docattach[:project_id]=project.id
             docattach[:repository_id]=repository.id
             docattach[:filename]=dochash2[:file]
-            
-
             #load 'acts_as_event.rb'
             docattach[:project_id]=project.id
             Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
