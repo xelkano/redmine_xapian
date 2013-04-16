@@ -30,6 +30,9 @@ $stem_langs	= ['english', 'spanish']
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
 $projects	= [ 'prj_id1', 'prj_id2' ]
 
+# Temporary directory for indexing, it can be tmpfs
+$tempdir	= "/tmp"
+
 ################################################################################################
 # END Configuration parameters
 ################################################################################################
@@ -66,6 +69,7 @@ optparse = OptionParser.new do |opts|
   opts.on("-f", "--files",              "Only index Redmine attachments") {$onlyfiles = 1}
   opts.on("-r", "--repositories",       "Only index Redmine repositories") {$onlyrepos = 1}
   opts.on("-e", "--environment",        "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
+  opts.on("-t", "--temp-dir",           "Temporary directory for indexing"){ |t| $tempdir = t }
   opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
   opts.on("-h", "--help",               "show help and exit") {puts opts; exit }
   #opts.on("-q", "--quiet",             "no log") {$quiet = true}
@@ -115,7 +119,7 @@ def indexing(repository)
     #latest_indexed = nil
     Rails.logger.debug "Debug latest_indexed " + latest_indexed.inspect
     begin
-      $indexconf = Tempfile.new( "index.conf", "/tmp" )
+      $indexconf = Tempfile.new( "index.conf", $tempdir )
       $indexconf.write "url : field boolean=Q unique=Q\n"
       $indexconf.write "body : index truncate=400 field=sample\n"
       $indexconf.write "date: field=date\n"
@@ -295,7 +299,7 @@ def add_or_update_index(repository, identifier, entry, action)
   #print "\t>rev: " + identifier.inspect
   log("\t>Indexing: #{entry.path}", :level=>1)
   begin
-    itext = Tempfile.new( "filetoindex.tmp", "/tmp" )       
+    itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
     itext.write("url=#{uri.to_s}\n")
     sdate = entry.lastrev.time || Time.at(0).in_time_zone
     if action != DELETE then
