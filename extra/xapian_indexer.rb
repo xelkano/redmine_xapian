@@ -68,8 +68,8 @@ optparse = OptionParser.new do |opts|
   opts.on("-v", "--verbose",            "verbose") {$verbose += 1}
   opts.on("-f", "--files",              "Only index Redmine attachments") {$onlyfiles = 1}
   opts.on("-r", "--repositories",       "Only index Redmine repositories") {$onlyrepos = 1}
-  opts.on("-e", "--environment",        "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
-  opts.on("-t", "--temp-dir",           "Temporary directory for indexing"){ |t| $tempdir = t }
+  opts.on("-e", "--environment [ENV]",        "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
+  opts.on("-t", "--temp-dir [PATH]",           "Temporary directory for indexing"){ |t| $tempdir = t }
   opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
   opts.on("-h", "--help",               "show help and exit") {puts opts; exit }
   #opts.on("-q", "--quiet",             "no log") {$quiet = true}
@@ -83,6 +83,7 @@ end
 optparse.parse!
 
 ENV['RAILS_ENV'] = $env
+
 
 STATUS_SUCCESS = 1
 STATUS_FAIL = -1
