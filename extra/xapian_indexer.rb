@@ -297,18 +297,20 @@ def indexing_diff(repository, diff_from, diff_to)
     return unless actions
     actions.each do |path, action|
       entry = repository.entry(path, identifier)
-      log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil?
-      Rails.logger.debug "DEBUG: entry to index " + entry.inspect
-      add_or_update_index(repository, identifier, entry, action, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) unless entry.nil?
+      if !entry.nil? and entry.is_file?
+        log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil?
+        Rails.logger.debug "DEBUG: entry to index " + entry.inspect
+        add_or_update_index(repository, identifier, entry, action, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) unless entry.nil? or not supported_mime_type(entry.path)
       end
-      end
+    end
+  end
 
-      if diff_from.id >= diff_to.id
-	Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
+  if diff_from.id >= diff_to.id
+    Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
 			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
-	log("\t>Already indexed: #{repository.identifier} (from #{diff_from.id} to #{diff_to.id})", :level=>1)
-	return
-	end
+    log("\t>Already indexed: #{repository.identifier} (from #{diff_from.id} to #{diff_to.id})", :level=>1)
+    return
+  end
 
 	Rails.logger.info("Indexing diff: %s (from: %s to %s)" % [
 			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
@@ -333,7 +335,7 @@ def indexing_diff(repository, diff_from, diff_to)
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	end
-	end
+end
 
 def generate_uri(repository, identifier, path)
 	return url_for(:controller => 'repositories',
