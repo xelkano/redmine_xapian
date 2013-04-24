@@ -33,6 +33,16 @@ $projects	= [ 'prj_id1', 'prj_id2' ]
 # Temporary directory for indexing, it can be tmpfs
 $tempdir	= "/tmp"
 
+# Binaries for text conversion
+$pdftotext	= "/usr/bin/pdftotext -enc UTF-8"
+$antiword	= "/usr/bin/antiword"
+$catdoc		= "/usr/bin/catdoc"
+$xls2csv	= "/usr/bin/xls2csv"
+$catppt		= "/usr/bin/catppt"
+$unzip		= "/usr/bin/unzip"
+$unrtf		= "/usr/bin/unrtf -t text 2>/dev/null"
+
+
 ################################################################################################
 # END Configuration parameters
 ################################################################################################
@@ -44,7 +54,35 @@ $repositories=nil
 $onlyfiles=nil
 $onlyrepos=nil
 $env='production'
+$userch=nil
 
+MIME_TYPES = {
+  'application/pdf' => 'pdf',
+  'application/rtf' => 'rtf',
+  'application/msword' => 'doc',
+  'application/vnd.ms-excel' => 'xls',
+  'application/vnd.ms-powerpoint' => 'ppt,pps',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+  'application/vnd.openxmlformats-officedocument.presentationml.slideshow' => 'ppsx',
+  'application/vnd.oasis.opendocument.spreadsheet' => 'ods',
+  'application/vnd.oasis.opendocument.text' => 'odt',
+  'application/vnd.oasis.opendocument.presentation' => 'odp'
+}.freeze
+
+
+FORMAT_HANDLERS = {
+  'pdf' => $pdftotext,
+  'doc' => $catdoc,
+  'xls' => $xls2csv,
+  'ppt,pps' => $catppt,
+  'docx' => $unzip,
+  'xlsx' => $unzip,
+  'pptx' => $unzip,
+  'ppsx' => $unzip,
+  'rtf' => $unrtf
+}.freeze
 
 require 'optparse'
 
@@ -68,8 +106,9 @@ optparse = OptionParser.new do |opts|
   opts.on("-v", "--verbose",            "verbose") {$verbose += 1}
   opts.on("-f", "--files",              "Only index Redmine attachments") {$onlyfiles = 1}
   opts.on("-r", "--repositories",       "Only index Redmine repositories") {$onlyrepos = 1}
-  opts.on("-e", "--environment [ENV]",        "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
-  opts.on("-t", "--temp-dir [PATH]",           "Temporary directory for indexing"){ |t| $tempdir = t }
+  opts.on("-e", "--environment ENV",    "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
+  opts.on("-t", "--temp-dir PATH",      "Temporary directory for indexing"){ |t| $tempdir = t }
+  opts.on("-c", "--revision REV", 	"Use revision as base"){ |c| $userch = c }
   opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
   opts.on("-h", "--help",               "show help and exit") {puts opts; exit }
   #opts.on("-q", "--quiet",             "no log") {$quiet = true}
@@ -85,6 +124,7 @@ optparse.parse!
 ENV['RAILS_ENV'] = $env
 
 
+
 STATUS_SUCCESS = 1
 STATUS_FAIL = -1
     
@@ -92,7 +132,7 @@ ADD_OR_UPDATE = 1
 DELETE = 0
 
 MAIN_REPOSITORY_IDENTIFIER = 'main'
-
+ 
 
 
 class IndexingError < StandardError; end
@@ -116,8 +156,7 @@ def indexing(repository)
       ($repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
       latest_changeset.revision])
     #latest_indexed = Indexinglog.find_by_repository_id_and_status( repository.id, STATUS_SUCCESS, :first)
-    latest_indexed = Indexinglog.where("repository_id=#{$repository.id} AND status=#{STATUS_SUCCESS}").last
-    #latest_indexed = nil
+      latest_indexed = Indexinglog.where("repository_id=#{$repository.id} AND status=#{STATUS_SUCCESS}").last
     Rails.logger.debug "Debug latest_indexed " + latest_indexed.inspect
     begin
       $indexconf = Tempfile.new( "index.conf", $tempdir )
@@ -146,7 +185,13 @@ def indexing(repository)
     end
 end
 
-      
+def supported_mime_type(entry)
+  mtype=Redmine::MimeType.of(entry)
+  included = false
+  included = MIME_TYPES.include?(mtype) || mtype.split('/').first.eql?("text") unless mtype.nil?
+  #puts "Mtype for #{entry} is #{mtype} returning: #{included.inspect}"
+  return included
+end
 
 def add_log(repository, changeset, status, message=nil)
   log = Indexinglog.where("repository_id=#{repository.id}").last
@@ -169,6 +214,19 @@ def add_log(repository, changeset, status, message=nil)
   end
 end
 
+def update_log(repository, changeset, status, message=nil)
+  log = Indexinglog.where("repository_id=#{repository.id}").last
+  if log
+    log.changeset_id=changeset.id
+    log.status=status if status
+    log.message = message if message
+    log.save!
+    Rails.logger.info("Log for repo %s updated!"% [repository.identifier] )
+    log("\t>Log for repo #{repository.identifier} updated!", :level=>1)
+  end
+end
+
+
 def indexing_all(repository)
   def walk(repository, identifier, entries)
     Rails.logger.debug "DEBUG: walk entries size: " + entries.size.inspect
@@ -178,7 +236,11 @@ def indexing_all(repository)
       if entry.is_dir?
         walk(repository, identifier, repository.entries(entry.path, identifier))
       elsif entry.is_file?
-        add_or_update_index(repository, identifier, entry, ADD_OR_UPDATE ) if Redmine::MimeType.is_type?('text', entry.path)
+        add_or_update_index(repository, identifier, entry, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) if supported_mime_type(entry.path)
+	#if !Redmine::MimeType.is_type?('text', entry.path) then
+	#  mtype=Redmine::MimeType.of(entry.path)
+        #  log("Non text entry #{mtype.inspect} #{entry.path}", :level=>1)          
+	#end
       end
     end
   end
@@ -237,7 +299,7 @@ def indexing_diff(repository, diff_from, diff_to)
       entry = repository.entry(path, identifier)
       log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil?
       Rails.logger.debug "DEBUG: entry to index " + entry.inspect
-      add_or_update_index(repository, identifier, entry, action ) unless entry.nil?
+      add_or_update_index(repository, identifier, entry, action, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) unless entry.nil?
       end
       end
 
@@ -288,16 +350,56 @@ def print_and_flush(str)
 	$stdout.flush
 end
 
-def add_or_update_index(repository, identifier, entry, action)
+
+def convert_to_text(fpath, type)
+  text = nil
+  return text if !File.exists?(FORMAT_HANDLERS[type].split(' ').first)
+  case type
+  when "pdf"
+    fout=fpath.chomp(File.extname(fpath)) + ".txt"
+    text=`#{FORMAT_HANDLERS[type]} #{fpath}`
+    begin
+      text=File.read(fout)
+      File.unlink(fout)
+    rescue Exception => e
+      log("\tError: #{e.to_s} reading #{fout}", :level=>1)
+    end
+  when /(xlsx|docx|odt)/i
+    system_or_raise("#{$unzip} -d #{$tempdir}/temp #{fpath}")
+    fout= "#{$tempdir}/temp/" + "xl/sharedStrings.xml" if type eq "xlsx"
+    fout= "#{$tempdir}/temp/" + "word/document.xml" if type eq "docx"
+    fout= "#{$tempdir}/temp/" + "content.xml" if type eq "odt"
+    begin
+      text=File.read(fout)
+      FileUtils.rm_rf("#{$tempdir}/temp") 
+    rescue Exception => e
+      log("\tError: #{e.to_s} reading #{fout}", :level=>1)
+    end
+  else
+    text = `#{FORMAT_HANDLERS[type]} #{fpath}`
+  end
+  return text
+end
+
+def add_or_update_index(repository, identifier, entry, action, type)
   uri = generate_uri(repository, identifier, entry.path)
   return unless uri
-  text = repository.cat(entry.path, identifier)
+  if Redmine::MimeType.is_type?('text', entry.path) #type eq 'txt' 
+    text = repository.cat(entry.path, identifier)
+  else
+    fname = entry.path.split( '/').last.tr(' ', '_')
+    bstr = repository.cat(entry.path, identifier)
+    File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
+      bs.write(bstr)
+    end
+    text = convert_to_text( "#{$tempdir}/#{fname}", type)
+    File.unlink("#{$tempdir}/#{fname}")
+  end
   #return delete_doc(uri) unless text
   return  unless text
   Rails.logger.debug "generated uri: " + uri.inspect
   #log("\t>Generated uri: #{uri.inspect}", :level=>1)
   Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', entry.path)
-  #print "\t>rev: " + identifier.inspect
   log("\t>Indexing: #{entry.path}", :level=>1)
   begin
     itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
@@ -446,6 +548,10 @@ if not $onlyfiles then
 	if repository.identifier.nil? then
 	  log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier", :level=>1)
 	else
+          if !$userch.nil? then
+	    changeset=Changeset.where("revision='#{$userch}' and repository_id='#{repository.id}'").first
+  	    update_log(repository,changeset,nil,nil) unless changeset.nil?
+	  end
           indexing(repository)
 	end
       end
