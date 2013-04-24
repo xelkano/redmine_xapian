@@ -39,7 +39,7 @@ $antiword	= "/usr/bin/antiword"
 $catdoc		= "/usr/bin/catdoc"
 $xls2csv	= "/usr/bin/xls2csv"
 $catppt		= "/usr/bin/catppt"
-$unzip		= "/usr/bin/unzip"
+$unzip		= "/usr/bin/unzip -o"
 $unrtf		= "/usr/bin/unrtf -t text 2>/dev/null"
 
 
@@ -55,7 +55,7 @@ $onlyfiles=nil
 $onlyrepos=nil
 $env='production'
 $userch=nil
-$resetlog=0
+$resetlog=nil
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -82,6 +82,9 @@ FORMAT_HANDLERS = {
   'xlsx' => $unzip,
   'pptx' => $unzip,
   'ppsx' => $unzip,
+  'ods'  => $unzip,
+  'odt'  => $unzip,
+  'odp'  => $unzip,
   'rtf' => $unrtf
 }.freeze
 
@@ -124,7 +127,6 @@ end
 optparse.parse!
 
 ENV['RAILS_ENV'] = $env
-
 
 
 STATUS_SUCCESS = 1
@@ -375,10 +377,10 @@ def convert_to_text(fpath, type)
       log("\tError: #{e.to_s} reading #{fout}", :level=>1)
     end
   when /(xlsx|docx|odt)/i
-    system_or_raise("#{$unzip} -d #{$tempdir}/temp #{fpath}")
-    fout= "#{$tempdir}/temp/" + "xl/sharedStrings.xml" if type eq "xlsx"
-    fout= "#{$tempdir}/temp/" + "word/document.xml" if type eq "docx"
-    fout= "#{$tempdir}/temp/" + "content.xml" if type eq "odt"
+    system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", :out=>'/dev/null'
+    fout= "#{$tempdir}/temp/" + "xl/sharedStrings.xml" if type.eql?("xlsx")
+    fout= "#{$tempdir}/temp/" + "word/document.xml" if type.eql?("docx")
+    fout= "#{$tempdir}/temp/" + "content.xml" if type.eql?("odt")
     begin
       text=File.read(fout)
       FileUtils.rm_rf("#{$tempdir}/temp") 
