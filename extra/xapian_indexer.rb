@@ -55,6 +55,7 @@ $onlyfiles=nil
 $onlyrepos=nil
 $env='production'
 $userch=nil
+$resetlog=0
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -109,6 +110,7 @@ optparse = OptionParser.new do |opts|
   opts.on("-e", "--environment ENV",    "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
   opts.on("-t", "--temp-dir PATH",      "Temporary directory for indexing"){ |t| $tempdir = t }
   opts.on("-c", "--revision REV", 	"Use revision as base"){ |c| $userch = c }
+  opts.on("-x", "--resetlog",           "Reset index log"){  $resetlog = 1 }
   opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
   opts.on("-h", "--help",               "show help and exit") {puts opts; exit }
   #opts.on("-q", "--quiet",             "no log") {$quiet = true}
@@ -224,6 +226,12 @@ def update_log(repository, changeset, status, message=nil)
     Rails.logger.info("Log for repo %s updated!"% [repository.identifier] )
     log("\t>Log for repo #{repository.identifier} updated!", :level=>1)
   end
+end
+
+def delete_log(repository)
+  Indexinglog.delete_all("repository_id=#{repository.id}")
+  Rails.logger.info("Log for repo %s removed!"% [repository.identifier] )
+  log("\t>Log for repo #{repository.identifier} removed!", :level=>1)
 end
 
 
@@ -554,6 +562,7 @@ if not $onlyfiles then
 	    changeset=Changeset.where("revision='#{$userch}' and repository_id='#{repository.id}'").first
   	    update_log(repository,changeset,nil,nil) unless changeset.nil?
 	  end
+	  delete_log(repository) if ($resetlog)
           indexing(repository)
 	end
       end
