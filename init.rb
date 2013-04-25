@@ -27,7 +27,7 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.5.0'
+	version '1.5.1'
 	requires_redmine :version_or_higher => '2.0.0'
 
 	settings :partial => 'settings/redmine_xapian_settings',
