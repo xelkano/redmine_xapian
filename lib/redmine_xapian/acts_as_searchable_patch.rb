@@ -16,19 +16,19 @@ module Redmine
               tokens,
               projects,
               options,
-	      name
+              name
             )
 
             search_results = []
-	    values = []
-	    values_count = 0
+            values = []
+            values_count = 0
 
             if Redmine::Search.available_search_types.include?("articles")
               search_results += [ search_for_articles_attachments(search_data) ]
             end
-	
-	    unless name == "Repofile"
-	    # Does not have table
+        
+            unless name == "Repofile"
+            # Does not have table
               search_results += [
                 search_for_documents_attachments(search_data),
                 search_for_issues_attachments(search_data),
@@ -37,17 +37,17 @@ module Redmine
                 search_for_project_files(search_data)
               ]
             
-	
+        
               values = search_results.map(&:first).flatten
               values_count = search_results.map(&:last).inject(0, :+)
-	    end
+            end
 
             if !options[:titles_only]
-	      Rails.logger.debug "DEBUG: call xapian search service for #{name.inspect}"
+              Rails.logger.debug "DEBUG: call xapian search service for #{name.inspect}"
               xapian_values, xapian_values_count = \
                 RedmineXapian::SearchStrategies::XapianSearchService \
                   .search(search_data)
-	      Rails.logger.debug "DEBUG: call xapian search service for  #{name.inspect} completed"
+              Rails.logger.debug "DEBUG: call xapian search service for  #{name.inspect} completed"
               values = (xapian_values | values).sort_by { |x| x[:created_on] }
               values_count += xapian_values_count
             end
@@ -60,11 +60,11 @@ module Redmine
           private
             def search_for_articles_attachments(search_data)
               query = <<-sql
-			    INNER JOIN kb_articles 
-				  ON kb_articles.id = container_id 
-			    INNER JOIN #{Project.table_name} 
-				  ON #{KbArticle.table_name}.project_id=#{Project.table_name}.id
-			  sql
+                            INNER JOIN kb_articles 
+                                  ON kb_articles.id = container_id 
+                            INNER JOIN #{Project.table_name} 
+                                  ON #{KbArticle.table_name}.project_id=#{Project.table_name}.id
+                          sql
               search_in_container(search_data, "KbArticle", query)
             end
 
