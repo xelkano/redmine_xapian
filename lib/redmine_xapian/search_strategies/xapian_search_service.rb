@@ -13,7 +13,7 @@ module RedmineXapian
             search_data.options[:all_words],
             search_data.options[:user_stem_lang],
             search_data.options[:user_stem_strategy],
-	    search_data.element
+            search_data.element
           )
           xapian_search_data
         end

@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../test_helper'
+
 class AttachmentTest < ActiveSupport::TestCase
   fixtures :users, :projects, :issues, :issue_statuses, :documents, :attachments, :roles
 
@@ -49,7 +51,7 @@ class AttachmentTest < ActiveSupport::TestCase
       project.documents << Document.new(:title => "some_document")
 
       # Issue
-      Issue.generate_for_project!(project, :priority => some_priority)
+      Issue.generate!(:project => project, :priority => some_priority)
 
       # Message
       project.boards << Board.new(:name => "board#{project.id}", :description => "board")
