@@ -91,7 +91,7 @@ module RedmineXapian
     private
 
       def process_attachment(projects_to_search, dochash)
-        docattach = Attachment.where( :disk_filename => dochash.fetch('url') ).first
+	docattach = Attachment.where( :disk_filename => dochash.fetch('url').split('/').last).first
         if docattach
           Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
           Rails.logger.debug "DEBUG: attach project" + docattach.project.inspect
