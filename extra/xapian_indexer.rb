@@ -246,7 +246,7 @@ def indexing_all(repository)
       if entry.is_dir?
         walk(repository, identifier, repository.entries(entry.path, identifier))
       elsif entry.is_file?
-        add_or_update_index(repository, identifier, entry, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) if supported_mime_type(entry.path)
+        add_or_update_index(repository, identifier, entry.path, entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) if supported_mime_type(entry.path)
 	#if !Redmine::MimeType.is_type?('text', entry.path) then
 	#  mtype=Redmine::MimeType.of(entry.path)
         #  log("Non text entry #{mtype.inspect} #{entry.path}", :level=>1)          
@@ -307,10 +307,12 @@ def indexing_diff(repository, diff_from, diff_to)
     return unless actions
     actions.each do |path, action|
       entry = repository.entry(path, identifier)
-      if !entry.nil? and entry.is_file?
-        log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil?
+      if (!entry.nil? and entry.is_file?) or action == DELETE
+        log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil? and action != DELETE
         Rails.logger.debug "DEBUG: entry to index " + entry.inspect
-        add_or_update_index(repository, identifier, entry, action, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) unless entry.nil? or not supported_mime_type(entry.path)
+  	lastrev=nil
+  	lastrev=entry.lastrev unless entry.nil?
+        add_or_update_index(repository, identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)] ) if supported_mime_type(path) or action == DELETE
       end
     end
   end
@@ -368,19 +370,20 @@ def convert_to_text(fpath, type)
   return text if !File.exists?(FORMAT_HANDLERS[type].split(' ').first)
   case type
   when "pdf"
-    fout=fpath.chomp(File.extname(fpath)) + ".txt"
-    text=`#{FORMAT_HANDLERS[type]} #{fpath}`
-    begin
-      text=File.read(fout)
-      File.unlink(fout)
-    rescue Exception => e
-      log("\tError: #{e.to_s} reading #{fout}", :level=>1)
-    end
-  when /(xlsx|docx|odt)/i
+    #fout=fpath.chomp(File.extname(fpath)) + ".txt"
+    text=`#{FORMAT_HANDLERS[type]} #{fpath} -`
+    #begin
+    #  text=File.read(fout)
+    #  File.unlink(fout)
+    #rescue Exception => e
+    #  log("\tError: #{e.to_s} reading #{fout}", :level=>1)
+    #end
+  when /(xlsx|docx|odt|pptx)/i
     system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", :out=>'/dev/null'
     fout= "#{$tempdir}/temp/" + "xl/sharedStrings.xml" if type.eql?("xlsx")
     fout= "#{$tempdir}/temp/" + "word/document.xml" if type.eql?("docx")
     fout= "#{$tempdir}/temp/" + "content.xml" if type.eql?("odt")
+    fout= "#{$tempdir}/temp/" + "docProps/app.xml" if type.eql?("pptx")
     begin
       text=File.read(fout)
       FileUtils.rm_rf("#{$tempdir}/temp") 
@@ -393,31 +396,33 @@ def convert_to_text(fpath, type)
   return text
 end
 
-def add_or_update_index(repository, identifier, entry, action, type)
-  uri = generate_uri(repository, identifier, entry.path)
+def add_or_update_index(repository, identifier, path, lastrev, action, type)
+  uri = generate_uri(repository, identifier, path)
   return unless uri
-  if Redmine::MimeType.is_type?('text', entry.path) #type eq 'txt' 
-    text = repository.cat(entry.path, identifier)
+  text=nil
+  if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
+    text = repository.cat(path, identifier)
   else
-    fname = entry.path.split( '/').last.tr(' ', '_')
-    bstr = repository.cat(entry.path, identifier)
+    fname = path.split( '/').last.tr(' ', '_')
+    bstr = nil
+    bstr = repository.cat(path, identifier)
     File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
       bs.write(bstr)
     end
-    text = convert_to_text( "#{$tempdir}/#{fname}", type)
+    text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
     File.unlink("#{$tempdir}/#{fname}")
   end
   #return delete_doc(uri) unless text
-  return  unless text
+  #return  unless text
   Rails.logger.debug "generated uri: " + uri.inspect
   #log("\t>Generated uri: #{uri.inspect}", :level=>1)
-  Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', entry.path)
-  log("\t>Indexing: #{entry.path}", :level=>1)
+  Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', path)
+  log("\t>Indexing: #{path}", :level=>1)
   begin
     itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
     itext.write("url=#{uri.to_s}\n")
-    sdate = entry.lastrev.time || Time.at(0).in_time_zone
     if action != DELETE then
+      sdate = lastrev.time || Time.at(0).in_time_zone
       itext.write("date=#{sdate.to_s}\n")
       body=nil
       text.force_encoding('UTF-8')
@@ -463,7 +468,7 @@ def system_or_raise(command)
 end
 
 def find_project(prt)
-    puts "find project for #{prt}"
+    #puts "find project for #{prt}"
     scope = Project.active.has_module(:repository)
     project = nil
     project = scope.find_by_identifier(prt)
