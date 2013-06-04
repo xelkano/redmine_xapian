@@ -41,7 +41,7 @@ class Repofile < ActiveRecord::Base
   column :project_id,   :integer
   column :filename, 	:string
   column :repository_id, :integer
-  validates :created_on, :filename, :repository_id, presence => true
+  validates_presence_of :created_on, :filename, :repository_id
 
 
   acts_as_searchable :xapianfile => "repofile",
@@ -64,6 +64,7 @@ class Repofile < ActiveRecord::Base
   attr_accessor :repository_id
 
   def event_title
+    Rails.logger.debug "DEBUG: event title: " +  self[:filename].inspect
     self[:filename]
   end
 
@@ -80,7 +81,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_url
-    {:controller => 'repositories', :action => 'changes', :id => self[:project_id], 
+    {:controller => 'repositories', :action => 'entry', :id => self[:project_id], 
 	:repository_id => self[:repository_id], :rev => nil, :path => self[:filename]} 
   end
 

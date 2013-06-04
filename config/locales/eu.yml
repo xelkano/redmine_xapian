@@ -19,6 +19,7 @@ eu:
     label_default_stemming_lang: "Set default stemming lang"
     label_stemming_lang: "Stemming Language"
     label_enable_xapian_on_search: "Enable xapian config on search screen"
+    label_repository_search: "Enable repository search"
     label_search_languages: "Stemming languages on search screen"
     label_stemming_strategy: "Stemming strategy"
     label_stem_none: "Stem none"

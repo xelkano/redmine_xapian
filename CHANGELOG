@@ -23,3 +23,4 @@
 1.4.3 	- Compatibility for ruby1.9, tested on Redmine 2.0.3 + Ruby 1.9.2 + Rails 3.2.6
 1.5.0 	- New permission model + bug fixes + code cleaning + new pagination.
 1.5.1	- Support for Redmine 2.3
+1.6.0	- Added support for repository indexing and search (thanks to Kosei Kitahara for his work on Redmine reposearch plugin and Prevas companny for supporting).

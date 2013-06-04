@@ -19,6 +19,7 @@ module RedmineXapian
 
     def highlight_tokens2(text, tokens)
       Rails.logger.debug "DEBUG: highlight_tokens2 "
+      text= h text
       return text unless text && tokens && !tokens.empty?
       re_tokens = tokens.collect {|t| Regexp.escape(t)}
       regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE
@@ -38,6 +39,7 @@ module RedmineXapian
           result << content_tag('span', words, :class => "highlight token-#{t}")
         end
       end
+      Rails.logger.debug "DEBUG: returning description: " + result.html_safe.inspect
       result.html_safe
     end
   end

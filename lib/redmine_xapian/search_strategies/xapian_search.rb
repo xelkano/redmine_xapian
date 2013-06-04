@@ -9,13 +9,15 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: global settings dump" + Setting.plugin_redmine_xapian.inspect
         Rails.logger.debug "DEBUG: user_stem_lang: " + user_stem_lang.inspect
         Rails.logger.debug "DEBUG: user_stem_strategy: " + user_stem_strategy.inspect
-        Rails.logger.debug "DEBUG: databasepath: " + get_database_path(user_stem_lang)
-        databasepath = get_database_path(user_stem_lang)
+        Rails.logger.debug "DEBUG: databasepath: " + get_database_path(user_stem_lang, xapian_file)
+        databasepath = get_database_path(user_stem_lang, xapian_file)
 
         begin
           database = Xapian::Database.new(databasepath)
         rescue => error
-          raise databasepath
+          #raise databasepath
+	  Rails.logger.error "ERROR: xapian database #{$databasepath} cannot be open #{error.inspect}"
+ 	  return [xpattachments,0]
         end
 
         # Start an enquire session.
@@ -60,13 +62,14 @@ module RedmineXapian
           #Rails.logger.debug "#{m.rank + 1}: #{m.percent}% docid=#{m.docid} [#{m.document.data}]\n"
           Rails.logger.debug "DEBUG: m: " + m.document.data.inspect
           docdata = m.document.data{url}
-          dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size)=\/?([^\n\]]+)/).flatten]
-          dochash["url"]=URI.unescape(dochash["url"].to_s)
+          dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size|date)=\/?([^\n\]]+)/).flatten]
+	  dochash["date"]=Time.at(0).in_time_zone  if dochash["date"].nil? # default timestamp
+	  dochash["url"]=URI.unescape(dochash["url"].to_s)
           if dochash
             Rails.logger.debug "DEBUG: dochash not nil.. " + dochash.fetch('url').to_s
             Rails.logger.debug "DEBUG: limit_conditions " + limit_options[:limit].inspect
-            if dochash["url"].to_s =~ /^repos\// and xapian_file == "Repofile" then
-              Rails.logger.debug "DEBUG: searching for repofiles" 
+            if dochash["url"].to_s =~ /^projects\// and xapian_file == "Repofile" then
+	      Rails.logger.debug "DEBUG: searching for repofiles" 
               if repo_file = process_repo_file(projects_to_search, dochash)
                 xpattachments << repo_file
               end
@@ -83,15 +86,39 @@ module RedmineXapian
         if RUBY_VERSION >= "1.9"
           xpattachments = xpattachments.each do |attachment|
             attachment[:description].force_encoding('UTF-8')
+            attachment[:description]=validate_encoding(attachment[:description], :invalid => :replace, :replace => "*")
           end
         end
         Rails.logger.debug "DEBUG: xapian searched"
         [xpattachments, xpattachments.size]
       end
     private
+    
+      def validate_encoding(str, options = {})
+        str.chars.collect do |c|
+          if c.valid_encoding?
+             c
+          else
+            unless options[:invalid] == :replace
+            # it ought to be filled out with all the metadata
+            # this exception usually has, but what a pain!
+            # Why isn't ruby doing this for us?
+              raise  Encoding::InvalidByteSequenceError.new
+            else
+              options[:replace] || (
+            # surely there's a better way to tell if
+            # an encoding is a 'Unicode encoding form'
+            # than this? What's wrong with you ruby 1.9?
+              str.encoding.name.start_with?('UTF') ?
+                "\uFFFD" :
+                "?" )
+            end
+          end
+        end.join
+      end
 
       def process_attachment(projects_to_search, dochash)
-	docattach = Attachment.where( :disk_filename => dochash.fetch('url').split('/').last).first
+        docattach = Attachment.where( :disk_filename => dochash.fetch('url').split('/').last).first
         if docattach
           Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
           Rails.logger.debug "DEBUG: attach project" + docattach.project.inspect
@@ -130,27 +157,37 @@ module RedmineXapian
 
       def process_repo_file(projects_to_search, dochash)
         Rails.logger.debug "DEBUG: repo file: " + dochash.fetch('url').inspect
-        dochash2=Hash[ [:project_identifier, :repo_identifier, :file ].zip(dochash.fetch('url').split('/',4).drop(1)) ]
+        Rails.logger.debug "DEBUG: repo date: " + dochash.fetch('date').inspect
+        arrt=dochash.fetch('url').split('/',6)
+	entrystr=dochash.fetch('url')[/[\w\_\-]+\/[\w\_\-]+\/[\w\-\_]+\/[\w\-\_]+\/(\w+)\//,1]
+        arrt.delete(entrystr)
+        arrt.delete('repository')
+        arrt.delete('projects')
+ 	if arrt.last =~ /[\w\-\_]+\/entry\/(.*)/ then
+	  arrt[arrt.length-1]=$1
+	end
+        Rails.logger.debug "DEBUG: sample field: " + dochash.fetch('sample').inspect
+        dochash2=Hash[ [:project_identifier, :repo_identifier, :file ].zip(arrt) ]
         project=Project.where(:identifier => dochash2[:project_identifier]).first
+        Rails.logger.debug "DEBUG: dochas2 content: " + dochash2.inspect
         repository=Repository.where( :project_id=>project.id, :identifier=>dochash2[:repo_identifier] ).first unless project.nil?
         Rails.logger.debug "DEBUG: repository found " + repository.inspect
-        if repository
+        if repository and not dochash.fetch('sample').blank?
           allowed = User.current.allowed_to?(:browse_repository, repository.project)
-          if (allowed and project_included( project.id, projects_to_search ))
-            fmtime=file_timestamp(dochash2[:file], project.identifier, repository.identifier)
-            docattach=Repofile.new( :filename=>dochash2[:file],
-                                      :created_on=>fmtime,
+          if ( allowed and project_included( project.id, projects_to_search ) )
+            #fmtime=file_timestamp(dochash2[:file], project.identifier, repository.identifier)
+	          docattach=Repofile.new( :filename=>dochash2[:file],
+                                      :created_on=>Time.at(0).in_time_zone,
                                       :project_id=>project.id,
                                       :description=>dochash["sample"],
                                       :repository_id=>repository.id)
-            Rails.logger.debug "DEBUG: push attach" + docattach.inspect
+	          Rails.logger.debug "DEBUG: push attach" + docattach.inspect
             docattach[:description]=dochash["sample"]
-            docattach[:created_on]=fmtime
+	    docattach[:created_on]=dochash["date"]
             docattach[:project_id]=project.id
             docattach[:repository_id]=repository.id
             docattach[:filename]=dochash2[:file]
-
-              #load 'acts_as_event.rb'
+            #load 'acts_as_event.rb'
             docattach[:project_id]=project.id
             Rails.logger.debug "DEBUG: attach event_datetime" + docattach.event_datetime.inspect
             Rails.logger.debug "DEBUG: push attach" + docattach.inspect
@@ -175,11 +212,14 @@ module RedmineXapian
         end
       end
 
-      def get_database_path(user_stem_lang)
-        File.join(
-          Setting.plugin_redmine_xapian['index_database'].rstrip,
-          user_stem_lang
-        )
+      def get_database_path(user_stem_lang, xapian_file)
+	path=nil
+	if xapian_file == "Repofile" then
+	  path=File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, "repodb" )
+ 	else
+          path=File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, user_stem_lang )
+	end
+  	path
       end
 
       def file_timestamp( filename, project_name, repo_identifier )
