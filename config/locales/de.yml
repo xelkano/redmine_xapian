@@ -1,5 +1,5 @@
+# German strings go here for Rails i18n
 de:
-
   label_enable_redmine_xapian: "aktiviere die Suche auch für Dateianhänge"
   label_index_database: "Verzeichnis für den Datenbank-Index"
   label_stemming_text: "Stelle die Stemming Sprache ein, der Standard ist 'english'. 
@@ -14,6 +14,8 @@ de:
   label_issue: "Ticket"
   label_wiki: "Wiki"
   label_message: "Mitteilung"
+  label_article: "Artikel"
+  label_file: "Datei"
   label_stemming_lang: "Stemming Sprache"
   label_default_stemming_lang: "Standard Stemming Sprache"
   label_enable_xapian_on_search: "Zeige die Indizierungseinstellungen in der Suchmaske"
@@ -24,18 +26,24 @@ de:
 
   label_stem_none: "Stem abschalten"
   label_stem_some: "Schnelles Stemming aktivieren"
+  label_stem_all:  "alles stemmen"
   label_stem_all: "Vollständiges Stemming aktivieren"
+  label_default_stemming_strategy: "voreingestellte Stemming-Strategie"
+  label_database_error: "Datenbank Fehler! Bitte konfigurieren sie die Suchengine"
   will_paginate:
+      page_gap: "......"
+      next_label: "vorwärts"
+      previous_label: "rückwärts"
       page_entries_info:
         single_page:
-          zero:  "No results found"
-          one:   "Displaying 1 result"
-          other: "Displaying %{count} results"
+          zero:  "Keine Treffer gefunden"
+          one:   "Zeige einen Treffer an"
+          other: "Zeige %{count} Treffer an"
         single_page_html:
           zero:  "No results found"
-          one:   "Displaying <b>1</b> result"
-          other: "Displaying <b>all&nbsp;%{count}</b> results"
-        multi_page: "Displaying results %{from} - %{to} of %{count} in total"
-        multi_page_html: "Displaying results <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
+          one:   "Zeige <b>1</b> Treffer"
+          other: "Zeige <b>alle&nbsp;%{count}</b> Treffer"
+        multi_page: "Zeige Treffer %{from} - %{to} von %{count} insgesamt"
+        multi_page_html: "Zeige Treffer <b>%{from}&nbsp;-&nbsp;%{to}</b> von <b>%{count}</b> insgesamt"
   label_repofile: Repository
   label_repofile_plural: Repositories
