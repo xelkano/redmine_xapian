@@ -27,10 +27,10 @@ else
   	author_url 'http://undefinederror.org'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.6.0'
+	version '1.6.1'
 	requires_redmine :version_or_higher => '2.0.0'
 
-	settings :partial => 'settings/redmine_xapian_settings',
+	settings :partial => 'redmine_xapian_settings',
     		:default => {
       		'enable' => 'true',
      		  'index_database' => '/var/tmp',
@@ -46,3 +46,7 @@ else
      search.register :repofiles
   end
 end
+
+#Rails.logger.debug "DEBUG Xavailable settings: #{@@available_settings.inspect}"
+Rails.logger.debug "DEBUG XSetting plugin_redmine_wktime : #{Setting.plugin_redmine_wktime.inspect}"
+Rails.logger.debug "DEBUG XSetting plugin_redmine_xapian : #{Setting.plugin_redmine_xapian.inspect}"

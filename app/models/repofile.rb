@@ -69,7 +69,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_date
-    Rails.logger.debug "DEBUG: date call"
+    #Rails.logger.debug "DEBUG: date call"
     #self[:created_on].to_date
     Time.now.to_date
   end 

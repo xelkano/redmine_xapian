@@ -87,13 +87,15 @@ module RedmineXapian
               r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
               :all_words => @all_words,
               :titles_only => @titles_only,
-              :limit => (limit+1),
+              #:limit => (limit+1),
               :offset => offset,
               :before => params[:previous].nil?,
               :user_stem_lang => @user_stem_lang,
               :user_stem_strategy => @user_stem_strategy)
                   @rresults += r
                   @results_by_type[s] += c
+	       Rails.logger.debug "DEBUG: #{s.inspect} results partial r: #{r.size}"
+               Rails.logger.debug "DEBUG #{s.inspect} result c #{c}"
             rescue => error
               flash[:error] = "#{error}: searching model #{s.inspect}"
             end
@@ -103,6 +105,8 @@ module RedmineXapian
           #per_page = params[:per_page] # could be configurable or fixed in your app
           per_page = 10
           @results = @rresults.paginate(:page => current_page, :per_page => per_page)
+	  Rails.logger.debug "DEBUG: results total: #{@rresults.size}"
+	  Rails.logger.debug "DEBUG result sum by tipe #{@results_by_type.values.sum}"
         else
           @question = ""
           flash.delete(:error)
