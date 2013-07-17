@@ -47,6 +47,3 @@ else
   end
 end
 
-#Rails.logger.debug "DEBUG Xavailable settings: #{@@available_settings.inspect}"
-Rails.logger.debug "DEBUG XSetting plugin_redmine_wktime : #{Setting.plugin_redmine_wktime.inspect}"
-Rails.logger.debug "DEBUG XSetting plugin_redmine_xapian : #{Setting.plugin_redmine_xapian.inspect}"
