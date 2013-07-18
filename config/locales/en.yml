@@ -29,6 +29,9 @@ en:
     label_default_stemming_strategy: "Set default stemming strategy"
     label_database_error: "database error, please configure xapian"
     will_paginate:
+      page_gap: "......"
+      next_label: "next"
+      previous_label: "prev"
       page_entries_info:
         single_page:
           zero:  "No results found"
