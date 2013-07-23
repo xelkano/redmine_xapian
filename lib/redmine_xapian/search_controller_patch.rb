@@ -69,8 +69,8 @@ module RedmineXapian
         # eg. hello "bye bye" => ["hello", "bye bye"]
         @tokens = @question.scan(%r{((\s|^)"[\s\w]+"(\s|$)|\S+)}).collect {|m| m.first.gsub(%r{(^\s*"\s*|\s*"\s*$)}, '')}
         # tokens must be at least 2 characters long
-        @tokens = @tokens.uniq.select {|w| w.length > 1 }
-
+        @tokens = @tokens.uniq.select {|w| w.length > 1  }
+	@tokens = @tokens.map { |x| (x[-1,1].eql?'*')? x.chop : x }
         if @tokens.any?
           # no more than 5 tokens to search for
           @tokens.slice! 5..-1 if @tokens.size > 5

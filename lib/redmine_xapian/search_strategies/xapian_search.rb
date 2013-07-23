@@ -28,7 +28,7 @@ module RedmineXapian
         # them, so that simple queries don't have to be quoted at the shell
         # level.
         #query_string = ARGV[1..-1].join(' ')
-        query_string = tokens.join(' ')
+        query_string = tokens.map{ |x| !(x[-1,1].eql?'*')? x+'*': x }.join(' ')
         # Parse the query string to produce a Xapian::Query object.
         qp = Xapian::QueryParser.new()
         stemmer = Xapian::Stem.new(user_stem_lang)
@@ -44,7 +44,8 @@ module RedmineXapian
         else
           qp.default_op = Xapian::Query::OP_OR
         end
-        query = qp.parse_query(query_string)
+	#Xapian::QueryParser::FLAG_WILDCARD
+        query = qp.parse_query(query_string,Xapian::QueryParser::FLAG_WILDCARD)
         Rails.logger.debug "DEBUG query_string is: #{query_string}"
         Rails.logger.debug "DEBUG: Parsed query is: #{query.description()} "
 

@@ -18,9 +18,10 @@ module RedmineXapian
     end
 
     def highlight_tokens2(text, tokens)
-      Rails.logger.debug "DEBUG: highlight_tokens2 "
-      text= h text
+      Rails.logger.debug "DEBUG: highlight_tokens2 tokens: #{tokens.inspect} "
       return text unless text && tokens && !tokens.empty?
+      tokens = tokens.map { |x| (x[-1,1].eql?'*')? x.chop : x }
+      text= h text
       re_tokens = tokens.collect {|t| Regexp.escape(t)}
       regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE
       result = ''

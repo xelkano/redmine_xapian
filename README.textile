@@ -1,6 +1,6 @@
 h1. Redmine Xapian search plugin
 
-With this plugin you will be able to do searches by file name and by strings inside your documents through the xapian search engine.
+With this plugin you will be able to make searches by file name and by strings inside your documents through the xapian search engine.
 This plugin replaces search controller, its view and search and acts_as_searchable methods.
 
 
@@ -102,7 +102,6 @@ To perform attachment searches view_document permission is needed, be sure it is
 
 h1. 3. KNOWN BUGS
 
-- When search is performed across redmine database and xapian database, results count is approximate and may not be accurate due to the required effort in database operations to determine this value.
-
-- If you are upgrading plugin version, please, first configure plugin and save settings, otherwise may appear errors in search screen.
+- Because of the name of the plugin redmine_xapian, this plugin is loaded frecuently the last. Some other plugins have been proben to have incompatibilities with this plugin because they are loaded first. For example redmine_wktime. This issues are not caused by this plugin.
+- If you are upgrading plugin version, first configure plugin and save settings, otherwise may appear errors in search screen.
 
