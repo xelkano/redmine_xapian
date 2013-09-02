@@ -96,21 +96,25 @@ mysql> update repositories set identifier='main' where identifier is null;
 Examples running the script:
 
 Run the script based in its configuration in verbose mode, index repositories and files:
+
 <pre>
 # ruby xapian_indexer.rb -v
 </pre>
 
 Only index redmine files:
+
 <pre>
 # ruby xapian_indexer.rb -v -f
 </pre>
 
 Only index repositories:
+
 <pre>
 # xapian_indexer.rb -v -r
 </pre>
 
 Indexing repositories of some projects:
+
 <pre>
 # xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
 </pre>
