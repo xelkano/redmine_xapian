@@ -1,6 +1,7 @@
 h1. Redmine Xapian search plugin
 
 With this plugin you will be able to make searches by file name and by strings inside your documents through the xapian search engine.
+This plugin can also index the files located in your repositories.
 This plugin replaces search controller, its view and search and acts_as_searchable methods.
 
 
@@ -49,13 +50,6 @@ On debian run:
 # apt-get install uuid-dev
 </pre>
 
-Now, go to redmine root directory and run bundle command to install required gem:
-
-<pre>
-# cd /var/www/redmine
-# bundle
-</pre>
-
 h2. 1.2. Plugin installation
 
 Install redmine_xapian into plugins directory with:
@@ -63,35 +57,70 @@ Install redmine_xapian into plugins directory with:
 * cd into [redmine_root]
 * run command "bundle install --without development test"
 * cd into [redmine_root]/plugins/
-* run command "git clone http://github.com/xelkano/redmine_xapian.git" or download and extract tar or zip file into redmine plugins directory..
+* run command "git clone http://github.com/xelkano/redmine_xapian.git" or download and extract tar or zip file into redmine plugins directory
 * rake db:migrate_plugins RAILS_ENV="production"
-* Restart web server
 
-Now, you can see a new check box “files” on search screen, that allows you to search attachments by file name and its contents.
+Now, go to redmine root directory and run bundle command to install required gems:
+
+<pre>
+# cd /var/www/redmine
+# bundle
+</pre>
+
+
+And after that restart the application server.
+
+Now, you can see new check boxes "files" and "repositories" on search screen, those allows you to search attachments by file name and its contents.
 Xapian plugin checks for ruby bindings before its startup, if plugin can not find them,it is not activated and this message is going to appear in redmine log “REDMAIN_XAPIAN ERROR:No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby" If you see this message,please make sure that xapian library are correctly installed for your ruby environment.
 
 h2. 1.3. Setup
 
-To use stemmed languages on searches, xapian needs to generate stemmed forms for each language and store them on each database.
-Before you can use the plugin, you have to populate the omega databases for each stemmed language you want to use:
+First at all, go to redmine interface and in plugins section configure the plugin. It's very important to set up correctly the directory that will contain the xapian databases.
+
+To use stemmed languages in searches, xapian needs to generate stemmed forms for each language and store them in a database.
+Before you can use the plugin, you have to populate the xapian databases for each stemmed language you want to use. From plugin version 1.6 a new script (xapian_indexer.rb) is included in the extra directory that is use to populate xapian databases. This script is a wrapper for omindex binary, so omindex should not to be used anymore.
+
+First edit the script file and configure the required variables, they are self-explanatory and most of them can be specififed and overwritten through the command line. 
+
+To view command line help simply run "xapian_index.rb -h". To view the complete process you can run it using verbose flag (-v).
+
+Note, that the first time you index a repository it can take a long time. After the first indexation the process is much faster.
+You have to take into account that the script needs a defined repository identifier for all repositories that will be indexed. The repository identifier is not required in redmine and can have null value for some of the repositories, so before indexing a repository you have to be sure that the repository has a defined identifier, otherwise the script will ignore it.
+
+You can run this mysql statement in your database for setting up a default identifier for your repositories:
 
 <pre>
-omindex -s english --db /var/www/xapian-index/english /var/www/redmine/files/
+mysql> update repositories set identifier='main' where identifier is null;
 </pre>
 
+Examples running the script:
+
+Run the script based in its configuration in verbose mode, index repositories and files:
 <pre>
-omindex -s german --db /var/www/xapian-index/german /var/www/redmine/files/
+# ruby xapian_indexer.rb -v
 </pre>
 
-use *omindex -h* for help.
+Only index redmine files:
+<pre>
+# ruby xapian_indexer.rb -v -f
+</pre>
 
-You can launch this command from crontab, one or two times a day.
-The database directories have to be named with language name you want to use, english directory for english stemmed forms, german directory for german stemmed forms,…
+Only index repositories:
+<pre>
+# xapian_indexer.rb -v -r
+</pre>
 
-Example of cron job (every 30 minutes):
+Indexing repositories of some projects:
+<pre>
+# xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
+</pre>
+
++Configure a cron task for automatic indexing+
+
+Once you have tested the script functionality you can configure it for running every day at nights keeping your xapian database up to date, for example:
 
 <pre>
-*/30 * * * * root /usr/bin/omindex -s english -U / --db /var/www/xapian-index/english /var/www/redmine/files/
+00 * * * * /usr/bin/xapian_indexer.rb
 </pre>
 
 
