@@ -30,6 +30,9 @@ $stem_langs	= ['english', 'spanish']
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
 $projects	= [ 'prj_id1', 'prj_id2' ]
 
+#File extensions that will not be indexed Ej [ '.txt', '.pdf']
+$excluded_extensions = []
+
 # Temporary directory for indexing, it can be tmpfs
 $tempdir	= "/tmp"
 
@@ -114,6 +117,7 @@ optparse = OptionParser.new do |opts|
   opts.on("-t", "--temp-dir PATH",      "Temporary directory for indexing"){ |t| $tempdir = t }
   #opts.on("-c", "--revision REV", 	"Use revision as base"){ |c| $userch = c }
   opts.on("-x", "--resetlog",           "Reset index log"){  $resetlog = 1 }
+  opts.on("-b", "--excluded .xls,.pdf",Array,"Comma separated list of extensions to exclude from indexing") { |p| $excluded_extensions=p }
   opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
   opts.on("-h", "--help",               "show help and exit") {puts opts; exit }
   #opts.on("-q", "--quiet",             "no log") {$quiet = true}
@@ -366,6 +370,15 @@ def print_and_flush(str)
 end
 
 
+def file_excluded(path)
+  excluded=false
+  log("\tDEBUG: extension #{File.extname(path)}", :level=>1)
+  if $excluded_extensions.include?(File.extname(path))
+    excluded=true
+  end
+  excluded
+end
+
 def convert_to_text(fpath, type)
   text = nil
   return text if !File.exists?(FORMAT_HANDLERS[type].split(' ').first)
@@ -401,55 +414,60 @@ def add_or_update_index(repository, identifier, path, lastrev, action, type)
   uri = generate_uri(repository, identifier, path)
   return unless uri
   text=nil
-  if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
-    text = repository.cat(path, identifier)
+  if file_excluded( path )
+    log("\t>Found in excluded list: #{path}", :level=>1)
+    log("\t>Not indexing #{path}", :level=>1)
   else
-    fname = path.split( '/').last.tr(' ', '_')
-    bstr = nil
-    bstr = repository.cat(path, identifier)
-    File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
-      bs.write(bstr)
-    end
-    text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
-    File.unlink("#{$tempdir}/#{fname}")
-  end
-  #return delete_doc(uri) unless text
-  #return  unless text
-  Rails.logger.debug "generated uri: " + uri.inspect
-  #log("\t>Generated uri: #{uri.inspect}", :level=>1)
-  Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', path)
-  log("\t>Indexing: #{path}", :level=>1)
-  begin
-    itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
-    itext.write("url=#{uri.to_s}\n")
-    if action != DELETE then
-      sdate = lastrev.time || Time.at(0).in_time_zone
-      itext.write("date=#{sdate.to_s}\n")
-      body=nil
-      text.force_encoding('UTF-8')
-      text.each_line do |line|
-        #Rails.logger.debug "inspecting line: " + line.inspect
-        if body.blank? 
-          itext.write("body=#{line}")
-          body=1
-        else
-          itext.write("=#{line}")
-        end
-      end
-      #print_and_flush "A" if $verbose
+    if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
+      text = repository.cat(path, identifier)
     else
-      #print_and_flush "D" if $verbose
-      Rails.logger.debug "DEBUG path: %s should be deleted" % [path]
+      fname = path.split( '/').last.tr(' ', '_')
+      bstr = nil
+      bstr = repository.cat(path, identifier)
+      File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
+        bs.write(bstr)
+      end
+      text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
+      File.unlink("#{$tempdir}/#{fname}")
     end
-    itext.close
-    Rails.logger.debug "TEXT #{itext.path} generated " 
-    #@rwdb.close #Closing because of use of scriptindex
-    Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
-    system_or_raise("#{$scriptindex} -s english #{$databasepath} #{$indexconf.path} #{itext.path} " )
-    itext.unlink
-    Rails.logger.info ("New doc added to xapian database")
-    rescue Exception => e  
-      Rails.logger.error("ERROR text not indexed beacause an error #{e.to_s}")
+    #return delete_doc(uri) unless text
+    #return  unless text
+    Rails.logger.debug "generated uri: " + uri.inspect
+    #log("\t>Generated uri: #{uri.inspect}", :level=>1)
+    Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', path)
+    log("\t>Indexing: #{path}", :level=>1)
+    begin
+      itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
+      itext.write("url=#{uri.to_s}\n")
+      if action != DELETE then
+        sdate = lastrev.time || Time.at(0).in_time_zone
+        itext.write("date=#{sdate.to_s}\n")
+        body=nil
+        text.force_encoding('UTF-8')
+        text.each_line do |line|
+        #Rails.logger.debug "inspecting line: " + line.inspect
+          if body.blank? 
+            itext.write("body=#{line}")
+            body=1
+          else
+            itext.write("=#{line}")
+          end
+        end
+        #print_and_flush "A" if $verbose
+      else
+        #print_and_flush "D" if $verbose
+        Rails.logger.debug "DEBUG path: %s should be deleted" % [path]
+      end
+      itext.close
+      Rails.logger.debug "TEXT #{itext.path} generated " 
+      #@rwdb.close #Closing because of use of scriptindex
+      Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
+      system_or_raise("#{$scriptindex} -s english #{$databasepath} #{$indexconf.path} #{itext.path} " )
+      itext.unlink
+      Rails.logger.info ("New doc added to xapian database")
+      rescue Exception => e  
+        Rails.logger.error("ERROR text not indexed beacause an error #{e.to_s}")
+      end
   end
 end
  
@@ -532,7 +550,7 @@ if not $onlyrepos then
       end
     end
     log("- Indexing files under #{$filespath} with omindex stemming in #{lang} ...", :level=>1)
-    system_or_raise ("#{$omindex} -s #{lang} --db #{dbpath} #{$filespath} --url / > /dev/null")
+    system_or_raise("#{$omindex} -s #{lang} --db #{dbpath} #{$filespath} --url / > /dev/null")
   end
   log("- Redmine files indexed ...", :level=>1)
 end
