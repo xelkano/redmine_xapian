@@ -27,7 +27,7 @@ module RedmineXapian
       def xapian_search(tokens, limit_options, projects_to_search, all_words, user)
         Rails.logger.debug 'XapianSearch::xapian_search'
         xpattachments = []
-        return [xpattachments, 0] unless Setting.plugin_redmine_xapian['enable'] == 'true'
+        return nil unless Setting.plugin_redmine_xapian['enable'] == 'true'
         Rails.logger.debug "DEBUG: global settings dump #{Setting.plugin_redmine_xapian.inspect}"
         stemming_lang = Setting.plugin_redmine_xapian['stemming_lang'].rstrip
         Rails.logger.debug "DEBUG: stemming_lang: #{stemming_lang}"
@@ -39,8 +39,8 @@ module RedmineXapian
         begin
           database = Xapian::Database.new(databasepath)
         rescue => error          
-          Rails.logger.error "ERROR: xapian database #{$databasepath} cannot be open #{error.inspect}"
-          return [xpattachments,0]
+          Rails.logger.error "ERROR: xapian database #{$databasepath} cannot be open #{error.inspect}"          
+          return nil
         end
 
         # Start an enquire session.
@@ -78,7 +78,7 @@ module RedmineXapian
         enquire.query = query
         matchset = enquire.mset(0, 1000)
 
-        return [xpattachments, 0] if matchset.nil?
+        return nil if matchset.nil?
 
         # Display the results.        
         Rails.logger.debug "DEBUG: Matches 1-#{matchset.size}:\n"

@@ -76,7 +76,8 @@ module RedmineXapian
         
         if !options[:titles_only]
           Rails.logger.debug "DEBUG: call xapian search service for #{name.inspect}"          
-          search_results.concat RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
+          xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
+          search_results.concat xapian_results unless xapian_results.blank?
           Rails.logger.debug "DEBUG: call xapian search service for  #{name.inspect} completed"          
         end
         
