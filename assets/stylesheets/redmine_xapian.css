@@ -1,9 +1,0 @@
-
-div.repofiles { margin-top: 12px; }
-div.repofiles p { margin:4px 0 2px 0; }
-div.repofiles img { vertical-align: middle; }
-div.repofiles span.author { font-size: 0.9em; color: #888; }
-dt.subversion { background-image: url(../images/subversion.png); }
-.icon-repofile  { background-image: url(../images/repofile.png); }
-dt.git { background-image: url(../images/git.png); }
-

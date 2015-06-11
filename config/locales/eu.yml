@@ -1,44 +1,64 @@
+# encoding: utf-8
+#
+# Redmine Xapian is a Redmine plugin to allow attachments searches by content.
+#
+# Copyright (C) 2010  Xabier Elkano
+# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 # English strings go here for Rails i18n
 eu:
-  
-    label_enable_redmine_xapian: "Xapian bilaketa aktibatu"
-    label_index_database: "Indize DB kokapena"
-    label_stemming_text: "set the stemming language, the default is 'english'.
-                           Possible values: danish dutch english finnish french
-                           german german2 hungarian italian kraaij_pohlmann
-                           lovins norwegian porter portuguese romanian russian
-                           spanish swedish turkish (pass 'none' to disable
-                           stemming)"
-    label_search2: "Bilaketa aurreratua"
-    label_document: "Dokumentua"
-    label_issue: "Zeregina"
-    label_wiki: "Wiki"
-    label_message: "Mezua"
-    text_search1: "Plugin honek adjuntuen barruan bilaketak egitea ahalbidetzen du. Adjuntuak wikietan, zereginetan, mezuetan edo dokumentuetan egon daitezke eta pluginak bilatu ditzake token batzuk zehaztuz."
-    label_stemming_lang: "Stemming Language"
-    label_default_stemming_lang: "Set default stemming lang"
-    label_stemming_lang: "Stemming Language"
-    label_enable_xapian_on_search: "Enable xapian config on search screen"
-    label_repository_search: "Enable repository search"
-    label_search_languages: "Stemming languages on search screen"
-    label_stemming_strategy: "Stemming strategy"
-    label_stem_none: "Stem none"
-    label_stem_some: "Stem some"
-    label_stem_all:  "Stem all"
-    label_default_stemming_lang: "Set default stemming lang"
-    label_default_stemming_strategy: "Set default stemming strategy"
-    will_paginate:
-      page_entries_info:
-        single_page:
-          zero:  "No results found"
-          one:   "Displaying 1 result"
-          other: "Displaying %{count} results"
-        single_page_html:
-          zero:  "No results found"
-          one:   "Displaying <b>1</b> result"
-          other: "Displaying <b>all&nbsp;%{count}</b> results"
-        multi_page: "Displaying results %{from} - %{to} of %{count} in total"
-        multi_page_html: "Displaying results <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
-    label_repofile: Repository
-    label_repofile_plural: Repositories
-
+  label_enable_redmine_xapian: "Xapian bilaketa aktibatu"
+  label_index_database: "Indize DB kokapena"
+  label_stemming_text: "set the stemming language, the default is 'english'.
+                         Possible values: danish dutch english finnish french
+                         german german2 hungarian italian kraaij_pohlmann
+                         lovins norwegian porter portuguese romanian russian
+                         spanish swedish turkish (pass 'none' to disable
+                         stemming)"
+  label_search2: "Bilaketa aurreratua"
+  label_document: "Dokumentua"
+  label_issue: "Zeregina"
+  label_wiki: "Wiki"
+  label_message: "Mezua"
+  text_search1: "Plugin honek adjuntuen barruan bilaketak egitea ahalbidetzen du. Adjuntuak wikietan, zereginetan, mezuetan edo dokumentuetan egon daitezke eta pluginak bilatu ditzake token batzuk zehaztuz."
+  label_stemming_lang: "Stemming Language"
+  label_default_stemming_lang: "Set default stemming lang"
+  label_stemming_lang: "Stemming Language"
+  label_enable_xapian_on_search: "Enable xapian config on search screen"
+  label_repository_search: "Enable repository search"
+  label_search_languages: "Stemming languages on search screen"
+  label_stemming_strategy: "Stemming strategy"
+  label_stem_none: "Stem none"
+  label_stem_some: "Stem some"
+  label_stem_all:  "Stem all"
+  label_default_stemming_lang: "Set default stemming lang"
+  label_default_stemming_strategy: "Set default stemming strategy"
+  will_paginate:
+    page_entries_info:
+      single_page:
+        zero:  "No results found"
+        one:   "Displaying 1 result"
+        other: "Displaying %{count} results"
+      single_page_html:
+        zero:  "No results found"
+        one:   "Displaying <b>1</b> result"
+        other: "Displaying <b>all&nbsp;%{count}</b> results"
+      multi_page: "Displaying results %{from} - %{to} of %{count} in total"
+      multi_page_html: "Displaying results <b>%{from}&nbsp;-&nbsp;%{to}</b> of <b>%{count}</b> in total"
+  label_repofile: Repository
+  label_repofile_plural: Repositories
+  notice_search_tips: Please choose searching options carefully. Keep in mind that full-text search in files of all projects can take very long.

@@ -1,4 +1,3 @@
-
 1.0.0 - First stable release
 1.0.1 - Attachments permission added because search_controller definitely needs it.
 1.1.0 - Enhanced search results view screen.
@@ -25,3 +24,4 @@
 1.5.1	- Support for Redmine 2.3
 1.6.0	- Added support for repository indexing and search (thanks to Kosei Kitahara for his work on Redmine reposearch plugin and Prevas company for supporting).
 1.6.1	- Fix for #44
+1.6.2   - Completely rewritten in order to be compatible with Redmine >= 3.0

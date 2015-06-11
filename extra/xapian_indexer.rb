@@ -1,6 +1,25 @@
 #!/usr/bin/ruby -W0
-# encoding: UTF-8
 
+# encoding: utf-8
+#
+# Redmine Xapian is a Redmine plugin to allow attachments searches by content.
+#
+# Copyright (C) 2010  Xabier Elkano
+# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ################################################################################################
 # BEGIN Configuration parameters
@@ -8,7 +27,7 @@
 ################################################################################################
 
 # Redmine installation directory
-$redmine_root = "/var/www/redmine"
+$redmine_root = "/home/kpicman/NetBeansProjects/redmine"
 
 # scriptindex binary path 
 $scriptindex  = "/usr/bin/scriptindex"
@@ -17,7 +36,7 @@ $scriptindex  = "/usr/bin/scriptindex"
 $omindex      = "/usr/bin/omindex"
 
 # Directory containing xapian databases for omindex (Attachments indexing)
-$dbrootpath   = "/var/www/xapian-index"
+$dbrootpath   = "/var/tmp/xapian-index"
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
 $verbose      = 0
@@ -25,13 +44,10 @@ $verbose      = 0
 # Define stemmed languages to index attachments Ej [ 'english', 'italian', 'spanish' ]
 # Repository database will be always indexed in english
 # Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
-$stem_langs	= ['english', 'spanish']
+$stem_langs	= ['english']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
 $projects	= [ 'prj_id1', 'prj_id2' ]
-
-#File extensions that will not be indexed Ej [ '.txt', '.pdf']
-$excluded_extensions = []
 
 # Temporary directory for indexing, it can be tmpfs
 $tempdir	= "/tmp"
@@ -44,7 +60,6 @@ $xls2csv	= "/usr/bin/xls2csv"
 $catppt		= "/usr/bin/catppt"
 $unzip		= "/usr/bin/unzip -o"
 $unrtf		= "/usr/bin/unrtf -t text 2>/dev/null"
-
 
 ################################################################################################
 # END Configuration parameters
@@ -93,34 +108,26 @@ FORMAT_HANDLERS = {
 
 require 'optparse'
 
-
 VERSION = "0.1"
 SUPPORTED_SCM = %w( Subversion Darcs Mercurial Bazaar Git Filesystem )
-
 
 optparse = OptionParser.new do |opts|
   opts.banner = "Usage: xapian_indexer.rb [OPTIONS...]"
   opts.separator("")
   opts.separator("Index redmine files and repositories")
-  opts.separator("")
-  #opts.on("-k", "--key KEY",           "use KEY as the Redmine repository key") { |k| $key = k}
+  opts.separator("")  
   opts.separator("")
   opts.separator("Options:")
   opts.on("-p", "--projects a,b,c",Array,     "Comma separated list of projects to index") { |p| $projects=p }
-  opts.on("-s", "--stemming_lang a,b,c",Array,"Comma separated list of stemming languages for indexing") { |s| $stem_langs=s }
-  #opts.on("-t", "--test",              "only show what should be done") {$test = true}
-  #opts.on("-f", "--force",             "force reindex") {$force = true}
+  opts.on("-s", "--stemming_lang a,b,c",Array,"Comma separated list of stemming languages for indexing") { |s| $stem_langs=s }  
   opts.on("-v", "--verbose",            "verbose") {$verbose += 1}
   opts.on("-f", "--files",              "Only index Redmine attachments") {$onlyfiles = 1}
   opts.on("-r", "--repositories",       "Only index Redmine repositories") {$onlyrepos = 1}
   opts.on("-e", "--environment ENV",    "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
-  opts.on("-t", "--temp-dir PATH",      "Temporary directory for indexing"){ |t| $tempdir = t }
-  #opts.on("-c", "--revision REV", 	"Use revision as base"){ |c| $userch = c }
+  opts.on("-t", "--temp-dir PATH",      "Temporary directory for indexing"){ |t| $tempdir = t }  
   opts.on("-x", "--resetlog",           "Reset index log"){  $resetlog = 1 }
-  opts.on("-b", "--excluded .xls,.pdf",Array,"Comma separated list of extensions to exclude from indexing") { |p| $excluded_extensions=p }
   opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
-  opts.on("-h", "--help",               "show help and exit") {puts opts; exit }
-  #opts.on("-q", "--quiet",             "no log") {$quiet = true}
+  opts.on("-h", "--help",               "show help and exit") {puts opts; exit }  
   opts.separator("")
   opts.separator("Examples:")
   opts.separator("  xapian_indexer.rb -f -s english,italian -v")
@@ -142,14 +149,8 @@ DELETE = 0
 
 MAIN_REPOSITORY_IDENTIFIER = 'main'
  
-
-
 class IndexingError < StandardError; end
-    
 
-#@rwdb = Xapian::WritableDatabase.new(databasepath, Xapian::DB_CREATE_OR_OVERWRITE)          
-
-     
 def indexing(repository)
     $repository=repository
     Rails.logger.info("Fetch changesets: %s - %s" % [$project.name,(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
@@ -163,8 +164,7 @@ def indexing(repository)
     Rails.logger.debug("Latest revision: %s - %s - %s" % [
       $project.name,
       ($repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
-      latest_changeset.revision])
-    #latest_indexed = Indexinglog.find_by_repository_id_and_status( repository.id, STATUS_SUCCESS, :first)
+      latest_changeset.revision])    
       latest_indexed = Indexinglog.where("repository_id=#{$repository.id} AND status=#{STATUS_SUCCESS}").last
     Rails.logger.debug "Debug latest_indexed " + latest_indexed.inspect
     begin
@@ -197,8 +197,7 @@ end
 def supported_mime_type(entry)
   mtype=Redmine::MimeType.of(entry)
   included = false
-  included = MIME_TYPES.include?(mtype) || mtype.split('/').first.eql?("text") unless mtype.nil?
-  #puts "Mtype for #{entry} is #{mtype} returning: #{included.inspect}"
+  included = MIME_TYPES.include?(mtype) || mtype.split('/').first.eql?("text") unless mtype.nil?  
   return included
 end
 
@@ -241,7 +240,6 @@ def delete_log(repository)
   log("\t>Log for repo #{repository.identifier} removed!", :level=>1)
 end
 
-
 def indexing_all(repository)
   def walk(repository, identifier, entries)
     Rails.logger.debug "DEBUG: walk entries size: " + entries.size.inspect
@@ -251,11 +249,7 @@ def indexing_all(repository)
       if entry.is_dir?
         walk(repository, identifier, repository.entries(entry.path, identifier))
       elsif entry.is_file?
-        add_or_update_index(repository, identifier, entry.path, entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) if supported_mime_type(entry.path)
-	#if !Redmine::MimeType.is_type?('text', entry.path) then
-	#  mtype=Redmine::MimeType.of(entry.path)
-        #  log("Non text entry #{mtype.inspect} #{entry.path}", :level=>1)          
-	#end
+        add_or_update_index(repository, identifier, entry.path, entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) if supported_mime_type(entry.path)	
       end
     end
   end
@@ -299,13 +293,9 @@ def indexing_diff(repository, diff_from, diff_to)
       next unless changeset.filechanges
       changeset.filechanges.each do |change|
         if change.action == 'D'
-          actions[change.path] = DELETE
-	  #entry = repository.entry(change.path, identifier)
-	  #add_or_update_index(repository, identifier, entry, DELETE )
+          actions[change.path] = DELETE	  
         else
-          actions[change.path] = ADD_OR_UPDATE
-	  #entry = repository.entry(change.path, identifier)
-	  #add_or_update_index(repository, identifier, entry, ADD_OR_UPDATE )
+          actions[change.path] = ADD_OR_UPDATE	  
         end
       end
     end
@@ -315,8 +305,8 @@ def indexing_diff(repository, diff_from, diff_to)
       if (!entry.nil? and entry.is_file?) or action == DELETE
         log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil? and action != DELETE
         Rails.logger.debug "DEBUG: entry to index " + entry.inspect
-  	lastrev=nil
-  	lastrev=entry.lastrev unless entry.nil?
+        lastrev=nil
+        lastrev=entry.lastrev unless entry.nil?
         add_or_update_index(repository, identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)] ) if supported_mime_type(path) or action == DELETE
       end
     end
@@ -369,29 +359,12 @@ def print_and_flush(str)
 	$stdout.flush
 end
 
-
-def file_excluded(path)
-  excluded=false
-  log("\tDEBUG: extension #{File.extname(path)}", :level=>1)
-  if $excluded_extensions.include?(File.extname(path))
-    excluded=true
-  end
-  excluded
-end
-
 def convert_to_text(fpath, type)
   text = nil
   return text if !File.exists?(FORMAT_HANDLERS[type].split(' ').first)
   case type
-  when "pdf"
-    #fout=fpath.chomp(File.extname(fpath)) + ".txt"
-    text=`#{FORMAT_HANDLERS[type]} #{fpath} -`
-    #begin
-    #  text=File.read(fout)
-    #  File.unlink(fout)
-    #rescue Exception => e
-    #  log("\tError: #{e.to_s} reading #{fout}", :level=>1)
-    #end
+  when "pdf"    
+    text=`#{FORMAT_HANDLERS[type]} #{fpath} -`    
   when /(xlsx|docx|odt|pptx)/i
     system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", :out=>'/dev/null'
     fout= "#{$tempdir}/temp/" + "xl/sharedStrings.xml" if type.eql?("xlsx")
@@ -414,66 +387,50 @@ def add_or_update_index(repository, identifier, path, lastrev, action, type)
   uri = generate_uri(repository, identifier, path)
   return unless uri
   text=nil
-  if file_excluded( path )
-    log("\t>Found in excluded list: #{path}", :level=>1)
-    log("\t>Not indexing #{path}", :level=>1)
+  if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
+    text = repository.cat(path, identifier)
   else
-    if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
-      text = repository.cat(path, identifier)
-    else
-      fname = path.split( '/').last.tr(' ', '_')
-      bstr = nil
-      bstr = repository.cat(path, identifier)
-      File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
-        bs.write(bstr)
-      end
-      text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
-      File.unlink("#{$tempdir}/#{fname}")
+    fname = path.split( '/').last.tr(' ', '_')
+    bstr = nil
+    bstr = repository.cat(path, identifier)
+    File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
+      bs.write(bstr)
     end
-    #return delete_doc(uri) unless text
-    #return  unless text
-    Rails.logger.debug "generated uri: " + uri.inspect
-    #log("\t>Generated uri: #{uri.inspect}", :level=>1)
-    Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', path)
-    log("\t>Indexing: #{path}", :level=>1)
-    begin
-      itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
-      itext.write("url=#{uri.to_s}\n")
-      if action != DELETE then
-        sdate = lastrev.time || Time.at(0).in_time_zone
-        itext.write("date=#{sdate.to_s}\n")
-        body=nil
-        text.force_encoding('UTF-8')
-        text.each_line do |line|
-        #Rails.logger.debug "inspecting line: " + line.inspect
-          if body.blank? 
-            itext.write("body=#{line}")
-            body=1
-          else
-            itext.write("=#{line}")
-          end
+    text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
+    File.unlink("#{$tempdir}/#{fname}")
+  end  
+  Rails.logger.debug "generated uri: " + uri.inspect  
+  Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', path)
+  log("\t>Indexing: #{path}", :level=>1)
+  begin
+    itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
+    itext.write("url=#{uri.to_s}\n")
+    if action != DELETE then
+      sdate = lastrev.time || Time.at(0).in_time_zone
+      itext.write("date=#{sdate.to_s}\n")
+      body=nil
+      text.force_encoding('UTF-8')
+      text.each_line do |line|        
+        if body.blank? 
+          itext.write("body=#{line}")
+          body=1
+        else
+          itext.write("=#{line}")
         end
-        #print_and_flush "A" if $verbose
-      else
-        #print_and_flush "D" if $verbose
-        Rails.logger.debug "DEBUG path: %s should be deleted" % [path]
-      end
-      itext.close
-      Rails.logger.debug "TEXT #{itext.path} generated " 
-      #@rwdb.close #Closing because of use of scriptindex
-      Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
-      system_or_raise("#{$scriptindex} -s english #{$databasepath} #{$indexconf.path} #{itext.path} " )
-      itext.unlink
-      Rails.logger.info ("New doc added to xapian database")
-      rescue Exception => e  
-        Rails.logger.error("ERROR text not indexed beacause an error #{e.to_s}")
-      end
+      end      
+    else      
+      Rails.logger.debug "DEBUG path: %s should be deleted" % [path]
+    end
+    itext.close
+    Rails.logger.debug "TEXT #{itext.path} generated "     
+    Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
+    system_or_raise("#{$scriptindex} -s english #{$databasepath} #{$indexconf.path} #{itext.path} " )
+    itext.unlink
+    Rails.logger.info ("New doc added to xapian database")
+    rescue Exception => e  
+      Rails.logger.error("ERROR text not indexed beacause an error #{e.to_s}")
   end
 end
- 
-
-
-#include RepositoryIndexer
 
 def log(text, options={})
   level = options[:level] || 0
@@ -486,8 +443,7 @@ def system_or_raise(command)
   raise "\"#{command}\" failed" unless system command ,:out=>'/dev/null'
 end
 
-def find_project(prt)
-    #puts "find project for #{prt}"
+def find_project(prt)    
     scope = Project.active.has_module(:repository)
     project = nil
     project = scope.find_by_identifier(prt)
@@ -523,11 +479,9 @@ include Rails.application.routes.url_helpers
 
 log("- Redmine environment [RAILS_ENV=#{$env}] correctly loaded ...", :level => 1) 
 
-
 if $test
   log("- Running in test mode ...")
 end
-
 
 # Indexing files
 if not $onlyrepos then
@@ -549,8 +503,8 @@ if not $onlyrepos then
         exit 1
       end
     end
-    log("- Indexing files under #{$filespath} with omindex stemming in #{lang} ...", :level=>1)
-    system_or_raise("#{$omindex} -s #{lang} --db #{dbpath} #{$filespath} --url / > /dev/null")
+    log("- Indexing files under #{$filespath} with omindex stemming in #{lang} ...", :level=>1)    
+    system_or_raise ("#{$omindex} -s #{lang} --db #{dbpath} #{$filespath} --url / > /dev/null")    
   end
   log("- Redmine files indexed ...", :level=>1)
 end
@@ -584,9 +538,9 @@ if not $onlyfiles then
 	if repository.identifier.nil? then
 	  log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier", :level=>1)
 	else
-          if !$userch.nil? then
+    if !$userch.nil? then
 	    changeset=Changeset.where("revision='#{$userch}' and repository_id='#{repository.id}'").first
-  	    update_log(repository,changeset,nil,nil) unless changeset.nil?
+  	  update_log(repository,changeset,nil,nil) unless changeset.nil?
 	  end
 	  delete_log(repository) if ($resetlog)
           indexing(repository)

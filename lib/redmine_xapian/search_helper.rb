@@ -1,47 +1,43 @@
+# encoding: utf-8
+#
+# Redmine Xapian is a Redmine plugin to allow attachments searches by content.
+#
+# Copyright (C) 2010  Xabier Elkano
+# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 module RedmineXapian
   module SearchHelper
+    
     def link_to_container(attachment)
-      case attachment.container_type
-        when "Document"
-          link_to(truncate( l(:label_document)+attachment.container_name, :length => 255), attachment.container_url)
-        when "Message"
-          link_to(truncate( l(:label_message)+attachment.container_name, :length => 255), attachment.container_url)
-        when "WikiPage"
-          link_to(truncate( l(:label_wiki)+attachment.container_name, :length => 255), attachment.container_url)
-        when "Issue"
-          link_to(truncate( l(:label_issue)+attachment.container_name, :length => 255), attachment.container_url)
-        when "KbArticle"
-          link_to(truncate( l(:label_article)+attachment.container_name, :length => 255), attachment.container_url)
-        when "Version"
-          link_to(truncate( l(:label_file)+attachment.container_name, :length => 255), attachment.container_url)
+      case attachment.container_type        
+        when 'Message'
+          link_to(" - #{l(:label_message)}: #{attachment.container.subject}".truncate(255),
+            board_message_path(attachment.container.board, attachment.container))
+        when 'WikiPage'
+          link_to(" - #{l(:label_wiki)}: #{attachment.container.title}".truncate(255),
+            wiki_page_path(attachment.container))
+        when 'Issue'
+          link_to(" - #{l(:label_issue)}: #{attachment.container.subject}".truncate(255),
+            issue_path(attachment.container))        
+        when 'Project'
+          link_to(" - #{l(:label_file_plural)}",
+            project_files_path(attachment.container))
       end
-    end
-
-    def highlight_tokens2(text, tokens)
-      Rails.logger.debug "DEBUG: highlight_tokens2 tokens: #{tokens.inspect} "
-      return text unless text && tokens && !tokens.empty?
-      tokens = tokens.map { |x| (x[-1,1].eql?'*')? x.chop : x }
-      text= h text
-      re_tokens = tokens.collect {|t| Regexp.escape(t)}
-      regexp = Regexp.new "(#{re_tokens.join('|')})", Regexp::IGNORECASE
-      result = ''
-      text.split(regexp).each_with_index do |words, i|
-        if result.length > 3000
-          # maximum length of the preview reached
-	        Rails.logger.debug "DEBUG: maximum length reached"
-          result << '...'
-          break
-        end
-        words = words.mb_chars
-        if i.even?
-          result << words
-        else
-          t = (tokens.index(words.downcase) || 0) % 6
-          result << content_tag('span', words, :class => "highlight token-#{t}")
-        end
-      end
-      Rails.logger.debug "DEBUG: returning description: " + result.html_safe.inspect
-      result.html_safe
-    end
+    end  
+    
   end
 end

@@ -1,44 +1,66 @@
+# encoding: utf-8
+#
+# Redmine Xapian is a Redmine plugin to allow attachments searches by content.
+#
+# Copyright (C) 2010  Xabier Elkano
+# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 # Czech strings go here for Rails i18n
 cs:
-    label_enable_redmine_xapian: "Povolit Xapian pro vyhledávání v souborech"
-    label_index_database: "Adresář obsahující databázi Xapianu"
-    label_stemming_text: "nastavit jazyk pro stemming, výchozí je 'english'.
-                           Možné hodnoty: danish dutch english finnish french
-                           german german2 hungarian italian kraaij_pohlmann
-                           lovins norwegian porter portuguese romanian russian
-                           spanish swedish turkish (vyber 'none' pro vypnutí
-                           stemmingu)"
-    label_search2: "Rozšířené vyhledávání"
-    text_search1: "Tento plugin rozžiřuje vyhledávání Redminu o vyhledávání v souborech. Pro povolení Xapianu je potřeba vytvořit databázi pomocí omindex utility a nastavit index databézi v nastavení pluginu."
-    label_document: "Dokument"
-    label_issue: "Úkol"
-    label_wiki: "Wiki"
-    label_message: "Zpráva"
-    label_article: "Článek"
-    label_file: "Soubor"
-    label_article_plural: "Články"
-    label_stemming_lang: "Jazyk stemmingu"
-    label_enable_xapian_on_search: "Povolit konfiguraci Xapianu na vyhledávacím formuláři"
-    label_repository_search: "Enable repository search"
-    label_search_languages: "Jazyky stemmingu na vyhledávacím formuláři"
-    label_stemming_strategy: "Strategie stemmingu"
-    label_stem_none: "Stem none"
-    label_stem_some: "Stem some"
-    label_stem_all:  "Stem all"
-    label_default_stemming_lang: "Nastavit výchozí jazyk stemmingu"
-    label_default_stemming_strategy: "Nastavit výchozí  strategii stemmingu"
-    label_database_error: "chyba databáze, zkonfigurujte Xapian"
-    will_paginate:
-      page_entries_info:
-        single_page:
-          zero:  "Nic nenalezeno"
-          one:   "Zobrazen 1 výsledek"
-          other: "Zobrazeno %{count} výsledků"
-        single_page_html:
-          zero:  "Nic nenalezeno"
-          one:   "Zobrazen <b>1</b> výsledek"
-          other: "Zobrazeno <b>all&nbsp;%{count}</b> výsledků"
-        multi_page: "Zobrazeno %{from} - %{to} z %{count} celkem"
-        multi_page_html: "Zobrazeno <b>%{from}&nbsp;-&nbsp;%{to}</b> z <b>%{count}</b> celkem"
-    label_repofile: Repozitář
-    label_repofile_plural: Repozitáře
+  label_enable_redmine_xapian: "Povolit Xapian pro vyhledávání v souborech"
+  label_index_database: "Adresář obsahující databázi Xapianu"
+  label_stemming_text: "nastavit jazyk pro stemming, výchozí je 'english'.
+                         Možné hodnoty: danish dutch english finnish french
+                         german german2 hungarian italian kraaij_pohlmann
+                         lovins norwegian porter portuguese romanian russian
+                         spanish swedish turkish (vyber 'none' pro vypnutí
+                         stemmingu)"
+  label_search2: "Rozšířené vyhledávání"
+  text_search1: "Tento plugin rozžiřuje vyhledávání Redminu o vyhledávání v souborech. Pro povolení Xapianu je potřeba vytvořit databázi pomocí omindex utility a nastavit index databézi v nastavení pluginu."
+  label_document: "Dokument"
+  label_issue: "Úkol"
+  label_wiki: "Wiki"
+  label_message: "Zpráva"
+  label_article: "Článek"
+  label_file: "Soubor"
+  label_article_plural: "Články"
+  label_stemming_lang: "Jazyk stemmingu"
+  label_enable_xapian_on_search: "Povolit konfiguraci Xapianu na vyhledávacím formuláři"
+  label_repository_search: "Enable repository search"
+  label_search_languages: "Jazyky stemmingu na vyhledávacím formuláři"
+  label_stemming_strategy: "Strategie stemmingu"
+  label_stem_none: "Stem none"
+  label_stem_some: "Stem some"
+  label_stem_all:  "Stem all"
+  label_default_stemming_lang: "Nastavit výchozí jazyk stemmingu"
+  label_default_stemming_strategy: "Nastavit výchozí  strategii stemmingu"
+  label_database_error: "chyba databáze, zkonfigurujte Xapian"
+  will_paginate:
+    page_entries_info:
+      single_page:
+        zero:  "Nic nenalezeno"
+        one:   "Zobrazen 1 výsledek"
+        other: "Zobrazeno %{count} výsledků"
+      single_page_html:
+        zero:  "Nic nenalezeno"
+        one:   "Zobrazen <b>1</b> výsledek"
+        other: "Zobrazeno <b>all&nbsp;%{count}</b> výsledků"
+      multi_page: "Zobrazeno %{from} - %{to} z %{count} celkem"
+      multi_page_html: "Zobrazeno <b>%{from}&nbsp;-&nbsp;%{to}</b> z <b>%{count}</b> celkem"
+  label_repofile: Repozitář
+  label_repofile_plural: Repozitáře
+  notice_search_tips: Vybírejte, prosím, vyhledávací volby uvážlivě. Mějte na paměti, že full-textové vyhledávání v souborech všech projektů může trvat velmi dlouho.

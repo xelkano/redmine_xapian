@@ -1,122 +1,128 @@
+# encoding: utf-8
+#
+# Redmine Xapian is a Redmine plugin to allow attachments searches by content.
+#
+# Copyright (C) 2010  Xabier Elkano
+# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 require_dependency 'search_controller'
 require 'will_paginate/array'
 
 module RedmineXapian
-  module SearchControllerPatch
-    def self.included(base) # :nodoc:
+  module SearchControllerPatch    
+    def self.included(base)
       base.send(:include, InstanceMethods)
 
       base.class_eval do
-        alias_method_chain :index, :xapian
-        #def get_user_xapian_settings
-        #  [@user_stem_lang, @user_stem_strategy]
-        #end
-
+        alias_method_chain :index, :xapian              
         helper ::RedmineXapian::SearchHelper
-      end
+      end            
     end
 
     module InstanceMethods
+      
       def index_with_xapian
         @question = params[:q] || ""
         @question.strip!
         @all_words = params[:all_words] ? params[:all_words].present? : true
-        @titles_only = params[:titles_only] ? params[:titles_only].present? : false
+        # Plugin change start
+        #@titles_only = params[:titles_only] ? params[:titles_only].present? : false
+        @titles_only = params[:titles_only] ? params[:titles_only].present? : true
+        # Plugin change end
+        @search_attachments = params[:attachments].presence || '0'
+        @open_issues = params[:open_issues] ? params[:open_issues].present? : false
+        
+        # Plugin change start
+        flash.now[:warning] = l(:notice_search_tips)
+        # Plugin change end
 
-        @user_stem_lang=params[:user_stem_lang] ? params[:user_stem_lang] : Setting.plugin_redmine_xapian['stemming_lang']
-        @user_stem_strategy=params[:user_stem_strategy] ? params[:user_stem_strategy] : Setting.plugin_redmine_xapian['stemming_strategy']
-        Rails.logger.debug "DEBUG: params[:user_stem_lang]" + params[:user_stem_lang].inspect + @user_stem_lang.inspect
-        Rails.logger.debug "DEBUG: params[:user_stem_strategy]" + params[:user_stem_strategy].inspect + @user_stem_strategy.inspect
+        # quick jump to an issue
+        if (m = @question.match(/^#?(\d+)$/)) && (issue = Issue.visible.find_by_id(m[1].to_i))
+          redirect_to issue_path(issue)
+          return
+        end
+        
+        # Plugin change start
+        # A Kontron extension to quick jump to an issue by the identifier
+        if @question.match(/^(BUG|FEA)(\d+)$/) && Issue.visible.find_by_id($2.to_i)          
+          redirect_to issue_path($2)
+          return
+        end
+        # Plugin change end
 
-        projects_to_search = case params[:scope]
+        projects_to_search =
+          case params[:scope]
           when 'all'
             nil
           when 'my_projects'
-            User.current.memberships.collect(&:project)
+            User.current.projects
           when 'subprojects'
-            @project ? (@project.self_and_descendants.active.all) : nil
+            @project ? (@project.self_and_descendants.active.to_a) : nil
           else
             @project
-        end
-
-        offset = nil
-        begin; offset = params[:offset].to_time if params[:offset]; rescue; end
-
-        # quick jump to an issue
-        if @question.match(/^#?(\d+)$/) && Issue.visible.find_by_id($1.to_i)
-          redirect_to :controller => "issues", :action => "show", :id => $1
-          return
-        end
+          end
 
         @object_types = Redmine::Search.available_search_types.dup
         if projects_to_search.is_a? Project
           # don't search projects
           @object_types.delete('projects')
           # only show what the user is allowed to view
-          @object_types = @object_types.select do |o|
-            if o == "attachments" || o == "repofiles"
-              true
+          # Plugin change start
+          #@object_types = @object_types.select {|o| User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)}
+          @object_types = @object_types.select do |o| 
+            case o
+            when 'attachments'
+              User.current.allowed_to?('view_files'.to_sym, projects_to_search)
             else
               User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
             end
           end
+          # Plugin change end
         end
 
         @scope = @object_types.select {|t| params[t]}
-        @scope = @object_types if @scope.empty?
+        # Plugin change start
+        #@scope = @object_types if @scope.empty?
+        @scope = %w(projects wiki_pages) if @scope.empty?
+        # Plugin change end
 
-        # extract tokens from the question
-        # eg. hello "bye bye" => ["hello", "bye bye"]
-        @tokens = @question.scan(%r{((\s|^)"[\s\w]+"(\s|$)|\S+)}).collect {|m| m.first.gsub(%r{(^\s*"\s*|\s*"\s*$)}, '')}
-        # tokens must be at least 2 characters long
-        @tokens = @tokens.uniq.select {|w| w.length > 1  }
-	@tokens = @tokens.map { |x| (x[-1,1].eql?'*')? x.chop : x }
-        if @tokens.any?
-          # no more than 5 tokens to search for
-          @tokens.slice! 5..-1 if @tokens.size > 5
+        fetcher = Redmine::Search::Fetcher.new(
+          @question, User.current, @scope, projects_to_search,
+          :all_words => @all_words, :titles_only => @titles_only, :attachments => @search_attachments, :open_issues => @open_issues,
+          :cache => params[:page].present?
+        )
 
-          @results = []
-          @rresults = []
-          @results_by_type = Hash.new {|h,k| h[k] = 0}
+        if fetcher.tokens.present?
+          @result_count = fetcher.result_count
+          @result_count_by_type = fetcher.result_count_by_type
+          @tokens = fetcher.tokens
 
-          limit = 10
-          Rails.logger.debug "DEBUG: scope " + @scope.inspect
-          @scope.each do |s|
-            begin
-              Rails.logger.debug "DEBUG: element: " + s.inspect
-              r, c = s.singularize.camelcase.constantize.search(@tokens, projects_to_search,
-              :all_words => @all_words,
-              :titles_only => @titles_only,
-              #:limit => (limit+1),
-              :offset => offset,
-              :before => params[:previous].nil?,
-              :user_stem_lang => @user_stem_lang,
-              :user_stem_strategy => @user_stem_strategy)
-                  @rresults += r
-                  @results_by_type[s] += c
-	       Rails.logger.debug "DEBUG: #{s.inspect} results partial r: #{r.size}"
-               Rails.logger.debug "DEBUG #{s.inspect} result c #{c}"
-            rescue => error
-              flash[:error] = "#{error}: searching model #{s.inspect}"
-            end
-          end
-          @rresults = @rresults.sort {|a,b| b.event_datetime <=> a.event_datetime}
-          current_page = params[:page]
-          #per_page = params[:per_page] # could be configurable or fixed in your app
-          per_page = 10
-          @results = @rresults.paginate(:page => current_page, :per_page => per_page)
-	  Rails.logger.debug "DEBUG: results total: #{@rresults.size}"
-	  Rails.logger.debug "DEBUG result sum by tipe #{@results_by_type.values.sum}"
+          per_page = Setting.search_results_per_page.to_i
+          per_page = 10 if per_page == 0
+          @result_pages = Redmine::Pagination::Paginator.new @result_count, per_page, params['page']
+          @results = fetcher.results(@result_pages.offset, @result_pages.per_page)
         else
           @question = ""
-          flash.delete(:error)
         end
-        render :layout => false if request.xhr?
+        render :layout => false if request.xhr?  
+        end
       end
-
-      def get_user_xapian_settings
-        [@user_stem_lang, @user_stem_strategy]
-      end
-    end
+    
   end
 end
+
+SearchController.send(:include, RedmineXapian::SearchControllerPatch)
