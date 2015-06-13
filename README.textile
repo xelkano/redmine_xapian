@@ -53,10 +53,11 @@ h2. 1.2. Plugin installation
 
 Install redmine_xapian into the plugins directory with:
 
-* cd into [redmine_root]
-* run command "bundle install --without development test"
-* cd into [redmine_root]/plugins/
-* rake db:migrate_plugins RAILS_ENV="production"
+<pre>
+# cd into [redmine_root]
+# bundle install --without development test
+# bundle exec rake redmine:plugins:migrate RAILS_ENV=production
+</pre>
 
 Now, go to the Redmine root directory and run bundle command to install required gems:
 

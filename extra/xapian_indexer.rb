@@ -36,7 +36,7 @@ $scriptindex  = "/usr/bin/scriptindex"
 $omindex      = "/usr/bin/omindex"
 
 # Directory containing xapian databases for omindex (Attachments indexing)
-$dbrootpath   = "/var/tmp/xapian-index"
+$dbrootpath   = "/var/tmp/omindex"
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
 $verbose      = 0
@@ -47,7 +47,7 @@ $verbose      = 0
 $stem_langs	= ['english']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
-$projects	= [ 'prj_id1', 'prj_id2' ]
+projects	= [ 'prj_id1', 'prj_id2' ]
 
 # Temporary directory for indexing, it can be tmpfs
 $tempdir	= "/tmp"
@@ -118,7 +118,7 @@ optparse = OptionParser.new do |opts|
   opts.separator("")  
   opts.separator("")
   opts.separator("Options:")
-  opts.on("-p", "--projects a,b,c",Array,     "Comma separated list of projects to index") { |p| $projects=p }
+  opts.on("-p", "--projects a,b,c",Array,     "Comma separated list of projects to index") { |p| projects=p }
   opts.on("-s", "--stemming_lang a,b,c",Array,"Comma separated list of stemming languages for indexing") { |s| $stem_langs=s }  
   opts.on("-v", "--verbose",            "verbose") {$verbose += 1}
   opts.on("-f", "--files",              "Only index Redmine attachments") {$onlyfiles = 1}
@@ -151,46 +151,39 @@ MAIN_REPOSITORY_IDENTIFIER = 'main'
  
 class IndexingError < StandardError; end
 
-def indexing(repository)
-    $repository=repository
-    Rails.logger.info("Fetch changesets: %s - %s" % [$project.name,(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
-    log("- Fetch changesets: #{$project.name} - #{$repository.identifier}", :level=>1)
-    $repository.fetch_changesets
-    $repository.reload.changesets.reload
+def indexing(databasepath, project, repository)
+    Rails.logger.info("Fetch changesets: #{project.name} - #{(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)}")
+    log("- Fetch changesets: #{project.name} - #{repository.identifier}", :level => 1)
+    repository.fetch_changesets    
+    repository.reload.changesets.reload    
 
-    latest_changeset = $repository.changesets.find(:first)
-    return if not latest_changeset
+    latest_changeset = repository.changesets.first    
+    return if not latest_changeset    
 
-    Rails.logger.debug("Latest revision: %s - %s - %s" % [
-      $project.name,
-      ($repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
-      latest_changeset.revision])    
-      latest_indexed = Indexinglog.where("repository_id=#{$repository.id} AND status=#{STATUS_SUCCESS}").last
-    Rails.logger.debug "Debug latest_indexed " + latest_indexed.inspect
+    Rails.logger.debug("Latest revision: #{project.name} - #{(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)} - #{latest_changeset.revision}")
+    latest_indexed = Indexinglog.where(:repository_id => repository.id, :status => STATUS_SUCCESS).last
+    Rails.logger.debug "Debug latest_indexed #{latest_indexed.inspect}"
     begin
-      $indexconf = Tempfile.new( "index.conf", $tempdir )
-      $indexconf.write "url : field boolean=Q unique=Q\n"
-      $indexconf.write "body : index truncate=400 field=sample\n"
-      $indexconf.write "date: field=date\n"
-      $indexconf.close
+      indexconf = Tempfile.new('index.conf', $tempdir)
+      indexconf.write "url : field boolean=Q unique=Q\n"
+      indexconf.write "body : index truncate=400 field=sample\n"
+      indexconf.write "date: field=date\n"
+      indexconf.close
       if not latest_indexed
-        Rails.logger.debug "DEBUG:  repo #{$repository.identifier} not indexed, indexing all"
-        log("\t>repo #{$repository.identifier} not indexed, indexing all", :level=>1)
-        indexing_all($repository)
+        Rails.logger.debug "DEBUG:  repo #{repository.identifier} not indexed, indexing all"
+        log("\t>repo #{repository.identifier} not indexed, indexing all", :level => 1)
+        indexing_all(databasepath, indexconf, project, repository)
       else
-        Rails.logger.debug "DEBUG:  repo #{$repository.identifier} indexed, indexing diff"
-        log("\t>repo #{$repository.identifier} already indexed, indexing only diff", :level=>1)
-        indexing_diff($repository, latest_indexed.changeset, latest_changeset)
+        Rails.logger.debug "DEBUG:  repo #{repository.identifier} indexed, indexing diff"
+        log("\t>repo #{repository.identifier} already indexed, indexing only diff", :level => 1)
+        indexing_diff(project, repository, latest_indexed.changeset, latest_changeset)
       end
-      $indexconf.unlink
+      indexconf.unlink
     rescue IndexingError => e
-      add_log($repository, latest_changeset, STATUS_FAIL, e.message)
+      add_log(repository, latest_changeset, STATUS_FAIL, e.message)
     else
-      add_log($repository, latest_changeset, STATUS_SUCCESS)
-      Rails.logger.info("Successfully indexed: %s - %s - %s" % [
-        $project.name,
-        ($repository.identifier or MAIN_REPOSITORY_IDENTIFIER),
-        latest_changeset.revision])
+      add_log(repository, latest_changeset, STATUS_SUCCESS)
+      Rails.logger.info("Successfully indexed: #{project.name} - #{(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)} - #{latest_changeset.revision}")
     end
 end
 
@@ -202,7 +195,7 @@ def supported_mime_type(entry)
 end
 
 def add_log(repository, changeset, status, message=nil)
-  log = Indexinglog.where("repository_id=#{repository.id}").last
+  log = Indexinglog.where(:repository_id => repository.id).last
   if not log
     log = Indexinglog.new
     log.repository = repository
@@ -222,62 +215,62 @@ def add_log(repository, changeset, status, message=nil)
   end
 end
 
-def update_log(repository, changeset, status, message=nil)
-  log = Indexinglog.where("repository_id=#{repository.id}").last
+def update_log(repository, changeset, status, message = nil)
+  log = Indexinglog.where(:repository_id => repository.id).last
   if log
-    log.changeset_id=changeset.id
-    log.status=status if status
+    log.changeset_id = changeset.id
+    log.status = status if status
     log.message = message if message
     log.save!
-    Rails.logger.info("Log for repo %s updated!"% [repository.identifier] )
-    log("\t>Log for repo #{repository.identifier} updated!", :level=>1)
+    Rails.logger.info("Log for repo #{repository.identifier} updated!")
+    log("\t>Log for repo #{repository.identifier} updated!", :level => 1)
   end
 end
 
 def delete_log(repository)
-  Indexinglog.delete_all("repository_id=#{repository.id}")
-  Rails.logger.info("Log for repo %s removed!"% [repository.identifier] )
-  log("\t>Log for repo #{repository.identifier} removed!", :level=>1)
+  Indexinglog.delete_all(:repository_id => repository.id)
+  Rails.logger.info("Log for repo #{repository.identifier} removed!")
+  log("\t>Log for repo #{repository.identifier} removed!", :level => 1)
 end
 
-def indexing_all(repository)
-  def walk(repository, identifier, entries)
-    Rails.logger.debug "DEBUG: walk entries size: " + entries.size.inspect
-    return if entries.size < 1
-    entries.each do |entry|
-      Rails.logger.debug "DEBUG: walking into: " + entry.lastrev.time.inspect
-      if entry.is_dir?
-        walk(repository, identifier, repository.entries(entry.path, identifier))
-      elsif entry.is_file?
-        add_or_update_index(repository, identifier, entry.path, entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)] ) if supported_mime_type(entry.path)	
-      end
+def walk(databasepath, indexconf, project, repository, identifier, entries)
+  Rails.logger.debug "DEBUG: walk entries size: " + entries.size.inspect
+  return if entries.size < 1
+  entries.each do |entry|
+    Rails.logger.debug "DEBUG: walking into: " + entry.lastrev.time.inspect
+    if entry.is_dir?
+      walk(databasepath, indexconf, repository, identifier, repository.entries(entry.path, identifier))
+    elsif entry.is_file?
+      add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path, 
+        entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
     end
   end
+end
 
+def indexing_all(databasepath, indexconf, project, repository)  
   Rails.logger.info("Indexing all: %s" % [
     (repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
   if repository.branches
     repository.branches.each do |branch|
       Rails.logger.debug("Walking in branch: %s - %s" % [
         (repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
-      walk(repository, branch, repository.entries(nil, branch))
+      walk(databasepath, indexconf, project, repository, branch, repository.entries(nil, branch))
     end
   else
     Rails.logger.debug("Walking in branch: %s - %s" % [
       (repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
-    walk(repository, nil, repository.entries(nil, nil))
+    walk(databasepath, indexconf, project, repository, nil, repository.entries(nil, nil))
   end
   if repository.tags
     repository.tags.each do |tag|
       Rails.logger.debug("Walking in tag: %s - %s" % [
         (repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
-      walk(repository, tag, repository.entries(nil, tag))
+      walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
     end
   end
 end
 
-def indexing_diff(repository, diff_from, diff_to)
-  def walk(repository, identifier, changesets)
+def walkin(project, repository, identifier, changesets)
     Rails.logger.debug "DEBUG: walking into " + changesets.inspect     
     return if not changesets or changesets.size <= 0
     changesets.sort! { |a, b| a.id <=> b.id }
@@ -307,11 +300,12 @@ def indexing_diff(repository, diff_from, diff_to)
         Rails.logger.debug "DEBUG: entry to index " + entry.inspect
         lastrev=nil
         lastrev=entry.lastrev unless entry.nil?
-        add_or_update_index(repository, identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)] ) if supported_mime_type(path) or action == DELETE
+        add_or_update_index(project, repository, identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)] ) if supported_mime_type(path) or action == DELETE
       end
     end
   end
 
+def indexing_diff(project, repository, diff_from, diff_to)  
   if diff_from.id >= diff_to.id
     Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
 			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
@@ -326,28 +320,28 @@ def indexing_diff(repository, diff_from, diff_to)
 	if repository.branches
 	repository.branches.each do |branch|
 	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
-	walk(repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
+	walkin(project, repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 
 	end
 	else
 	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
-	walk(repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
+	walkin(project, repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	if repository.tags
 	repository.tags.each do |tag|
 	Rails.logger.debug("Walking in tag: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
-	walk(repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
+	walkin(project, repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	end
 end
 
-def generate_uri(repository, identifier, path)
+def generate_uri(project, repository, identifier, path)
 	return url_for(:controller => 'repositories',
 			:action => 'entry',
-			:id => $project,
+			:id => project.identifier,
 			:repository_id => repository.identifier,
 			:rev => identifier,
 			:path => repository.relative_path(path),
@@ -383,8 +377,9 @@ def convert_to_text(fpath, type)
   return text
 end
 
-def add_or_update_index(repository, identifier, path, lastrev, action, type)
-  uri = generate_uri(repository, identifier, path)
+def add_or_update_index(databasepath, indexconf, project, repository, identifier, 
+    path, lastrev, action, type)  
+  uri = generate_uri(project, repository, identifier, path)
   return unless uri
   text=nil
   if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
@@ -399,11 +394,11 @@ def add_or_update_index(repository, identifier, path, lastrev, action, type)
     text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
     File.unlink("#{$tempdir}/#{fname}")
   end  
-  Rails.logger.debug "generated uri: " + uri.inspect  
-  Rails.logger.debug "Mime type text" if  Redmine::MimeType.is_type?('text', path)
-  log("\t>Indexing: #{path}", :level=>1)
+  log "generated uri: #{uri.inspect}", :lebel => 1
+  log('Mime type text', :level => 1) if  Redmine::MimeType.is_type?('text', path)
+  log("\t>Indexing: #{path}", :level => 1)
   begin
-    itext = Tempfile.new( "filetoindex.tmp", $tempdir ) 
+    itext = Tempfile.new('filetoindex.tmp', $tempdir) 
     itext.write("url=#{uri.to_s}\n")
     if action != DELETE then
       sdate = lastrev.time || Time.at(0).in_time_zone
@@ -413,34 +408,42 @@ def add_or_update_index(repository, identifier, path, lastrev, action, type)
       text.each_line do |line|        
         if body.blank? 
           itext.write("body=#{line}")
-          body=1
+          body = 1
         else
           itext.write("=#{line}")
         end
       end      
     else      
-      Rails.logger.debug "DEBUG path: %s should be deleted" % [path]
+      log "DEBUG path: #{path} should be deleted", :level => 1
     end
-    itext.close
-    Rails.logger.debug "TEXT #{itext.path} generated "     
-    Rails.logger.debug "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{$databasepath} #{$indexconf.path} #{itext.path}"
-    system_or_raise("#{$scriptindex} -s english #{$databasepath} #{$indexconf.path} #{itext.path} " )
-    itext.unlink
-    Rails.logger.info ("New doc added to xapian database")
-    rescue Exception => e  
-      Rails.logger.error("ERROR text not indexed beacause an error #{e.to_s}")
+    itext.close    
+    log "TEXT #{itext.path} generated", :level => 1
+    log "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}", :level => 1
+    log indexconf.path
+    FileUtils.cp indexconf.path, '/home/kpicman/from.txt'
+    log itext.path
+    FileUtils.cp itext.path, '/home/kpicman/to.txt'
+    system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path} " )
+    itext.unlink    
+    log 'New doc added to xapian database'
+    rescue Exception => e        
+      log "ERROR text not indexed beacause an error #{e.message}"
   end
 end
 
 def log(text, options={})
   level = options[:level] || 0
   dtext=Time.now.asctime.to_s + ": #{text}"
-  puts dtext unless $quiet or level > $verbose
+  puts dtext unless level > $verbose
   exit 1 if options[:exit]
 end
 
 def system_or_raise(command)
-  raise "\"#{command}\" failed" unless system command ,:out=>'/dev/null'
+  if $verbose > 0
+    raise "\"#{command}\" failed" unless system command
+  else
+    raise "\"#{command}\" failed" unless system command, :out=>'/dev/null'
+  end
 end
 
 def find_project(prt)    
@@ -515,40 +518,39 @@ if not $onlyfiles then
     log("- ERROR! #{$scriptindex} does not exist, exiting...")
     exit 1
   end
-  $databasepath = File.join( $dbrootpath.rstrip, "repodb" )
-  if not File.directory?($databasepath)
-    log("Db directory #{$databasepath} does not exist, creating...")
+  databasepath = File.join($dbrootpath.rstrip, 'repodb')
+  log(databasepath)
+  if not File.directory?(databasepath)
+    log("Db directory #{databasepath} does not exist, creating...")
     begin
-      Dir.mkdir($databasepath)
+      Dir.mkdir(databasepath)
       sleep 1
     rescue SystemCallError
-      log("ERROR! #{$databasepath} can not be created!, exiting ...")
+      log("ERROR! #{databasepath} can not be created!, exiting ...")
       exit 1
     end
-  end
-  $project=nil
-  $projects.each do |proj|
-    begin
-      scope = Project.active.has_module(:repository)
-      $project = scope.find_by_identifier(proj)
-      raise ActiveRecord::RecordNotFound unless $project
-      log("- Indexing repositories for #{$project.name} ...", :level=>1)
-      $repositories = $project.repositories.select { |repository| repository.supports_cat? }
-      $repositories.each do |repository|
-	if repository.identifier.nil? then
-	  log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier", :level=>1)
-	else
-    if !$userch.nil? then
-	    changeset=Changeset.where("revision='#{$userch}' and repository_id='#{repository.id}'").first
-  	  update_log(repository,changeset,nil,nil) unless changeset.nil?
-	  end
-	  delete_log(repository) if ($resetlog)
-          indexing(repository)
-	end
+  end  
+  projects.each do |identifier|
+    begin            
+      project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first
+      raise ActiveRecord::RecordNotFound if project.nil?
+      log("- Indexing repositories for #{project.name} ...", :level => 1)
+      repositories = project.repositories.select { |repository| repository.supports_cat? }
+      repositories.each do |repository|
+        if repository.identifier.nil? then
+          log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier", :level => 1)
+        else
+          if $userch
+            changeset = Changeset.where(:revision => $userch, :repository_id => repository.id).first
+            update_log(repository, changeset, nil, nil) if changeset
+          end
+          delete_log(repository) if ($resetlog)
+          indexing(databasepath, project, repository)
+        end
       end
     rescue ActiveRecord::RecordNotFound
-      log("- ERROR project identifier #{proj} not found, ignoring...", :level => 1)
-      Rails.logger.error "Project identifier #{proj} not found "
+      log("- ERROR project identifier #{identifier} not found or repository module not enabled, ignoring...", :level => 1)
+      Rails.logger.error "Project identifier #{identifier} not found "      
     end
   end
 end

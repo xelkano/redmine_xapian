@@ -64,7 +64,8 @@ module RedmineXapian
           tokens,
           projects,
           options,          
-          user
+          user,
+          name
         )
 
         search_results = []        

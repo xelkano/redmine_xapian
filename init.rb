@@ -51,6 +51,7 @@ else
    end
 
    Redmine::Search.map do |search|
-     search.register :attachments     
+     search.register :attachments
+     search.register :repofiles
   end
 end

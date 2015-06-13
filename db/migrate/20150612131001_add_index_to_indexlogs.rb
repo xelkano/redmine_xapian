@@ -19,25 +19,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-module RedmineXapian
-  module SearchStrategies
-    class XapianSearchService
-      extend XapianSearch
+class AddIndexToIndexlogs < ActiveRecord::Migration
+  def self.up    
+    add_index :indexinglogs, :repository_id
+  end
 
-      class << self
-        def search(search_data)
-          Rails.logger.debug 'XapianSearch::search'
-          xapian_search_data = xapian_search(
-            search_data.tokens,            
-            search_data.limit_options,            
-            search_data.projects,
-            search_data.options[:all_words],
-            search_data.user,
-            search_data.element
-          )
-          xapian_search_data
-        end
-      end
-    end
+  def self.down    
+    remove_index :indexinglogs, :repository_id
   end
 end

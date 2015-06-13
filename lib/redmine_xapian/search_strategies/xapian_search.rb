@@ -24,7 +24,7 @@ require 'uri'
 module RedmineXapian
   module SearchStrategies
     module XapianSearch
-      def xapian_search(tokens, limit_options, projects_to_search, all_words, user)
+      def xapian_search(tokens, limit_options, projects_to_search, all_words, user, xapian_file)
         Rails.logger.debug 'XapianSearch::xapian_search'
         xpattachments = []
         return nil unless Setting.plugin_redmine_xapian['enable'] == 'true'
@@ -33,7 +33,7 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: stemming_lang: #{stemming_lang}"
         stemming_strategy = Setting.plugin_redmine_xapian['stemming_strategy'].rstrip
         Rails.logger.debug "DEBUG: stemming_strategy: #{stemming_strategy}"
-        databasepath = get_database_path
+        databasepath = get_database_path(xapian_file)
         Rails.logger.debug "DEBUG: databasepath: #{databasepath}"
 
         begin
@@ -82,6 +82,7 @@ module RedmineXapian
 
         # Display the results.        
         Rails.logger.debug "DEBUG: Matches 1-#{matchset.size}:\n"
+        i = 0
 
         matchset.matches.each do |m|          
           Rails.logger.debug "DEBUG: m: #{m.document.data.inspect}"
@@ -91,14 +92,22 @@ module RedmineXapian
           dochash['url'] = URI.unescape(dochash['url'].to_s)
           if dochash
             Rails.logger.debug 'DEBUG: dochash not nil.. ' + dochash.fetch('url').to_s
-            Rails.logger.debug 'DEBUG: limit_conditions ' + limit_options[:limit].inspect            
-            Rails.logger.debug "DEBUG: searching for attachments"
-            if attachment = process_attachment(projects_to_search, dochash, user)
-              xpattachments << attachment
-            end            
+            Rails.logger.debug 'DEBUG: limit_conditions ' + limit_options[:limit].inspect                                               
+            if(dochash['url'].to_s =~ /^projects\// && xapian_file == 'Repofile')
+              Rails.logger.debug 'DEBUG: searching for repofiles'
+              i = i + 1
+              if repo_file = process_repo_file(projects_to_search, dochash, user, i)                
+                xpattachments << repo_file
+              end
+            elsif xapian_file == 'Attachment'
+              Rails.logger.debug 'DEBUG: searching for attachments'
+              if attachment = process_attachment(projects_to_search, dochash, user)
+                xpattachments << attachment
+              end
+            end
+            
           end
-        end
-        xpattachments = xpattachments.sort_by{|x| x[:created_on] }      
+        end        
         Rails.logger.debug 'DEBUG: xapian searched'        
         xpattachments.map{ |a| [a.created_on, a.id] }
       end
@@ -130,7 +139,7 @@ module RedmineXapian
             projects = [] << projects if projects.is_a?(Project)
             project_ids = projects.collect(&:id) if projects
             
-            if allowed && (project_ids.empty? || (project_ids.include?(docattach.container.project.id)))              
+            if allowed && (project_ids.blank? || (project_ids.include?(docattach.container.project.id)))
               Redmine::Search.cache_store.write("Attachment-#{docattach.id}", 
                 dochash['sample'].force_encoding('UTF-8')) if dochash['sample']
               docattach
@@ -141,12 +150,58 @@ module RedmineXapian
           end
         end
       end
-           
-      def get_database_path
-        File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, 
-          Setting.plugin_redmine_xapian['stemming_lang'].rstrip )        
+      
+      def process_repo_file(projects, dochash, user, id)
+        Rails.logger.debug "DEBUG: repo file: #{dochash.fetch('url').inspect}"
+        Rails.logger.debug "DEBUG: repo date: #{dochash.fetch('date').inspect}"
+        arrt = dochash.fetch('url').split('/',6)
+        entrystr = dochash.fetch('url')[/[\w\_\-]+\/[\w\_\-]+\/[\w\-\_]+\/[\w\-\_]+\/(\w+)\//,1]
+        arrt.delete(entrystr)
+        arrt.delete('repository')
+        arrt.delete('projects')
+        if arrt.last =~ /[\w\-\_]+\/entry\/(.*)/ then
+          arrt[arrt.length - 1] = $1
+        end
+        Rails.logger.debug "DEBUG: sample field: #{dochash.fetch('sample').inspect}"
+        dochash2 = Hash[ [:project_identifier, :repo_identifier, :file ].zip(arrt) ]
+        project = Project.where(:identifier => dochash2[:project_identifier]).first
+        Rails.logger.debug "DEBUG: dochas2 content: #{dochash2.inspect}"
+        repository = Repository.where(:project_id => project.id, :identifier => dochash2[:repo_identifier]).first if project
+        Rails.logger.debug "DEBUG: repository found #{repository.inspect}"
+        if repository and not dochash.fetch('sample').blank?
+          projects = [] << projects if projects.is_a?(Project)
+          project_ids = projects.collect(&:id) if projects            
+          allowed = user.allowed_to?(:browse_repository, repository.project)
+          
+          if allowed && (project_ids.blank? || (project_ids.include?(docattach.container.project.id)))
+	          docattach = Repofile.new
+            docattach.filename = dochash2[:file]
+            docattach.created_on = dochash['date'].to_datetime
+            docattach.project_id = project.id
+            docattach.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
+            docattach.repository_id = repository.id
+            docattach.id = id	          
+            h = { :filename => docattach.filename, :created_on => docattach.created_on.to_s, 
+              :project_id => docattach.project_id, :description => docattach.description,
+              :repository_id => docattach.repository_id }                          
+            Redmine::Search.cache_store.write("Repofile-#{docattach.id}", h.to_s)
+            docattach
+          else
+            Rails.logger.debug 'DEBUG: user without :browse_repository permissions'
+            nil
+          end
+        end
       end
-    
+           
+      def get_database_path(xapian_file)
+        if xapian_file == 'Repofile'
+          File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, 'repodb')
+        else
+          File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, 
+            Setting.plugin_redmine_xapian['stemming_lang'].rstrip )        
+        end
+      end
+      
     end
   end
 end

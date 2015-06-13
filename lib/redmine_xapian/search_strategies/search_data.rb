@@ -24,9 +24,9 @@ module RedmineXapian
     class SearchData
       attr_reader :tokens, :projects, :options,
         :find_options, :limit_options, :columns,
-        :project_conditions, :user
+        :project_conditions, :user, :element
 
-      def initialize(context, tokens, projects, options, user)
+      def initialize(context, tokens, projects, options, user, element)
         @context = context
         @tokens = tokens        
         if projects.is_a? Project || projects.nil?
@@ -37,6 +37,7 @@ module RedmineXapian
         @options = options
         @columns = searchable_options[:columns]        
         @user = user
+        @element = element
         
         init_find_options(@options)
         init_limit_options(@options)
