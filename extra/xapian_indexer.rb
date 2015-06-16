@@ -47,7 +47,7 @@ $verbose      = 0
 $stem_langs	= ['english']
 
 #Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
-projects	= [ 'prj_id1', 'prj_id2' ]
+$projects	= [ 'prj_id1', 'prj_id2' ]
 
 # Temporary directory for indexing, it can be tmpfs
 $tempdir	= "/tmp"
