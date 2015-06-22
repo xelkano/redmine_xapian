@@ -176,7 +176,8 @@ def indexing(databasepath, project, repository)
       else
         Rails.logger.debug "DEBUG:  repo #{repository.identifier} indexed, indexing diff"
         log("\t>repo #{repository.identifier} already indexed, indexing only diff", :level => 1)
-        indexing_diff(project, repository, latest_indexed.changeset, latest_changeset)
+        indexing_diff(databasepath, indexconf, project, repository, 
+          latest_indexed.changeset, latest_changeset)
       end
       indexconf.unlink
     rescue IndexingError => e
@@ -188,9 +189,9 @@ def indexing(databasepath, project, repository)
 end
 
 def supported_mime_type(entry)
-  mtype=Redmine::MimeType.of(entry)
+  mtype = Redmine::MimeType.of(entry)
   included = false
-  included = MIME_TYPES.include?(mtype) || mtype.split('/').first.eql?("text") unless mtype.nil?  
+  included = MIME_TYPES.include?(mtype) || mtype.split('/').first.eql?('text') unless mtype.nil?  
   return included
 end
 
@@ -270,7 +271,7 @@ def indexing_all(databasepath, indexconf, project, repository)
   end
 end
 
-def walkin(project, repository, identifier, changesets)
+def walkin(databasepath, indexconf, project, repository, identifier, changesets)
     Rails.logger.debug "DEBUG: walking into " + changesets.inspect     
     return if not changesets or changesets.size <= 0
     changesets.sort! { |a, b| a.id <=> b.id }
@@ -295,17 +296,19 @@ def walkin(project, repository, identifier, changesets)
     return unless actions
     actions.each do |path, action|
       entry = repository.entry(path, identifier)
-      if (!entry.nil? and entry.is_file?) or action == DELETE
-        log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", :level=>1) if entry.nil? and action != DELETE
-        Rails.logger.debug "DEBUG: entry to index " + entry.inspect
-        lastrev=nil
-        lastrev=entry.lastrev unless entry.nil?
-        add_or_update_index(project, repository, identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)] ) if supported_mime_type(path) or action == DELETE
+      if ((!entry.nil? && entry.is_file?) || action == DELETE)
+        log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", 
+          :level => 1) if (entry.nil? && action != DELETE)
+        Rails.logger.debug "DEBUG: entry to index " + entry.inspect        
+        lastrev = entry.lastrev unless entry.nil?
+        add_or_update_index(databasepath, indexconf, project, repository, 
+          identifier, path, lastrev, action, 
+          MIME_TYPES[Redmine::MimeType.of(path)]) if(supported_mime_type(path) || action == DELETE)
       end
     end
   end
 
-def indexing_diff(project, repository, diff_from, diff_to)  
+def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_to)  
   if diff_from.id >= diff_to.id
     Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
 			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
@@ -320,19 +323,19 @@ def indexing_diff(project, repository, diff_from, diff_to)
 	if repository.branches
 	repository.branches.each do |branch|
 	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
-	walkin(project, repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
+	walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 
 	end
 	else
 	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
-	walkin(project, repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
+	walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	if repository.tags
 	repository.tags.each do |tag|
 	Rails.logger.debug("Walking in tag: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
-	walkin(project, repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
+	walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
 			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	end
