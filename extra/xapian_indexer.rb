@@ -421,16 +421,12 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     end
     itext.close    
     log "TEXT #{itext.path} generated", :level => 1
-    log "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}", :level => 1
-    log indexconf.path
-    FileUtils.cp indexconf.path, '/home/kpicman/from.txt'
-    log itext.path
-    FileUtils.cp itext.path, '/home/kpicman/to.txt'
-    system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path} " )
+    log "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}", :level => 1    
+    system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path}")
     itext.unlink    
     log 'New doc added to xapian database'
-    rescue Exception => e        
-      log "ERROR text not indexed beacause an error #{e.message}"
+  rescue Exception => e        
+    log "ERROR text not indexed beacause an error #{e.message}"
   end
 end
 
