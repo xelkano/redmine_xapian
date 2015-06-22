@@ -240,7 +240,7 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
   entries.each do |entry|
     Rails.logger.debug "DEBUG: walking into: " + entry.lastrev.time.inspect
     if entry.is_dir?
-      walk(databasepath, indexconf, repository, identifier, repository.entries(entry.path, identifier))
+      walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
     elsif entry.is_file?
       add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path, 
         entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
