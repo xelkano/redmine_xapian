@@ -87,6 +87,8 @@ module RedmineXapian
             case o
             when 'attachments'
               User.current.allowed_to?('view_files'.to_sym, projects_to_search)
+            when 'repofiles'
+              User.current.allowed_to?('browse_repository'.to_sym, projects_to_search)
             else
               User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
             end
