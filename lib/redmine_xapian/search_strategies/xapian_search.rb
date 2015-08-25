@@ -173,7 +173,7 @@ module RedmineXapian
           project_ids = projects.collect(&:id) if projects            
           allowed = user.allowed_to?(:browse_repository, repository.project)
           
-          if allowed && (project_ids.blank? || (project_ids.include?(docattach.container.project.id)))
+          if allowed && (project_ids.blank? || (project_ids.include?(project.id)))
 	          docattach = Repofile.new
             docattach.filename = dochash2[:file]
             docattach.created_on = dochash['date'].to_datetime
