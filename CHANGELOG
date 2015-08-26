@@ -25,3 +25,4 @@
 1.6.0	- Added support for repository indexing and search (thanks to Kosei Kitahara for his work on Redmine reposearch plugin and Prevas company for supporting).
 1.6.1	- Fix for #44
 1.6.2   - Completely rewritten in order to be compatible with Redmine >= 3.0
+1.6.3   - Fix for #59

@@ -27,16 +27,16 @@
 ################################################################################################
 
 # Redmine installation directory
-$redmine_root = "/home/kpicman/NetBeansProjects/redmine"
+$redmine_root = '/opt/redmine'
 
 # scriptindex binary path 
-$scriptindex  = "/usr/bin/scriptindex"
+$scriptindex  = '/usr/bin/scriptindex'
 
 # omindex binary path
-$omindex      = "/usr/bin/omindex"
+$omindex      = '/usr/bin/omindex'
 
 # Directory containing xapian databases for omindex (Attachments indexing)
-$dbrootpath   = "/var/tmp/omindex"
+$dbrootpath   = '/var/tmp/omindex'
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
 $verbose      = 0
@@ -46,34 +46,33 @@ $verbose      = 0
 # Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
 $stem_langs	= ['english']
 
-#Project identifiers that will be indexed Ej [ 'prj_id1', 'prj_id2' ]
+# Project identifiers that will be indexed eg. [ 'prj_id1', 'prj_id2' ]
 projects	= [ 'prj_id1', 'prj_id2' ]
 
 # Temporary directory for indexing, it can be tmpfs
-$tempdir	= "/tmp"
+$tempdir	= '/tmp'
 
 # Binaries for text conversion
-$pdftotext	= "/usr/bin/pdftotext -enc UTF-8"
-$antiword	= "/usr/bin/antiword"
-$catdoc		= "/usr/bin/catdoc"
-$xls2csv	= "/usr/bin/xls2csv"
-$catppt		= "/usr/bin/catppt"
-$unzip		= "/usr/bin/unzip -o"
-$unrtf		= "/usr/bin/unrtf -t text 2>/dev/null"
+$pdftotext = '/usr/bin/pdftotext -enc UTF-8'
+$antiword	 = '/usr/bin/antiword'
+$catdoc		 = '/usr/bin/catdoc'
+$xls2csv	 = '/usr/bin/xls2csv'
+$catppt		 = '/usr/bin/catppt'
+$unzip		 = '/usr/bin/unzip -o'
+$unrtf		 = '/usr/bin/unrtf -t text 2>/dev/null'
 
 ################################################################################################
 # END Configuration parameters
 ################################################################################################
 
-$environment  = File.join($redmine_root, "config/environment.rb")
-$project=nil
-$databasepath=nil
-$repositories=nil
-$onlyfiles=nil
-$onlyrepos=nil
-$env='production'
-$userch=nil
-$resetlog=nil
+$environment = File.join($redmine_root, 'config/environment.rb')
+$project = nil
+$databasepath = nil
+$repositories = nil
+$onlyfiles = nil
+$onlyrepos = nil
+$env = 'production'
+$resetlog = nil
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -108,59 +107,60 @@ FORMAT_HANDLERS = {
 
 require 'optparse'
 
-VERSION = "0.1"
-SUPPORTED_SCM = %w( Subversion Darcs Mercurial Bazaar Git Filesystem )
+VERSION = '0.1'
+SUPPORTED_SCM = %w(Subversion Darcs Mercurial Bazaar Git Filesystem)
 
 optparse = OptionParser.new do |opts|
-  opts.banner = "Usage: xapian_indexer.rb [OPTIONS...]"
-  opts.separator("")
-  opts.separator("Index redmine files and repositories")
-  opts.separator("")  
-  opts.separator("")
-  opts.separator("Options:")
-  opts.on("-p", "--projects a,b,c",Array,     "Comma separated list of projects to index") { |p| projects=p }
-  opts.on("-s", "--stemming_lang a,b,c",Array,"Comma separated list of stemming languages for indexing") { |s| $stem_langs=s }  
-  opts.on("-v", "--verbose",            "verbose") {$verbose += 1}
-  opts.on("-f", "--files",              "Only index Redmine attachments") {$onlyfiles = 1}
-  opts.on("-r", "--repositories",       "Only index Redmine repositories") {$onlyrepos = 1}
-  opts.on("-e", "--environment ENV",    "Rails ENVIRONMENT (development, testing or production), default production") {|e| $env = e}
-  opts.on("-t", "--temp-dir PATH",      "Temporary directory for indexing"){ |t| $tempdir = t }  
-  opts.on("-x", "--resetlog",           "Reset index log"){  $resetlog = 1 }
-  opts.on("-V", "--version",            "show version and exit") {puts VERSION; exit}
-  opts.on("-h", "--help",               "show help and exit") {puts opts; exit }  
-  opts.separator("")
-  opts.separator("Examples:")
-  opts.separator("  xapian_indexer.rb -f -s english,italian -v")
-  opts.separator("  xapian_indexer.rb -p project_id -x -t /tmpfs -v")
-  opts.separator("")
-
+  opts.banner = 'Usage: xapian_indexer.rb [OPTIONS...]'
+  opts.separator('')
+  opts.separator('Index redmine files and repositories')
+  opts.separator('')  
+  opts.separator('')
+  opts.separator('Options:')
+  opts.on('-p', '--projects a,b,c', Array,     'Comma separated list of projects to index') { |p| projects = p }
+  opts.on('-s', '--stemming_lang a,b,c', Array,'Comma separated list of stemming languages for indexing') { |s| $stem_langs = s }  
+  opts.on('-v', '--verbose',            'verbose') {$verbose += 1}
+  opts.on('-f', '--files',              'Only index Redmine attachments') { $onlyfiles = 1 }
+  opts.on('-r', '--repositories',       'Only index Redmine repositories') { $onlyrepos = 1 }
+  opts.on('-e', '--environment ENV',    'Rails ENVIRONMENT (development, testing or production), default production') { |e| $env = e}
+  opts.on('-t', '--temp-dir PATH',      'Temporary directory for indexing'){ |t| $tempdir = t }  
+  opts.on('-x', '--resetlog',           'Reset index log'){  $resetlog = 1 }
+  opts.on('-V', '--version',            'show version and exit') { puts VERSION; exit}
+  opts.on('-h', '--help',               'show help and exit') { puts opts; exit }  
+  opts.separator('')
+  opts.separator('Examples:')
+  opts.separator('  xapian_indexer.rb -f -s english,italian -v')
+  opts.separator('  xapian_indexer.rb -p project_id -x -t /tmpfs -v')
+  opts.separator('')
   opts.summary_width = 25
 end
+
 optparse.parse!
 
 ENV['RAILS_ENV'] = $env
-
 
 STATUS_SUCCESS = 1
 STATUS_FAIL = -1
     
 ADD_OR_UPDATE = 1
 DELETE = 0
-
-MAIN_REPOSITORY_IDENTIFIER = 'main'
  
 class IndexingError < StandardError; end
 
+def repo_name(repository)
+  repository.identifier.blank? ? 'main' : repository.identifier
+end
+
 def indexing(databasepath, project, repository)
-    Rails.logger.info("Fetch changesets: #{project.name} - #{(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)}")
-    log("- Fetch changesets: #{project.name} - #{repository.identifier}", :level => 1)
+    Rails.logger.info("Fetch changesets: #{project.name} - #{repo_name(repository)}")
+    log("- Fetch changesets: #{project.name} - #{repo_name(repository)}", :level => 1)
     repository.fetch_changesets    
     repository.reload.changesets.reload    
 
     latest_changeset = repository.changesets.first    
     return if not latest_changeset    
 
-    Rails.logger.debug("Latest revision: #{project.name} - #{(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)} - #{latest_changeset.revision}")
+    Rails.logger.debug("Latest revision: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}")
     latest_indexed = Indexinglog.where(:repository_id => repository.id, :status => STATUS_SUCCESS).last
     Rails.logger.debug "Debug latest_indexed #{latest_indexed.inspect}"
     begin
@@ -170,12 +170,12 @@ def indexing(databasepath, project, repository)
       indexconf.write "date: field=date\n"
       indexconf.close
       if not latest_indexed
-        Rails.logger.debug "DEBUG:  repo #{repository.identifier} not indexed, indexing all"
-        log("\t>repo #{repository.identifier} not indexed, indexing all", :level => 1)
+        Rails.logger.debug "DEBUG:  repo #{repo_name(repository)} not indexed, indexing all"
+        log("\t>repo #{repo_name(repository)} not indexed, indexing all", :level => 1)
         indexing_all(databasepath, indexconf, project, repository)
       else
-        Rails.logger.debug "DEBUG:  repo #{repository.identifier} indexed, indexing diff"
-        log("\t>repo #{repository.identifier} already indexed, indexing only diff", :level => 1)
+        Rails.logger.debug "DEBUG:  repo #{repo_name(repository)} indexed, indexing diff"
+        log("\t>repo #{repo_name(repository)} already indexed, indexing only diff", :level => 1)
         indexing_diff(databasepath, indexconf, project, repository, 
           latest_indexed.changeset, latest_changeset)
       end
@@ -184,7 +184,7 @@ def indexing(databasepath, project, repository)
       add_log(repository, latest_changeset, STATUS_FAIL, e.message)
     else
       add_log(repository, latest_changeset, STATUS_SUCCESS)
-      Rails.logger.info("Successfully indexed: #{project.name} - #{(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)} - #{latest_changeset.revision}")
+      Rails.logger.info("Successfully indexed: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}")
     end
 end
 
@@ -195,7 +195,7 @@ def supported_mime_type(entry)
   return included
 end
 
-def add_log(repository, changeset, status, message=nil)
+def add_log(repository, changeset, status, message = nil)
   log = Indexinglog.where(:repository_id => repository.id).last
   if not log
     log = Indexinglog.new
@@ -204,15 +204,15 @@ def add_log(repository, changeset, status, message=nil)
     log.status = status
     log.message = message if message
     log.save!
-    Rails.logger.info("New log for repo %s saved!"% [repository.identifier] )
-    log("\t>New log for repo #{repository.identifier} saved!", :level=>1)
+    Rails.logger.info "New log for repo #{repo_name(repository)} saved!"
+    log("\t>New log for repo #{repo_name(repository)} saved!", :level => 1)
   else
     log.changeset_id=changeset.id
     log.status=status
     log.message = message if message
     log.save!
-    Rails.logger.info("Log for repo %s updated!"% [repository.identifier] )
-    log("\t>Log for repo #{repository.identifier} updated!", :level=>1)
+    Rails.logger.info "Log for repo #{repo_name(repository)} updated!"
+    log("\t>Log for repo #{repo_name(repository)} updated!", :level => 1)
   end
 end
 
@@ -223,22 +223,22 @@ def update_log(repository, changeset, status, message = nil)
     log.status = status if status
     log.message = message if message
     log.save!
-    Rails.logger.info("Log for repo #{repository.identifier} updated!")
-    log("\t>Log for repo #{repository.identifier} updated!", :level => 1)
+    Rails.logger.info("Log for repo #{repo_name(repository)} updated!")
+    log("\t>Log for repo #{repo_name(repository)} updated!", :level => 1)
   end
 end
 
 def delete_log(repository)
   Indexinglog.delete_all(:repository_id => repository.id)
-  Rails.logger.info("Log for repo #{repository.identifier} removed!")
-  log("\t>Log for repo #{repository.identifier} removed!", :level => 1)
+  Rails.logger.info("Log for repo #{repo_name(repository)} removed!")
+  log("\t>Log for repo #{repo_name(repository)} removed!", :level => 1)
 end
 
 def walk(databasepath, indexconf, project, repository, identifier, entries)
-  Rails.logger.debug "DEBUG: walk entries size: " + entries.size.inspect
+  Rails.logger.debug "DEBUG: walk entries size: #{entries.size}"
   return if entries.size < 1
   entries.each do |entry|
-    Rails.logger.debug "DEBUG: walking into: " + entry.lastrev.time.inspect
+    Rails.logger.debug "DEBUG: walking into: #{entry.lastrev.time}"
     if entry.is_dir?
       walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
     elsif entry.is_file?
@@ -249,30 +249,26 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
 end
 
 def indexing_all(databasepath, indexconf, project, repository)  
-  Rails.logger.info("Indexing all: %s" % [
-    (repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
+  Rails.logger.info "Indexing all: #{repo_name(repository)}"
   if repository.branches
     repository.branches.each do |branch|
-      Rails.logger.debug("Walking in branch: %s - %s" % [
-        (repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
+      Rails.logger.debug "Walking in branch: #{repo_name(repository)} - #{branch}"
       walk(databasepath, indexconf, project, repository, branch, repository.entries(nil, branch))
     end
   else
-    Rails.logger.debug("Walking in branch: %s - %s" % [
-      (repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
+    Rails.logger.debug "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
     walk(databasepath, indexconf, project, repository, nil, repository.entries(nil, nil))
   end
   if repository.tags
     repository.tags.each do |tag|
-      Rails.logger.debug("Walking in tag: %s - %s" % [
-        (repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
+      Rails.logger.debug "Walking in tag: #{repo_name(repository)} - #{tag}"
       walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
     end
   end
 end
 
 def walkin(databasepath, indexconf, project, repository, identifier, changesets)
-    Rails.logger.debug "DEBUG: walking into " + changesets.inspect     
+    Rails.logger.debug "DEBUG: walking into #{changesets.inspect}"
     return if not changesets or changesets.size <= 0
     changesets.sort! { |a, b| a.id <=> b.id }
 
@@ -283,14 +279,10 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
     #   * R - Replaced
     #   * D - Deleted
     changesets.each do |changeset|
-      Rails.logger.debug "DEBUG: changeset changes for #{changeset.id} " + changeset.filechanges.inspect
+      Rails.logger.debug "DEBUG: changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
       next unless changeset.filechanges
-      changeset.filechanges.each do |change|
-        if change.action == 'D'
-          actions[change.path] = DELETE	  
-        else
-          actions[change.path] = ADD_OR_UPDATE	  
-        end
+      changeset.filechanges.each do |change|        
+        actions[change.path] = (change.action == 'D') ? DELETE : ADD_OR_UPDATE        
       end
     end
     return unless actions
@@ -299,45 +291,41 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
       if ((!entry.nil? && entry.is_file?) || action == DELETE)
         log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", 
           :level => 1) if (entry.nil? && action != DELETE)
-        Rails.logger.debug "DEBUG: entry to index " + entry.inspect        
+        Rails.logger.debug "DEBUG: entry to index #{entry.inspect}"
         lastrev = entry.lastrev unless entry.nil?
         add_or_update_index(databasepath, indexconf, project, repository, 
-          identifier, path, lastrev, action, 
-          MIME_TYPES[Redmine::MimeType.of(path)]) if(supported_mime_type(path) || action == DELETE)
+          identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)]) if(supported_mime_type(path) || action == DELETE)
       end
     end
   end
 
 def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_to)  
   if diff_from.id >= diff_to.id
-    Rails.logger.info("Already indexed: %s (from: %s to %s)" % [
-			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
-    log("\t>Already indexed: #{repository.identifier} (from #{diff_from.id} to #{diff_to.id})", :level=>1)
+    Rails.logger.info "Already indexed: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
+    log("\t>Already indexed: #{repo_name(repository)} (from #{diff_from.id} to #{diff_to.id})", :level => 1)
     return
   end
 
-	Rails.logger.info("Indexing diff: %s (from: %s to %s)" % [
-			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER),diff_from.id, diff_to.id])
-	Rails.logger.info("Indexing all: %s" % [
-			(repository.identifier or MAIN_REPOSITORY_IDENTIFIER)])
+	Rails.logger.info "Indexing diff: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
+	Rails.logger.info "Indexing all: #{repo_name(repository)}"
+  
 	if repository.branches
-	repository.branches.each do |branch|
-	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), branch])
-	walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets("", branch, diff_to.id - diff_from.id)\
-			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
-
+    repository.branches.each do |branch|
+    Rails.logger.debug "Walking in branch: #{repo_name(repository)} - #{branch}"
+    walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets('', branch, diff_to.id - diff_from.id).select { |changeset| 
+      changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	else
-	Rails.logger.debug("Walking in branch: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), "[NOBRANCH]"])
-	walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets("", nil, diff_to.id - diff_from.id)\
-			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+    Rails.logger.debug "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
+    walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets('', nil, diff_to.id - diff_from.id).select { |changeset| 
+      changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	if repository.tags
-	repository.tags.each do |tag|
-	Rails.logger.debug("Walking in tag: %s - %s" % [(repository.identifier or MAIN_REPOSITORY_IDENTIFIER), tag])
-	walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets("", tag, diff_to.id - diff_from.id)\
-			.select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
-	end
+    repository.tags.each do |tag|
+      Rails.logger.debug "Walking in tag: #{repo_name(repository)} - #{tag}"
+      walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets('', tag, diff_to.id - diff_from.id).select { |changeset| 
+          changeset.id > diff_from.id and changeset.id <= diff_to.id})
+    end
 	end
 end
 
@@ -360,22 +348,28 @@ def convert_to_text(fpath, type)
   text = nil
   return text if !File.exists?(FORMAT_HANDLERS[type].split(' ').first)
   case type
-  when "pdf"    
-    text=`#{FORMAT_HANDLERS[type]} #{fpath} -`    
-  when /(xlsx|docx|odt|pptx)/i
-    system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", :out=>'/dev/null'
-    fout= "#{$tempdir}/temp/" + "xl/sharedStrings.xml" if type.eql?("xlsx")
-    fout= "#{$tempdir}/temp/" + "word/document.xml" if type.eql?("docx")
-    fout= "#{$tempdir}/temp/" + "content.xml" if type.eql?("odt")
-    fout= "#{$tempdir}/temp/" + "docProps/app.xml" if type.eql?("pptx")
-    begin
-      text=File.read(fout)
-      FileUtils.rm_rf("#{$tempdir}/temp") 
-    rescue Exception => e
-      log("\tError: #{e.to_s} reading #{fout}", :level=>1)
-    end
-  else
-    text = `#{FORMAT_HANDLERS[type]} #{fpath}`
+    when 'pdf'    
+      text = "#{FORMAT_HANDLERS[type]} #{fpath} -"
+    when /(xlsx|docx|odt|pptx)/i
+      system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", :out=>'/dev/null'
+      case type
+        when 'xlsx'
+          fout = "#{$tempdir}/temp/xl/sharedStrings.xml"
+        when 'docx'
+          fout = "#{$tempdir}/temp/word/document.xml"
+        when 'odt'
+          fout = "#{$tempdir}/temp/content.xml"
+        when 'pptx'
+          fout = "#{$tempdir}/temp/docProps/app.xml"
+        end                
+      begin
+        text = File.read(fout)
+        FileUtils.rm_rf("#{$tempdir}/temp") 
+      rescue Exception => e
+        log("\tError: #{e.to_s} reading #{fout}", :level => 1)
+      end
+    else
+      text = "#{FORMAT_HANDLERS[type]} #{fpath}"
   end
   return text
 end
@@ -384,7 +378,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     path, lastrev, action, type)  
   uri = generate_uri(project, repository, identifier, path)
   return unless uri
-  text=nil
+  text = nil
   if Redmine::MimeType.is_type?('text', path) #type eq 'txt' 
     text = repository.cat(path, identifier)
   else
@@ -394,10 +388,10 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
       bs.write(bstr)
     end
-    text = convert_to_text( "#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
+    text = convert_to_text("#{$tempdir}/#{fname}", type) if File.exists?("#{$tempdir}/#{fname}") and !bstr.nil?
     File.unlink("#{$tempdir}/#{fname}")
   end  
-  log "generated uri: #{uri.inspect}", :lebel => 1
+  log "generated uri: #{uri}", :lebel => 1
   log('Mime type text', :level => 1) if  Redmine::MimeType.is_type?('text', path)
   log("\t>Indexing: #{path}", :level => 1)
   begin
@@ -432,7 +426,7 @@ end
 
 def log(text, options={})
   level = options[:level] || 0
-  dtext=Time.now.asctime.to_s + ": #{text}"
+  dtext = Time.now.asctime.to_s + ": #{text}"
   puts dtext unless level > $verbose
   exit 1 if options[:exit]
 end
@@ -441,7 +435,7 @@ def system_or_raise(command)
   if $verbose > 0
     raise "\"#{command}\" failed" unless system command
   else
-    raise "\"#{command}\" failed" unless system command, :out=>'/dev/null'
+    raise "\"#{command}\" failed" unless system command, :out => '/dev/null'
   end
 end
 
@@ -449,22 +443,21 @@ def find_project(prt)
     scope = Project.active.has_module(:repository)
     project = nil
     project = scope.find_by_identifier(prt)
-    Rails.logger.debug "DEBUG: project found: #{project.inspect}"
+    Rails.logger.debug "DEBUG: project found: #{project}"
     raise ActiveRecord::RecordNotFound unless project
     rescue ActiveRecord::RecordNotFound
       log("- ERROR project #{prt} not found", :level => 1)
-    @project=project
+    @project = project
 end
 
-def create_dir(path)
-  $rdo=0
+def create_dir(path)  
   begin
-    Dir.mkdir(path)
+    Dir.mkdir path
     sleep 1
   rescue SystemCallError
-    $rdo=1
+    return 1
   end
-  $rdo
+  return 0
 end
 
 log("- Trying to load Redmine environment <<#{$environment}>>...", :level => 1)
@@ -482,7 +475,7 @@ include Rails.application.routes.url_helpers
 log("- Redmine environment [RAILS_ENV=#{$env}] correctly loaded ...", :level => 1) 
 
 if $test
-  log("- Running in test mode ...")
+  log('- Running in test mode ...')
 end
 
 # Indexing files
@@ -492,23 +485,23 @@ if not $onlyrepos then
     exit 1
   end
   $stem_langs.each do | lang |
-    $filespath=File.join($redmine_root, "files")
-    if not File.directory?($filespath) then
-      log("- ERROR accessing #{$filespath}, exiting ...")
+    filespath = File.join($redmine_root, 'files')
+    if not File.directory?(filespath) then
+      log("- ERROR accessing #{filespath}, exiting...")
       exit 1
     end
-    dbpath=File.join($dbrootpath,lang)
+    dbpath = File.join($dbrootpath,lang)
     if not File.directory?(dbpath)
-      log("- ERROR! #{dbpath} does not exist, creating ...")
+      log("- #{dbpath} does not exist, creating ...")
       if not create_dir(dbpath) then
-        log("- ERROR! #{dbpath} can not be created!, exiting ...")
+        log("- ERROR! #{dbpath} can not be created!, exiting...")
         exit 1
       end
     end
-    log("- Indexing files under #{$filespath} with omindex stemming in #{lang} ...", :level=>1)    
-    system_or_raise ("#{$omindex} -s #{lang} --db #{dbpath} #{$filespath} --url / > /dev/null")    
+    log("- Indexing files under #{filespath} with omindex stemming in #{lang} ...", :level => 1)    
+    system_or_raise ("#{$omindex} -s #{lang} --db #{dbpath} #{filespath} --url / > /dev/null")    
   end
-  log("- Redmine files indexed ...", :level=>1)
+  log('- Redmine files indexed ...', :level => 1)
 end
 
 # Indexing repositories
@@ -520,36 +513,28 @@ if not $onlyfiles then
   databasepath = File.join($dbrootpath.rstrip, 'repodb')
   log(databasepath)
   if not File.directory?(databasepath)
-    log("Db directory #{databasepath} does not exist, creating...")
+    log("- Db directory #{databasepath} does not exist, creating...")
     begin
       Dir.mkdir(databasepath)
       sleep 1
     rescue SystemCallError
-      log("ERROR! #{databasepath} can not be created!, exiting ...")
+      log("- ERROR! #{databasepath} can not be created!, exiting ...")
       exit 1
     end
   end  
   projects.each do |identifier|
     begin            
       project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first
-      raise ActiveRecord::RecordNotFound if project.nil?
-      log("- Indexing repositories for #{project.name} ...", :level => 1)
+      raise ActiveRecord::RecordNotFound unless project
+      log("- Indexing repositories for #{project.name}...", :level => 1)
       repositories = project.repositories.select { |repository| repository.supports_cat? }
-      repositories.each do |repository|
-        if repository.identifier.nil? then
-          log("\t>Ignoring repo id #{repository.id}, repo has undefined identifier", :level => 1)
-        else
-          if $userch
-            changeset = Changeset.where(:revision => $userch, :repository_id => repository.id).first
-            update_log(repository, changeset, nil, nil) if changeset
-          end
-          delete_log(repository) if ($resetlog)
-          indexing(databasepath, project, repository)
-        end
+      repositories.each do |repository|        
+        delete_log(repository) if ($resetlog)
+        indexing(databasepath, project, repository)        
       end
     rescue ActiveRecord::RecordNotFound
-      log("- ERROR project identifier #{identifier} not found or repository module not enabled, ignoring...", :level => 1)
-      Rails.logger.error "Project identifier #{identifier} not found "      
+      log("- WARNING project identifier #{identifier} not found or repository module not enabled, ignoring...", :level => 1)
+      Rails.logger.error "Project identifier #{identifier} not found"      
     end
   end
 end

@@ -88,11 +88,11 @@ module RedmineXapian
           Rails.logger.debug "DEBUG: m: #{m.document.data.inspect}"
           docdata = m.document.data{url}
           dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size|date)=\/?([^\n\]]+)/).flatten]
-          dochash['date'] = Time.at(0).in_time_zone  if dochash['date'].nil? # default timestamp
+          dochash['date'] = Time.at(0).in_time_zone if dochash['date'].blank? # default timestamp
           dochash['url'] = URI.unescape(dochash['url'].to_s)
           if dochash
-            Rails.logger.debug 'DEBUG: dochash not nil.. ' + dochash.fetch('url').to_s
-            Rails.logger.debug 'DEBUG: limit_conditions ' + limit_options[:limit].inspect                                               
+            Rails.logger.debug "DEBUG: dochash not nil.. #{dochash['url']}"
+            Rails.logger.debug "DEBUG: limit_conditions #{limit_options[:limit]}"
             if(dochash['url'].to_s =~ /^projects\// && xapian_file == 'Repofile')
               Rails.logger.debug 'DEBUG: searching for repofiles'
               i = i + 1
@@ -115,11 +115,11 @@ module RedmineXapian
     private         
 
       def process_attachment(projects, dochash, user)
-        docattach = Attachment.where(:disk_filename => dochash.fetch('url').split('/').last).first
+        docattach = Attachment.where(:disk_filename => dochash['url'].split('/').last).first
         if docattach
-          Rails.logger.debug "DEBUG: attach event_datetime #{docattach.event_datetime.inspect}"
-          Rails.logger.debug "DEBUG: attach project #{docattach.project.inspect}"
-          Rails.logger.debug "DEBUG: docattach not nil..:  #{docattach.inspect}"
+          Rails.logger.debug "DEBUG: attach event_datetime #{docattach.event_datetime}"
+          Rails.logger.debug "DEBUG: attach project #{docattach.project}"
+          Rails.logger.debug "DEBUG: docattach not nil..:  #{docattach}"
           if docattach.container
             Rails.logger.debug 'DEBUG: adding attach...'
             
@@ -151,45 +151,47 @@ module RedmineXapian
         end
       end
       
-      def process_repo_file(projects, dochash, user, id)
-        Rails.logger.debug "DEBUG: repo file: #{dochash.fetch('url').inspect}"
-        Rails.logger.debug "DEBUG: repo date: #{dochash.fetch('date').inspect}"
-        arrt = dochash.fetch('url').split('/',6)
-        entrystr = dochash.fetch('url')[/[\w\_\-]+\/[\w\_\-]+\/[\w\-\_]+\/[\w\-\_]+\/(\w+)\//,1]
-        arrt.delete(entrystr)
-        arrt.delete('repository')
-        arrt.delete('projects')
-        if arrt.last =~ /[\w\-\_]+\/entry\/(.*)/ then
-          arrt[arrt.length - 1] = $1
-        end
-        Rails.logger.debug "DEBUG: sample field: #{dochash.fetch('sample').inspect}"
-        dochash2 = Hash[ [:project_identifier, :repo_identifier, :file ].zip(arrt) ]
-        project = Project.where(:identifier => dochash2[:project_identifier]).first
-        Rails.logger.debug "DEBUG: dochas2 content: #{dochash2.inspect}"
-        repository = Repository.where(:project_id => project.id, :identifier => dochash2[:repo_identifier]).first if project
-        Rails.logger.debug "DEBUG: repository found #{repository.inspect}"
-        if repository and not dochash.fetch('sample').blank?
-          projects = [] << projects if projects.is_a?(Project)
-          project_ids = projects.collect(&:id) if projects            
-          allowed = user.allowed_to?(:browse_repository, repository.project)
-          
-          if allowed && (project_ids.blank? || (project_ids.include?(project.id)))
-	          docattach = Repofile.new
-            docattach.filename = dochash2[:file]
-            docattach.created_on = dochash['date'].to_datetime
-            docattach.project_id = project.id
-            docattach.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
-            docattach.repository_id = repository.id
-            docattach.id = id	          
-            h = { :filename => docattach.filename, :created_on => docattach.created_on.to_s, 
-              :project_id => docattach.project_id, :description => docattach.description,
-              :repository_id => docattach.repository_id }                          
-            Redmine::Search.cache_store.write("Repofile-#{docattach.id}", h.to_s)
-            docattach
+      def process_repo_file(projects, dochash, user, id)        
+        Rails.logger.debug "DEBUG: repo file: #{dochash['url']}"
+        Rails.logger.debug "DEBUG: repo date: #{dochash['date']}"
+        Rails.logger.debug "DEBUG: sample field: #{dochash['sample']}"        
+        if dochash['url'] =~ /^projects\/(.+)\/repository\/(.*)\/entry\/(.*)/
+          repo_project_identifier = $1
+          repo_identifier = $2
+          repo_filename = $3
+          project = Project.where(:identifier => repo_project_identifier).first
+          if project            
+            repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project
+            Rails.logger.debug "DEBUG: repository found #{repository.inspect}"
+            if repository and dochash['sample'].present?
+              projects = [] << projects if projects.is_a?(Project)
+              project_ids = projects.collect(&:id) if projects            
+              allowed = user.allowed_to?(:browse_repository, repository.project)
+
+              if allowed && (project_ids.blank? || (project_ids.include?(project.id)))
+                docattach = Repofile.new
+                docattach.filename = repo_filename
+                docattach.created_on = dochash['date'].to_datetime
+                docattach.project_id = project.id
+                docattach.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
+                docattach.repository_id = repository.id
+                docattach.id = id	          
+                h = { :filename => docattach.filename, :created_on => docattach.created_on.to_s, 
+                  :project_id => docattach.project_id, :description => docattach.description,
+                  :repository_id => docattach.repository_id }                          
+                Redmine::Search.cache_store.write("Repofile-#{docattach.id}", h.to_s)
+                docattach
+              else
+                Rails.logger.warn 'DEBUG: user without :browse_repository permissions'                
+              end
+            else
+              Rails.logger.warn "DEBUG: Repository of #{repo_identifier} identifier of sample text not found"
+            end
           else
-            Rails.logger.debug 'DEBUG: user without :browse_repository permissions'
-            nil
+            Rails.logger.error "DEBUG: Project of #{repo_project_identifier} identifier not found"
           end
+        else
+          Rails.logger.error 'DEBUG: A wrong format of the URL'
         end
       end
            
