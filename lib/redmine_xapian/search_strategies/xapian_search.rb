@@ -115,40 +115,38 @@ module RedmineXapian
     private         
 
       def process_attachment(projects, dochash, user)
-        docattach = Attachment.where(:disk_filename => dochash['url'].split('/').last).first
-        if docattach
-          Rails.logger.debug "Attachment's event_datetime #{docattach.event_datetime}"
-          Rails.logger.debug "Attachment's project #{docattach.project}"
-          Rails.logger.debug "Attachment's docattach not nil..:  #{docattach}"
-          if docattach.container
-            Rails.logger.debug 'Adding attachment'
-            
-            project = docattach.container.project
-            container_type = docattach['container_type']
+        attachment = Attachment.where(:disk_filename => dochash['url'].split('/').last).first
+        if attachment
+          Rails.logger.debug "Attachment's event_datetime #{attachment.event_datetime}"
+          Rails.logger.debug "Attachment's project #{attachment.project}"
+          Rails.logger.debug "Attachment's docattach not nil..:  #{attachment}"
+          if attachment.container
+            Rails.logger.debug 'Adding attachment'            
+            project = attachment.container.project
+            container_type = attachment[:container_type]
             container_permission = SearchStrategies::ContainerTypeHelper.to_permission(container_type)
             can_view_container = user.allowed_to?(container_permission, project)
-
-            allowed = case container_type            
-            when 'Issue'
-              can_view_issue = Issue.find_by_id(docattach[:container_id]).visible?
-              can_view_container && can_view_issue
+            
+            if container_type == 'Issue'
+              issue = Issue.find_by_id(attachment[:container_id])
+              allowed = can_view_container && issue && issue.visible?
             else
-              can_view_container
+              allowed = can_view_container
             end
             
             projects = [] << projects if projects.is_a?(Project)
             project_ids = projects.collect(&:id) if projects
             
-            if allowed && (project_ids.blank? || (project_ids.include?(docattach.container.project.id)))
-              Redmine::Search.cache_store.write("Attachment-#{docattach.id}", 
-                dochash['sample'].force_encoding('UTF-8')) if dochash['sample']
-              docattach
+            if allowed && (project_ids.blank? || (project_ids.include?(attachment.container.project.id)))
+              Redmine::Search.cache_store.write("Attachment-#{attachment.id}", 
+                dochash['sample'].force_encoding('UTF-8')) if dochash['sample']  
+              return attachment
             else
-              Rails.logger.debug 'User without permissions'
-              nil
+              Rails.logger.warn 'User without permissions'                  
             end
           end
         end
+        return nil
       end
       
       def process_repo_file(projects, dochash, user, id)        
