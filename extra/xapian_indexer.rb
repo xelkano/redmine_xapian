@@ -170,11 +170,11 @@ def indexing(databasepath, project, repository)
       indexconf.write "date: field=date\n"
       indexconf.close
       if not latest_indexed
-        Rails.logger.debug "DEBUG:  repo #{repo_name(repository)} not indexed, indexing all"
+        Rails.logger.debug "Repository #{repo_name(repository)} not indexed, indexing all"
         log("\t>repo #{repo_name(repository)} not indexed, indexing all", :level => 1)
         indexing_all(databasepath, indexconf, project, repository)
       else
-        Rails.logger.debug "DEBUG:  repo #{repo_name(repository)} indexed, indexing diff"
+        Rails.logger.debug "Repository #{repo_name(repository)} indexed, indexing diff"
         log("\t>repo #{repo_name(repository)} already indexed, indexing only diff", :level => 1)
         indexing_diff(databasepath, indexconf, project, repository, 
           latest_indexed.changeset, latest_changeset)
@@ -235,10 +235,10 @@ def delete_log(repository)
 end
 
 def walk(databasepath, indexconf, project, repository, identifier, entries)
-  Rails.logger.debug "DEBUG: walk entries size: #{entries.size}"
+  Rails.logger.debug "Walk entries size: #{entries.size}"
   return if entries.size < 1
   entries.each do |entry|
-    Rails.logger.debug "DEBUG: walking into: #{entry.lastrev.time}"
+    Rails.logger.debug "Walking into: #{entry.lastrev.time}"
     if entry.is_dir?
       walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
     elsif entry.is_file?
@@ -268,7 +268,7 @@ def indexing_all(databasepath, indexconf, project, repository)
 end
 
 def walkin(databasepath, indexconf, project, repository, identifier, changesets)
-    Rails.logger.debug "DEBUG: walking into #{changesets.inspect}"
+    Rails.logger.debug "Walking into #{changesets.inspect}"
     return if not changesets or changesets.size <= 0
     changesets.sort! { |a, b| a.id <=> b.id }
 
@@ -279,7 +279,7 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
     #   * R - Replaced
     #   * D - Deleted
     changesets.each do |changeset|
-      Rails.logger.debug "DEBUG: changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
+      Rails.logger.debug "Changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
       next unless changeset.filechanges
       changeset.filechanges.each do |change|        
         actions[change.path] = (change.action == 'D') ? DELETE : ADD_OR_UPDATE        
@@ -291,7 +291,7 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
       if ((!entry.nil? && entry.is_file?) || action == DELETE)
         log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", 
           :level => 1) if (entry.nil? && action != DELETE)
-        Rails.logger.debug "DEBUG: entry to index #{entry.inspect}"
+        Rails.logger.debug "Entry to index #{entry.inspect}"
         lastrev = entry.lastrev unless entry.nil?
         add_or_update_index(databasepath, indexconf, project, repository, 
           identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)]) if(supported_mime_type(path) || action == DELETE)
@@ -411,16 +411,16 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
         end
       end      
     else      
-      log "DEBUG path: #{path} should be deleted", :level => 1
+      log "Path: #{path} should be deleted", :level => 1
     end
     itext.close    
     log "TEXT #{itext.path} generated", :level => 1
-    log "DEBUG index cmd: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}", :level => 1    
+    log "Index command: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}", :level => 1    
     system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path}")
     itext.unlink    
     log 'New doc added to xapian database'
   rescue Exception => e        
-    log "ERROR text not indexed beacause an error #{e.message}"
+    log "Text not indexed beacause an error #{e.message}"
   end
 end
 
@@ -443,7 +443,7 @@ def find_project(prt)
     scope = Project.active.has_module(:repository)
     project = nil
     project = scope.find_by_identifier(prt)
-    Rails.logger.debug "DEBUG: project found: #{project}"
+    Rails.logger.debug "Project found: #{project}"
     raise ActiveRecord::RecordNotFound unless project
     rescue ActiveRecord::RecordNotFound
       log("- ERROR project #{prt} not found", :level => 1)

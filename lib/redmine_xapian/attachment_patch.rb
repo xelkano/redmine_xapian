@@ -76,10 +76,10 @@ module RedmineXapian
         search_results.concat search_for_project_files(user, search_data)
         
         if !options[:titles_only]
-          Rails.logger.debug "DEBUG: call xapian search service for #{name.inspect}"          
+          Rails.logger.debug "Call xapian search service for #{name.inspect}"          
           xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
           search_results.concat xapian_results unless xapian_results.blank?
-          Rails.logger.debug "DEBUG: call xapian search service for  #{name.inspect} completed"          
+          Rails.logger.debug "Call xapian search service for  #{name.inspect} completed"          
         end
         
         search_results
