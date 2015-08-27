@@ -163,9 +163,9 @@ module RedmineXapian
           Rails.logger.debug "Repository file: #{repo_filename}"
           project = Project.where(:identifier => repo_project_identifier).first
           if project            
-            repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project
-            Rails.logger.debug "Repository found #{repository.inspect}"
+            repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project            
             if repository
+              Rails.logger.debug "Repository found #{repository.identifier}"
               projects = [] << projects if projects.is_a?(Project)
               project_ids = projects.collect(&:id) if projects            
               allowed = user.allowed_to?(:browse_repository, repository.project)
