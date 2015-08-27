@@ -157,8 +157,11 @@ module RedmineXapian
         Rails.logger.debug "DEBUG: sample field: #{dochash['sample']}"        
         if dochash['url'] =~ /^projects\/(.+)\/repository\/(.*)\/entry\/(.*)/
           repo_project_identifier = $1
+          Rails.logger.debug "DEBUG: project identifier: #{repo_project_identifier}"
           repo_identifier = $2
+          Rails.logger.debug "DEBUG: repository identifier: #{repo_identifier}"
           repo_filename = $3
+          Rails.logger.debug "DEBUG: repository file: #{repo_filename}"
           project = Project.where(:identifier => repo_project_identifier).first
           if project            
             repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project
@@ -182,16 +185,16 @@ module RedmineXapian
                 Redmine::Search.cache_store.write("Repofile-#{docattach.id}", h.to_s)
                 docattach
               else
-                Rails.logger.warn 'DEBUG: user without :browse_repository permissions'                
+                Rails.logger.warn 'User without :browse_repository permissions'                
               end
             else
-              Rails.logger.warn "DEBUG: Repository of #{repo_identifier} identifier of sample text not found"
+              Rails.logger.warn "Repository #{repo_identifier} - sample text not found"
             end
           else
-            Rails.logger.error "DEBUG: Project of #{repo_project_identifier} identifier not found"
+            Rails.logger.error "Project #{repo_project_identifier} not found"
           end
         else
-          Rails.logger.error 'DEBUG: A wrong format of the URL'
+          Rails.logger.error 'Wrong format of the URL'
         end
       end
            
