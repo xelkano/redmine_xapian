@@ -155,6 +155,7 @@ module RedmineXapian
         Rails.logger.debug "Repository file: #{dochash['url']}"
         Rails.logger.debug "Repository date: #{dochash['date']}"
         Rails.logger.debug "Repository sample field: #{dochash['sample']}"        
+        repository_attachment = nil
         if dochash['url'] =~ /^projects\/(.+)\/repository\/(.*)\/entry\/(.*)/
           repo_project_identifier = $1
           Rails.logger.debug "Project identifier: #{repo_project_identifier}"
@@ -166,29 +167,28 @@ module RedmineXapian
           if project            
             repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project
             Rails.logger.debug "Repository found #{repository.inspect}"
-            if repository and dochash['sample'].present?
+            if repository
               projects = [] << projects if projects.is_a?(Project)
               project_ids = projects.collect(&:id) if projects            
               allowed = user.allowed_to?(:browse_repository, repository.project)
 
               if allowed && (project_ids.blank? || (project_ids.include?(project.id)))
-                docattach = Repofile.new
-                docattach.filename = repo_filename
-                docattach.created_on = dochash['date'].to_datetime
-                docattach.project_id = project.id
-                docattach.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
-                docattach.repository_id = repository.id
-                docattach.id = id	          
-                h = { :filename => docattach.filename, :created_on => docattach.created_on.to_s, 
-                  :project_id => docattach.project_id, :description => docattach.description,
-                  :repository_id => docattach.repository_id }                          
-                Redmine::Search.cache_store.write("Repofile-#{docattach.id}", h.to_s)
-                docattach
+                repository_attachment = Repofile.new
+                repository_attachment.filename = repo_filename
+                repository_attachment.created_on = dochash['date'].to_datetime
+                repository_attachment.project_id = project.id
+                repository_attachment.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
+                repository_attachment.repository_id = repository.id
+                repository_attachment.id = id	          
+                h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s, 
+                  :project_id => repository_attachment.project_id, :description => repository_attachment.description,
+                  :repository_id => repository_attachment.repository_id }                          
+                Redmine::Search.cache_store.write("Repofile-#{repository_attachment.id}", h.to_s)               
               else
                 Rails.logger.warn 'User without :browse_repository permissions'                
               end
             else
-              Rails.logger.warn "Repository #{repo_identifier} - sample text not found"
+              Rails.logger.error "Repository not found"
             end
           else
             Rails.logger.error "Project #{repo_project_identifier} not found"
@@ -196,6 +196,7 @@ module RedmineXapian
         else
           Rails.logger.error 'Wrong format of the URL'
         end
+        repository_attachment
       end
            
       def get_database_path(xapian_file)
