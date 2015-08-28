@@ -93,7 +93,7 @@ module RedmineXapian
           if dochash
             Rails.logger.debug "dochash not nil.. #{dochash['url']}"
             Rails.logger.debug "limit_conditions #{limit_options[:limit]}"
-            if(dochash['url'].to_s =~ /^projects\// && xapian_file == 'Repofile')
+            if(xapian_file == 'Repofile')
               Rails.logger.debug 'Searching for repofiles'
               i = i + 1
               if repo_file = process_repo_file(projects_to_search, dochash, user, i)                
@@ -154,7 +154,7 @@ module RedmineXapian
         Rails.logger.debug "Repository date: #{dochash['date']}"
         Rails.logger.debug "Repository sample field: #{dochash['sample']}"        
         repository_attachment = nil
-        if dochash['url'] =~ /^projects\/(.+)\/repository\/(.*)\/entry\/(.*)/
+        if dochash['url'] =~ /^projects\/(.+)\/repository\/([\w\.]*).*\/entry\/(.*)$/
           repo_project_identifier = $1
           Rails.logger.debug "Project identifier: #{repo_project_identifier}"
           repo_identifier = $2
