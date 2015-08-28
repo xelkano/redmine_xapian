@@ -170,20 +170,24 @@ module RedmineXapian
               project_ids = projects.collect(&:id) if projects            
               allowed = user.allowed_to?(:browse_repository, repository.project)
 
-              if allowed && (project_ids.blank? || (project_ids.include?(project.id)))
-                repository_attachment = Repofile.new
-                repository_attachment.filename = repo_filename
-                repository_attachment.created_on = dochash['date'].to_datetime
-                repository_attachment.project_id = project.id
-                repository_attachment.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
-                repository_attachment.repository_id = repository.id
-                repository_attachment.id = id	          
-                h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s, 
-                  :project_id => repository_attachment.project_id, :description => repository_attachment.description,
-                  :repository_id => repository_attachment.repository_id }                          
-                Redmine::Search.cache_store.write("Repofile-#{repository_attachment.id}", h.to_s)               
+              if allowed
+                if (project_ids.blank? || (project_ids.include?(project.id)))
+                  repository_attachment = Repofile.new
+                  repository_attachment.filename = repo_filename
+                  repository_attachment.created_on = dochash['date'].to_datetime
+                  repository_attachment.project_id = project.id
+                  repository_attachment.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
+                  repository_attachment.repository_id = repository.id
+                  repository_attachment.id = id	          
+                  h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s, 
+                    :project_id => repository_attachment.project_id, :description => repository_attachment.description,
+                    :repository_id => repository_attachment.repository_id }                          
+                  Redmine::Search.cache_store.write("Repofile-#{repository_attachment.id}", h.to_s)               
+                else
+                  Rails.logger.warn 'No projects to search in'
+                end
               else
-                Rails.logger.warn 'User without :browse_repository permissions'                
+                Rails.logger.warn 'User without :browse_repository permissions'
               end
             else
               Rails.logger.error "Repository not found"
