@@ -42,7 +42,7 @@ module RedmineXapian
       
       def search_result_ranks_and_ids_with_search_result_ranks_and_ids_ext(tokens, user = User.current, projects = nil, options = {})      
         r = search(tokens, user, projects, options)        
-        r.map{ |x| [x[0].to_i, x[1]] }
+        r.map{ |x| [x[0].is_a?(DateTime) ? x[0].to_i : DateTime.now.to_i, x[1]] }
       end
       
       def event_description

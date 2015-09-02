@@ -117,7 +117,7 @@ module RedmineXapian
       def process_attachment(projects, dochash, user)
         attachment = Attachment.where(:disk_filename => dochash['url'].split('/').last).first
         if attachment
-          Rails.logger.debug "Attachment's event_datetime #{attachment.event_datetime}"
+          Rails.logger.debug "Attachment created on #{attachment.created_on}"
           Rails.logger.debug "Attachment's project #{attachment.project}"
           Rails.logger.debug "Attachment's docattach not nil..:  #{attachment}"
           if attachment.container
