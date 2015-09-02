@@ -88,7 +88,17 @@ module RedmineXapian
           Rails.logger.debug "m: #{m.document.data.inspect}"
           docdata = m.document.data{url}
           dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size|date)=\/?([^\n\]]+)/).flatten]
-          dochash['date'] = Time.at(0).in_time_zone if dochash['date'].blank? # default timestamp
+          begin
+            if dochash['date'].blank?
+              Rails.logger.error 'Date is blank!'
+              dochash['date'] = Time.at(0).in_time_zone 
+            else
+              dochash['date'].to_datetime 
+            end
+          rescue Exception => e            
+            Rails.logger.error e.message
+            dochash['date'] = Time.at(0).in_time_zone
+          end            
           dochash['url'] = URI.unescape(dochash['url'].to_s)
           if dochash
             Rails.logger.debug "dochash not nil.. #{dochash['url']}"
@@ -105,8 +115,7 @@ module RedmineXapian
                 xpattachments << attachment
               end
             end
-            
-          end
+          end          
         end        
         Rails.logger.debug 'Xapian searched'        
         xpattachments.map{ |a| [a.created_on, a.id] }

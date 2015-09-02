@@ -400,7 +400,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     if action != DELETE then
       sdate = lastrev.time || Time.at(0).in_time_zone
       itext.write("date=#{sdate.to_s}\n")
-      body=nil
+      body = nil
       text.force_encoding('UTF-8')
       text.each_line do |line|        
         if body.blank? 
