@@ -1,6 +1,6 @@
 h1. Redmine Xapian search plugin
 
-The current version of Redmine Xapian is **1.6.3** [![Build Status](https://api.travis-ci.org/picman/redmine_xapian.png)](https://travis-ci.org/picman/redmine_xapian)
+The current version of Redmine Xapian is **1.6.3** !https://api.travis-ci.org/picman/redmine_xapian.png(Build status)!:https://travis-ci.org/picman/redmine_xapian                                                    
 With this plugin you will be able to make searches by file name and by strings inside your documents through the Xapian search engine.
 This plugin can also index the files located in your repositories.
 This plugin replaces search controller, its view and search methods.
