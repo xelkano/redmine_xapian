@@ -41,7 +41,7 @@ module RedmineXapian
         @all_words = params[:all_words] ? params[:all_words].present? : true
         # Plugin change start
         #@titles_only = params[:titles_only] ? params[:titles_only].present? : false
-        @titles_only = params[:titles_only] ? params[:titles_only].present? : true
+        @titles_only = params[:titles_only] ? params[:titles_only].present? : true        
         # Plugin change end
         @search_attachments = params[:attachments].presence || '0'
         @open_issues = params[:open_issues] ? params[:open_issues].present? : false

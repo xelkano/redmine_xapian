@@ -19,16 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-if RUBY_VERSION >= "1.9"
+if RUBY_VERSION >= '1.9'
 
   SimpleCov.start do
     redmine_xapian_base = File.expand_path(File.dirname(__FILE__) + '/../')
     root redmine_xapian_base
-    add_group "Models", "app/models"
-    add_group "Controllers", "app/controllers"
-    add_group "Helpers", "app/helpers"
-    add_group "Views", "app/views"
-    add_group "Lib", "lib"
+    add_group 'Models', 'app/models'
+    add_group 'Controllers', 'app/controllers'
+    add_group 'Helpers', 'app/helpers'
+    add_group 'Views', 'app/views'
+    add_group 'Lib', 'lib'
   end
 end
 

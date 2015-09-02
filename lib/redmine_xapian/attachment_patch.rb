@@ -58,7 +58,7 @@ module RedmineXapian
     private
       
       def search(tokens, user, projects = nil, options = {})     
-        Rails.logger.debug 'Attachment::search'
+        Rails.logger.debug "Attachment::search"        
         search_data = RedmineXapian::SearchStrategies::SearchData.new(
           self,
           tokens,
@@ -67,19 +67,17 @@ module RedmineXapian
           user,
           name
         )
-
-        search_results = []        
-                               
+        search_results = []
         search_results.concat search_for_issues_attachments(user, search_data)
         search_results.concat search_for_message_attachments(user, search_data)
         search_results.concat search_for_wiki_page_attachments(user, search_data)
         search_results.concat search_for_project_files(user, search_data)
         
         if !options[:titles_only]
-          Rails.logger.debug "Call xapian search service for #{name.inspect}"          
+          Rails.logger.debug "Call xapian search service for #{name}"          
           xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
           search_results.concat xapian_results unless xapian_results.blank?
-          Rails.logger.debug "Call xapian search service for  #{name.inspect} completed"          
+          Rails.logger.debug "Call xapian search service for  #{name} completed"          
         end
         
         search_results

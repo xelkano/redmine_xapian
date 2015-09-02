@@ -69,7 +69,7 @@
         <dt class="<%= e.event_type %>">
           <% # Plugin change start %>
           <%#= content_tag('span', h(e.project), :class => 'project') unless @project == e.project %>
-          <%= content_tag('span', link_to(e.project.name, project_path(e.project)), :class => 'project') unless @project == e.project  %>
+          <%= content_tag('span', link_to(e.project, project_path(e.project)), :class => 'project') unless @project == e.project  %>
           <% #Project change end %>
           <%= link_to(highlight_tokens(e.event_title.truncate(255), @tokens), e.event_url) %>
         <% # Plugin change start %>
