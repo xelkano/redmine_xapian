@@ -85,23 +85,15 @@ module RedmineXapian
         i = 0
 
         matchset.matches.each do |m|          
-          Rails.logger.debug "m: #{m.document.data.inspect}"
-          docdata = m.document.data{url}
-          dochash = Hash[*docdata.scan(/(url|sample|modtime|type|size|date)=\/?([^\n\]]+)/).flatten]
-          begin
-            if dochash['date'].blank?
-              Rails.logger.error 'Date is blank!'
-              dochash['date'] = Time.at(0).in_time_zone 
-            else
-              dochash['date'].to_datetime 
-            end
-          rescue Exception => e            
-            Rails.logger.error e.message
-            dochash['date'] = Time.at(0).in_time_zone
-          end            
-          dochash['url'] = URI.unescape(dochash['url'].to_s)
+          Rails.logger.debug "Document data: '#{m.document.data}'"          
+          if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)/
+            dochash = { :date => $1, :sample => $2, :url => URI.unescape($3) }
+          else
+            Rails.logger.error "Wrong format of document data"
+            next
+          end                               
           if dochash
-            Rails.logger.debug "dochash not nil.. #{dochash['url']}"
+            Rails.logger.debug "dochash not nil.. #{dochash[:url]}"
             Rails.logger.debug "limit_conditions #{limit_options[:limit]}"
             if(xapian_file == 'Repofile')
               Rails.logger.debug 'Searching for repofiles'
@@ -124,7 +116,7 @@ module RedmineXapian
     private         
 
       def process_attachment(projects, dochash, user)
-        attachment = Attachment.where(:disk_filename => dochash['url'].split('/').last).first
+        attachment = Attachment.where(:disk_filename => dochash[:url].split('/').last).first
         if attachment
           Rails.logger.debug "Attachment created on #{attachment.created_on}"
           Rails.logger.debug "Attachment's project #{attachment.project}"
@@ -148,7 +140,7 @@ module RedmineXapian
             
             if allowed && (project_ids.blank? || (project_ids.include?(attachment.container.project.id)))
               Redmine::Search.cache_store.write("Attachment-#{attachment.id}", 
-                dochash['sample'].force_encoding('UTF-8')) if dochash['sample']  
+                dochash[:sample].force_encoding('UTF-8')) if dochash[:sample]  
               return attachment
             else
               Rails.logger.warn 'User without permissions'                  
@@ -159,11 +151,11 @@ module RedmineXapian
       end
       
       def process_repo_file(projects, dochash, user, id)        
-        Rails.logger.debug "Repository file: #{dochash['url']}"
-        Rails.logger.debug "Repository date: #{dochash['date']}"
-        Rails.logger.debug "Repository sample field: #{dochash['sample']}"        
+        Rails.logger.debug "Repository file: #{dochash[:url]}"
+        Rails.logger.debug "Repository date: #{dochash[:date]}"
+        Rails.logger.debug "Repository sample field: #{dochash[:sample]}"        
         repository_attachment = nil
-        if dochash['url'] =~ /^projects\/(.+)\/repository\/([\w\.]*).*\/entry\/(.*)$/
+        if dochash[:url] =~ /^\/projects\/(.+)\/repository\/([\w\.]*).*\/entry\/(.*)$/
           repo_project_identifier = $1
           Rails.logger.debug "Project identifier: #{repo_project_identifier}"
           repo_identifier = $2
@@ -182,10 +174,15 @@ module RedmineXapian
               if allowed
                 if (project_ids.blank? || (project_ids.include?(project.id)))
                   repository_attachment = Repofile.new
-                  repository_attachment.filename = repo_filename
-                  repository_attachment.created_on = dochash['date'].to_datetime
+                  repository_attachment.filename = repo_filename                  
+                  begin                    
+                    repository_attachment.created_on = dochash[:date].to_datetime                     
+                  rescue Exception => e            
+                    Rails.logger.error e.message
+                    repository_attachment.created_on = Time.at(0)
+                  end                                              
                   repository_attachment.project_id = project.id
-                  repository_attachment.description = dochash['sample'].force_encoding('UTF-8') if dochash['sample']
+                  repository_attachment.description = dochash[:sample].force_encoding('UTF-8') if dochash[:sample]
                   repository_attachment.repository_id = repository.id
                   repository_attachment.id = id	          
                   h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s, 

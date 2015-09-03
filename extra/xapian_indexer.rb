@@ -234,9 +234,9 @@ def delete_log(repository)
   log("\t>Log for repo #{repo_name(repository)} removed!", :level => 1)
 end
 
-def walk(databasepath, indexconf, project, repository, identifier, entries)
+def walk(databasepath, indexconf, project, repository, identifier, entries)  
+  return if entries.nil? || entries.size < 1
   Rails.logger.debug "Walk entries size: #{entries.size}"
-  return if entries.size < 1
   entries.each do |entry|
     Rails.logger.debug "Walking into: #{entry.lastrev.time}"
     if entry.is_dir?
