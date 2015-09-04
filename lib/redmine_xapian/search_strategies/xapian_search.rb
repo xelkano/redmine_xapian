@@ -81,31 +81,29 @@ module RedmineXapian
         return nil if matchset.nil?
 
         # Display the results.        
-        Rails.logger.debug "Matches 1-#{matchset.size}:\n"
+        Rails.logger.debug "Matches 1-#{matchset.size} records:"        
+        Rails.logger.debug "Searching for #{(xapian_file == 'Repofile') ? 'repofiles' : 'attachments'}"
         i = 0
-
-        matchset.matches.each do |m|          
-          Rails.logger.debug "Document data: '#{m.document.data}'"          
-          if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)/
-            dochash = { :date => $1, :sample => $2, :url => URI.unescape($3) }
-          else
-            Rails.logger.error "Wrong format of document data"
-            next
-          end                               
-          if dochash
-            Rails.logger.debug "dochash not nil.. #{dochash[:url]}"
-            Rails.logger.debug "limit_conditions #{limit_options[:limit]}"
-            if(xapian_file == 'Repofile')
-              Rails.logger.debug 'Searching for repofiles'
-              i = i + 1
-              if repo_file = process_repo_file(projects_to_search, dochash, user, i)                
+        
+        matchset.matches.each do |m|                    
+          if(xapian_file == 'Repofile')            
+            if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
+              dochash = { :date => $1, :sample => $2, :url => URI.unescape($3) }
+              if repo_file = process_repo_file(projects_to_search, dochash, user, i)                                  
                 xpattachments << repo_file
+                i = i + 1
               end
-            elsif xapian_file == 'Attachment'
-              Rails.logger.debug 'Searching for attachments'
+            else
+              Rails.logger.error "Wrong format of document data :#{m.document.data}"
+            end
+          elsif xapian_file == 'Attachment'
+            if m.document.data =~ /^url=(.+)\W+sample=(.+)\W+type=/ 
+              dochash = { :url => URI.unescape($1), :sample => $2 }
               if attachment = process_attachment(projects_to_search, dochash, user)
                 xpattachments << attachment
               end
+            else
+              Rails.logger.error "Wrong format of document data :#{m.document.data}"
             end
           end          
         end        
