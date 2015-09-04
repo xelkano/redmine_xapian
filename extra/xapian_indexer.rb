@@ -29,6 +29,9 @@
 # Redmine installation directory
 $redmine_root = '/opt/redmine'
 
+# Files location
+$files = 'files'
+
 # scriptindex binary path 
 $scriptindex  = '/usr/bin/scriptindex'
 
@@ -485,7 +488,7 @@ if not $onlyrepos then
     exit 1
   end
   $stem_langs.each do | lang |
-    filespath = File.join($redmine_root, 'files')
+    filespath = File.join($redmine_root, $files)
     if not File.directory?(filespath) then
       log("- ERROR accessing #{filespath}, exiting...")
       exit 1
