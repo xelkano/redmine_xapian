@@ -138,7 +138,7 @@ module RedmineXapian
             
             if allowed && (project_ids.blank? || (project_ids.include?(attachment.container.project.id)))
               Redmine::Search.cache_store.write("Attachment-#{attachment.id}", 
-                dochash[:sample].force_encoding('UTF-8')) if dochash[:sample]  
+                dochash[:sample]) if dochash[:sample]  
               return attachment
             else
               Rails.logger.warn 'User without permissions'                  
@@ -180,7 +180,7 @@ module RedmineXapian
                     repository_attachment.created_on = Time.at(0)
                   end                                              
                   repository_attachment.project_id = project.id
-                  repository_attachment.description = dochash[:sample].force_encoding('UTF-8') if dochash[:sample]
+                  repository_attachment.description = dochash[:sample]
                   repository_attachment.repository_id = repository.id
                   repository_attachment.id = id	          
                   h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s, 

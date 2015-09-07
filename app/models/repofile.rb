@@ -56,7 +56,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_description
-    self.description
+    self.description.force_encoding('UTF-8')
   end
 	 
   def event_type

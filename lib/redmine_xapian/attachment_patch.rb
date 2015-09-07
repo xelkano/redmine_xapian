@@ -48,11 +48,11 @@ module RedmineXapian
       def event_description
         desc = Redmine::Search.cache_store.fetch("Attachment-#{id}")                  
         if desc
-          Redmine::Search.cache_store.delete("Attachment-#{id}")
-          desc
+          Redmine::Search.cache_store.delete("Attachment-#{id}")          
         else
-          description
+          desc = description
         end
+        desc.force_encoding('UTF-8') if desc
       end
             
     private
