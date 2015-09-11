@@ -44,11 +44,7 @@ module RedmineXapian
         @titles_only = params[:titles_only] ? params[:titles_only].present? : true        
         # Plugin change end
         @search_attachments = params[:attachments].presence || '0'
-        @open_issues = params[:open_issues] ? params[:open_issues].present? : false
-        
-        # Plugin change start
-        flash.now[:warning] = l(:notice_search_tips)
-        # Plugin change end
+        @open_issues = params[:open_issues] ? params[:open_issues].present? : false               
 
         # quick jump to an issue
         if (m = @question.match(/^#?(\d+)$/)) && (issue = Issue.visible.find_by_id(m[1].to_i))
