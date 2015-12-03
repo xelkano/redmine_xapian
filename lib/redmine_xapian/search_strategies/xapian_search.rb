@@ -94,16 +94,16 @@ module RedmineXapian
                 i = i + 1
               end
             else
-              Rails.logger.error "Wrong format of document data :#{m.document.data}"
+              Rails.logger.error "Wrong format of document data: #{m.document.data}"
             end
           elsif xapian_file == 'Attachment'           
-            if (m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type)=/)
+            if (m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type|caption|modtime|size)=/)
               dochash = { :url => URI.unescape($1), :sample => $2 }
               if attachment = process_attachment(projects_to_search, dochash, user)
                 xpattachments << attachment
               end
             else
-              Rails.logger.error "Wrong format of document data :#{m.document.data}"
+              Rails.logger.error "Wrong format of document data: #{m.document.data}"
             end
           end          
         end        
