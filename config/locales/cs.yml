@@ -24,12 +24,10 @@ cs:
   label_enable_redmine_xapian: Povolit Xapian pro vyhledávání v souborech a repositářích
   label_index_database: Adresář obsahující databázi Xapianu
   label_stemming_text: "Nastavit jazyk pro stemming, výchozí je 'english'.
-                         Možné hodnoty jsou: %{languages} (vyber 'none' pro vypnutí
-                         stemmingu)"
+                         Možné hodnoty jsou: %{languages}"
   label_search2: Rozšířené vyhledávání
   text_search1: Tento plugin rozšiřuje vyhledávání Redminu o vyhledávání v souborech. Pro povolení Xapianu je potřeba vytvořit databázi pomocí omindex utility a nastavit index databézi v nastavení pluginu.  
-  label_stemming_lang: Jazyk stemmingu
-  label_enable_xapian_on_search: Povolit konfiguraci Xapianu na vyhledávacím formuláři
+  label_stemming_lang: Jazyk stemmingu  
   label_repository_search: Povolit vyhledávání v repositářích
   label_search_languages: Jazyky stemmingu na vyhledávacím formuláři
   label_stemming_strategy: Strategie stemmingu

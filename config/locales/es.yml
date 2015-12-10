@@ -24,12 +24,10 @@ es:
   label_enable_redmine_xapian: Habilitar xapian para búsquedas en ficheros and repositories
   label_index_database: Directorio que contiene las BD de xapian
   label_stemming_text: "Set the stemming language, the default is 'english'.
-                         Possible values are: %{languages} (pass 'none' to disable
-                         stemming)"
+                         Possible values are: %{languages}"
   label_search2: Búsqueda Extendida  
   text_search1: Este plugin, además de realizar las búsquedas habituales de redmine permite realizar búsquedas por contenido en los documentos adjuntos, ya sean páginas wiki, foros, documentos o peticiones.
-  label_stemming_lang: Stemming Language
-  label_enable_xapian_on_search: Habilitar configuración xapian en la búsqueda
+  label_stemming_lang: Stemming Language  
   label_repository_search: Enable repository search
   label_search_languages: Stemming languages on search screen
   label_stemming_strategy: Stemming strategy

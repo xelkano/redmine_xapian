@@ -24,12 +24,10 @@ ru:
   label_enable_redmine_xapian: Включить поисковую систему xapian, чтобы разрешить поиск в присоединённых файлах and repositories
   label_index_database: Каталог, содержащий базы данных Xapian
   label_stemming_text: "Установите язык стемминга, по умолчанию 'english'.
-                         Возможные значения are: %{languages} (Укажите 'none' для запрета 
-                         стемминга)"
+                         Возможные значения are: %{languages}"
   label_search2: Расширенный Поиск
   text_search1: Этот плагин делает то же самое, что и поиск Redmine, плюс к этому выполняет поиск в прсоединённых файлах. Для включения xapian Вам нужно построить базу данных с помощью утилиты omindex utility и сконфигурировать поисковую базу данных на странице настроек плагина  
-  label_stemming_lang: Язык стемминга
-  label_enable_xapian_on_search: Разрешить конфигурирование xapian на экране поиска
+  label_stemming_lang: Язык стемминга  
   label_repository_search: Enable repository search
   label_search_languages: Языки стемминга на экране поиска
   label_stemming_strategy: Стратегия стемминга

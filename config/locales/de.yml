@@ -24,12 +24,10 @@ de:
   label_enable_redmine_xapian: aktiviere die Suche auch für Dateianhänge und Repositories
   label_index_database: Verzeichnis für den Datenbank-Index
   label_stemming_text: "Stelle die Stemming Sprache ein, der Standard ist 'english'. 
-			Zulässige Werte sind: %{languages} (pass 'none' to disable
-			stemming)"
+			Zulässige Werte sind: %{languages}"
   label_search2: Erweiterte Suche
   text_search1: Diese Erweiterung ermöglicht die Standard Suche sowie zusätzlich die Suche in Dateien. Um die Dateisuche zu aktivieren ist es notwendig eine Suchdatenbank mit dem omindex Indexieierungswerkzeug erstellen zu lassen, welche zuvor für bestimmte Verzeichnisse konfiguriert wird. 
-  label_stemming_lang: Stemming Sprache  
-  label_enable_xapian_on_search: Zeige die Indizierungseinstellungen in der Suchmaske
+  label_stemming_lang: Stemming Sprache    
   label_repository_search: Enable repository search
   label_search_languages: Zeige die Sprachauswahl für das Stemming in der Suchmaske
   label_stemming_strategy: Stemming-Strategie  

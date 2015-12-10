@@ -24,12 +24,10 @@ en:
   label_enable_redmine_xapian: Enable xapian engine to allow searches on attachments and repositories
   label_index_database: Directory containing Xapian databases
   label_stemming_text: "Set the stemming language, the default is 'english'.
-                         Possible values are: %{languages} (pass 'none' to disable
-                         stemming)"
+                         Possible values are: %{languages}"
   label_search2: Extended Search
   text_search1: This plugin does same redmine search plus searches into attachment. To enable xapian you have to build database with omindex utility and configure index database on plugin settings page  
-  label_stemming_lang: Stemming Language
-  label_enable_xapian_on_search: Enable xapian config on search screen
+  label_stemming_lang: Stemming Language  
   label_repository_search: Enable repository search
   label_search_languages: Stemming languages on search screen
   label_stemming_strategy: Stemming strategy

@@ -24,12 +24,10 @@ eu:
   label_enable_redmine_xapian: Xapian bilaketa aktibatu
   label_index_database: Indize DB kokapena
   label_stemming_text: "Set the stemming language, the default is 'english'.
-                         Possible values are: %{languages} (pass 'none' to disable
-                         stemming)"
+                         Possible values are: %{languages}"
   label_search2: Bilaketa aurreratua 
   text_search1: Plugin honek adjuntuen barruan bilaketak egitea ahalbidetzen du. Adjuntuak wikietan, zereginetan, mezuetan edo dokumentuetan egon daitezke eta pluginak bilatu ditzake token batzuk zehaztuz.
-  label_stemming_lang: Stemming Language  
-  label_enable_xapian_on_search: Enable xapian config on search screen
+  label_stemming_lang: Stemming Language    
   label_repository_search: Enable repository search
   label_search_languages: Stemming languages on search screen
   label_stemming_strategy: Stemming strategy
