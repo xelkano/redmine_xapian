@@ -56,7 +56,7 @@ Now, go to the Redmine root directory and run bundle command to install required
 
 <pre>
 # cd /var/www/redmine
-# bundle
+# bundle install
 </pre>
 
 And after that restart the application server.
