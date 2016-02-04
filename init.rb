@@ -33,7 +33,7 @@ else
   Redmine::Plugin.register :redmine_xapian do
 	name 'Xapian search plugin'
 	author 'Xabier Elkano/Karel Pičman'
-  url 'https://github.com/xelkano/redmine_xapian'
+  url 'http://www.redmine.org/plugins/xapian_search'
   author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
