@@ -2,8 +2,8 @@
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
-# Copyright (C) 2010  Xabier Elkano
-# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+# Copyright (C) 2010    Xabier Elkano
+# Copyright (C) 2015-16 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -43,11 +43,11 @@ else
 	settings :partial => 'redmine_xapian_settings',
     :default => {
       'enable' => 'true',
-      'index_database' => '/var/tmp',
+      'index_database' => '/var/tmp/omindex',
       'stemming_lang' => 'english',
       'stemming_strategy' => 'STEM_SOME',
       'stem_on_search' => 'false',
-      'stem_langs' => ['english', 'spanish', 'german'] }
+      'stem_langs' => %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish) }
    end
 
    Redmine::Search.map do |search|
