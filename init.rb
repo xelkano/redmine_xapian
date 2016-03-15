@@ -37,7 +37,7 @@ else
   author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.6.4'
+	version '1.6.5'
 	requires_redmine :version_or_higher => '3.0.0'
 
 	settings :partial => 'redmine_xapian_settings',
@@ -47,7 +47,8 @@ else
       'stemming_lang' => 'english',
       'stemming_strategy' => 'STEM_SOME',
       'stem_on_search' => 'false',
-      'stem_langs' => %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish) }
+      'stem_langs' => %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish),
+      'save_search_scope' => 'false' }
    end
 
    Redmine::Search.map do |search|

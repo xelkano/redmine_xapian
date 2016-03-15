@@ -2,8 +2,8 @@
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
-# Copyright (C) 2010  Xabier Elkano
-# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+# Copyright (C) 2010    Xabier Elkano
+# Copyright (C) 2015-16 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -23,10 +23,7 @@
 eu:
   label_enable_redmine_xapian: Xapian bilaketa aktibatu
   label_index_database: Indize DB kokapena
-  label_stemming_text: "Set the stemming language, the default is 'english'.
-                         Possible values are: %{languages}"
-  label_search2: Bilaketa aurreratua 
-  text_search1: Plugin honek adjuntuen barruan bilaketak egitea ahalbidetzen du. Adjuntuak wikietan, zereginetan, mezuetan edo dokumentuetan egon daitezke eta pluginak bilatu ditzake token batzuk zehaztuz.
+  text_stemming: "Set the stemming language, the default is 'english'. Possible values are: %{languages}"  
   label_stemming_lang: Stemming Language    
   label_repository_search: Enable repository search
   label_search_languages: Stemming languages on search screen
@@ -39,8 +36,10 @@ eu:
   label_database_error: Database error! Please configure xapian.
   label_repofile: Repository
   label_repofile_plural: Repositories
-  label_stemming_text1: "This controls how the query parser will apply the stemming algorithm. The default value is STEM_NONE. The possible values are:"
-  label_stemming_text2: "STEM_NONE: Don't perform any stemming."
-  label_stemming_text3: "STEM_SOME: Search for stemmed forms of terms except for those which start with a capital letter, or are followed by certain characters (currently:'/@<>=*[{\"'), or are used with operators which need positional information. Stemmed terms are prefixed with 'Z'."
-  label_stemming_text4: "STEM_ALL: Search for stemmed forms of all words (note: no 'Z' prefix is added)."
-  label_stemming_text5: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.
+  text_stemming_info: "This controls how the query parser will apply the stemming algorithm. The default value is STEM_NONE. The possible values are:"
+  text_stemming_none: "STEM_NONE: Don't perform any stemming."
+  text_stemming_some: "STEM_SOME: Search for stemmed forms of terms except for those which start with a capital letter, or are followed by certain characters (currently:'/@<>=*[{\"'), or are used with operators which need positional information. Stemmed terms are prefixed with 'Z'."
+  text_stemming_all: "STEM_ALL: Search for stemmed forms of all words (note: no 'Z' prefix is added)."
+  text_stemming_info: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.
+  label_save_search_scope: Save the search scope
+  text_save_search_scope: The search options will be saved in the user's preferences when changed.

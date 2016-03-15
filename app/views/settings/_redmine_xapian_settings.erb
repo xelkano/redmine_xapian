@@ -40,7 +40,7 @@
   <%= content_tag(:label, l(:label_default_stemming_lang)) %>
   <%= select_tag('settings[stemming_lang]', options_for_select(stem_langs, @settings['stemming_lang']))%>
   <em class="info">
-    <%= l(:label_stemming_text, :languages => stem_langs.join(', ')) %> <%= "#{l(:label_default)}: #{stem_langs[2]}" %>
+    <%= l(:text_stemming, :languages => stem_langs.join(', ')) %> <%= "#{l(:label_default)}: #{stem_langs[2]}" %>
   </em>
 </p>
     
@@ -57,10 +57,18 @@
   <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME' %> <%= l(:label_stem_some) %><br/>
   <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL' %> <%= l(:label_stem_all) %><br/>
   <em class="info">
-    <%= l(:label_stemming_text1) %><br/>
-    &nbsp;&nbsp;<%= l(:label_stemming_text2) %><br/>
-    &nbsp;&nbsp;<%= l(:label_stemming_text3) %><br/>
-    &nbsp;&nbsp;<%= l(:label_stemming_text4) %><br/>
-  <%= l(:label_stemming_text5) %>
+    <%= l(:text_stemming_info) %><br/>
+    &nbsp;&nbsp;<%= l(:text_stemming_none) %><br/>
+    &nbsp;&nbsp;<%= l(:text_stemming_some) %><br/>
+    &nbsp;&nbsp;<%= l(:text_stemming_all) %><br/>
+  <%= l(:text_stemming_note) %>
+  </em>
+</p>
+
+<p>
+  <%= content_tag(:label, l(:label_save_search_scope)) %>
+  <%= check_box_tag 'settings[save_search_scope]', true, @settings['save_search_scope'] == 'true' %>
+  <em class="info">
+    <%= l(:text_save_search_scope) %>
   </em>
 </p>

@@ -2,8 +2,8 @@
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
-# Copyright (C) 2010  Xabier Elkano
-# Copyright (C) 2015  Karel Pičman <karel.picman@kontron.com>
+# Copyright (C) 2010    Xabier Elkano
+# Copyright (C) 2015-16 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -23,10 +23,7 @@
 cs:
   label_enable_redmine_xapian: Povolit Xapian pro vyhledávání v souborech a repositářích
   label_index_database: Adresář obsahující databázi Xapianu
-  label_stemming_text: "Nastavit jazyk pro stemming, výchozí je 'english'.
-                         Možné hodnoty jsou: %{languages}"
-  label_search2: Rozšířené vyhledávání
-  text_search1: Tento plugin rozšiřuje vyhledávání Redminu o vyhledávání v souborech. Pro povolení Xapianu je potřeba vytvořit databázi pomocí omindex utility a nastavit index databézi v nastavení pluginu.  
+  text_stemming: "Nastavit jazyk pro stemming, výchozí je 'english'. Možné hodnoty jsou: %{languages}"  
   label_stemming_lang: Jazyk stemmingu  
   label_repository_search: Povolit vyhledávání v repositářích
   label_search_languages: Jazyky stemmingu na vyhledávacím formuláři
@@ -39,8 +36,10 @@ cs:
   label_database_error: Chyba databáze! Zkonfigurujte Xapian.
   label_repofile: Repozitář
   label_repofile_plural: Repozitáře
-  label_stemming_text1: "Tímto se řídí jak parser dotazů použije stemovací algoritmus. Výchozí hodnota je STEM_NONE. Možné hodnoty jsou:"
-  label_stemming_text2: "STEM_NONE: Neaplikuj žádný steming."
-  label_stemming_text3: "STEM_SOME: Použij stemování pro výrazy, kromě těch, které začínají velkým písmenem nebo jsou následovány určitýmy znaky('/@<>=*[{\"') nebo jsou použité s operátory, které vyžadují informaci o pozici. Stemované výrazy začínají písmenem 'Z'."
-  label_stemming_text4: "STEM_ALL: Hledej stemové výrazy ve všech slovech (prefix 'Z' není přidán)."
-  label_stemming_text5: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.
+  text_stemming_info: "Tímto se řídí jak parser dotazů použije stemovací algoritmus. Výchozí hodnota je STEM_NONE. Možné hodnoty jsou:"
+  text_stemming_none: "STEM_NONE: Neaplikuj žádný steming."
+  text_stemming_some: "STEM_SOME: Použij stemování pro výrazy, kromě těch, které začínají velkým písmenem nebo jsou následovány určitýmy znaky('/@<>=*[{\"') nebo jsou použité s operátory, které vyžadují informaci o pozici. Stemované výrazy začínají písmenem 'Z'."
+  text_stemming_all: "STEM_ALL: Hledej stemové výrazy ve všech slovech (prefix 'Z' není přidán)."
+  text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.
+  label_save_search_scope: Save the search scope
+  text_save_search_scope: The search options will be saved in the user's preferences when changed.
