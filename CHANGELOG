@@ -4,7 +4,8 @@ Changelog for Redmine Xapian
 1.6.5 *2016-??-??*
 ------------------
 
-  Search options saved in the user's preferences. 
+  Search options saved in the user's preferences.
+  Quick jump to DMSF documents (Dxxx)
 
 * New: #67 - Search options saved in the user's preferences.  
 

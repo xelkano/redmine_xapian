@@ -74,6 +74,13 @@ module RedmineXapian
           redirect_to issue_path($2)
           return
         end
+        # A DMSF extension to quick jump to a document by its ID
+        if defined?(DmsfFile) == 'constant'
+          if @question.match(/^D(\d+)$/) && DmsfFile.visible.find_by_id($1.to_i)
+            redirect_to dmsf_file_path($1)
+            return
+          end
+        end
         # Plugin change end
 
         projects_to_search =
