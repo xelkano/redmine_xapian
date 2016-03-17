@@ -112,3 +112,9 @@ After files indexing and the plugin setup in the settings you can search attachm
 To perform searches in a particular module such as Files, Documents,... it is 
 mandatory to enable these modules in your projects and to have corresponding 
 permissions view_*; Be sure it is checked.
+
+There is a one hook allowing plugins to implement a quick jump to an object:
+
+<pre>
+:controller_search_quick_jump
+</pre>

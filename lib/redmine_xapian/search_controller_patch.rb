@@ -69,15 +69,11 @@ module RedmineXapian
         end
         
         # Plugin change start
-        # A Kontron extension to quick jump to an issue by the identifier
-        if @question.match(/^(BUG|FEA)(\d+)$/) && Issue.visible.find_by_id($2.to_i)          
-          redirect_to issue_path($2)
-          return
-        end
-        # A DMSF extension to quick jump to a document by its ID
-        if defined?(DmsfFile) == 'constant'
-          if @question.match(/^D(\d+)$/) && DmsfFile.visible.find_by_id($1.to_i)
-            redirect_to dmsf_file_path($1)
+        # A hook allowing plugins to implement a quick jump to an object
+        ret = call_hook(:controller_search_quick_jump, { :question => @question })
+        ret.each do |path|
+          if path
+            redirect_to path
             return
           end
         end
