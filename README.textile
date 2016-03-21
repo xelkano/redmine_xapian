@@ -35,10 +35,10 @@ From "Omega documentation":http://xapian.org/docs/omega/overview.html:
     * DjVu files (.djv, .djvu) if djvutxt is available
     * XPS files (.xps) if unzip is available
 
-On debian you can use this command to install required indexing tools:
+On Debian you can use following command to install required indexing tools:
 
 <pre>
-# sudo apt-get install xapian-omega libxapian-dev xpdf xpdf-utils antiword unzip \
+# sudo apt-get install xapian-omega libxapian-dev xpdf poppler-utils antiword unzip \
 catdoc libwpd-tools libwps-tools gzip unrtf catdvi djview djview3 uuid uuid-dev
 </pre>
 
