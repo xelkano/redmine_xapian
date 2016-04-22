@@ -66,11 +66,18 @@ First at all, go to the Redmine interface and in the plugins section configure t
 To use stemmed languages in searches, Xapian needs to generate stemmed forms for each language and store them in a database.
 Before you can use the plugin, you have to populate the Xapian databases for each stemmed language you want to use. From plugin version 1.6 a new script (xapian_indexer.rb) is included in the extra directory that is use to populate Xapian databases. This script is a wrapper for omindex binary, so omindex should not to be used anymore.
 
-First edit the script file and configure the required variables, they are self-explanatory and most of them can be specified and overwritten through the command line. 
+First edit the script file and configure the required variables, they are self-explanatory and most of them can be specified and overwritten through the command line.
 
 To view command line help simply run "xapian_index.rb -h". To view the complete process you can run it using verbose flag (-v).
 
 Note, that the first time you index a repository it can take a long time. After the first indexation the process is much faster.
+You have to take into account that the script needs a defined repository identifier for all repositories that will be indexed. The repository identifier is not required in redmine and can have null value for some of the repositories, so before indexing a repository you have to be sure that the repository has a defined identifier, otherwise the script will ignore it.
+
+You can run this SQL statement in your database for setting up a default identifier for your repositories:
+
+<pre>
+mysql> UDATE repositories SET identifier = 'main' WHERE identifier IS NULL;
+</pre>
 
 Examples running the script:
 
@@ -109,8 +116,8 @@ Once you have tested the script functionality, you can configure it for running 
 
 After files indexing and the plugin setup in the settings you can search attachments by name and content.
 
-To perform searches in a particular module such as Files, Documents,... it is 
-mandatory to enable these modules in your projects and to have corresponding 
+To perform searches in a particular module such as Files, Documents,... it is
+mandatory to enable these modules in your projects and to have corresponding
 permissions view_*; Be sure it is checked.
 
 There is a one hook allowing plugins to implement a quick jump to an object:
