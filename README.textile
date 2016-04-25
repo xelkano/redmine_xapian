@@ -73,10 +73,10 @@ To view command line help simply run "xapian_index.rb -h". To view the complete 
 Note, that the first time you index a repository it can take a long time. After the first indexation the process is much faster.
 You have to take into account that the script needs a defined repository identifier for all repositories that will be indexed. The repository identifier is not required in redmine and can have null value for some of the repositories, so before indexing a repository you have to be sure that the repository has a defined identifier, otherwise the script will ignore it.
 
-You can run this SQL statement in your database for setting up a default identifier for your repositories:
+There is a rake task for setting up a default identifier for your repositories:
 
 <pre>
-mysql> UDATE repositories SET identifier = 'main' WHERE identifier IS NULL;
+bundle exec rake redmine:xapian_set_identifiers identifier='main' RAILS_ENV="production"
 </pre>
 
 Examples running the script:
