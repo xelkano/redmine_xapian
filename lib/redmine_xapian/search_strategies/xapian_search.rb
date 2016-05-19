@@ -89,6 +89,7 @@ module RedmineXapian
           if(xapian_file == 'Repofile')            
             if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
               dochash = { :date => $1, :sample => $2, :url => URI.unescape($3) }
+              # Rails.logger.debug "Xapian data match on #{m.document.data}"
               if repo_file = process_repo_file(projects_to_search, dochash, user, i)                                  
                 xpattachments << repo_file
                 i = i + 1
@@ -153,16 +154,23 @@ module RedmineXapian
         Rails.logger.debug "Repository date: #{dochash[:date]}"
         Rails.logger.debug "Repository sample field: #{dochash[:sample]}"        
         repository_attachment = nil
-        if dochash[:url] =~ /^\/projects\/(.+)\/repository\/([\w\.]*).*\/entry\/(.*)$/
+        # if dochash[:url] =~ /^\/projects\/(.+)\/repository\/?(.*)\/entry\/(.*)$/
+          if dochash[:url] =~ /^\/projects\/(.+)\/repository\/(?:revisions\/(.*)\/|([a-zA-Z_0-9]*)\/)?(?:revisions\/(.*))?\/?entry\/(?:(?:branches|tags)\/(.+?)\/)?(.+?)(?:\?rev=(.*))?$/
           repo_project_identifier = $1
           Rails.logger.debug "Project identifier: #{repo_project_identifier}"
-          repo_identifier = $2
+          repo_identifier = $3
           Rails.logger.debug "Repository identifier: #{repo_identifier}"
-          repo_filename = $3
+          repo_filename = $6
           Rails.logger.debug "Repository file: #{repo_filename}"
+          repo_revision = (!$2.nil? ? $2 : "") + (!$4.nil? ? $4 : "") + (!$5.nil? ? $5 : "") +(!$7.nil? ? $7 : "")
+          Rails.logger.debug "Repository revision: #{repo_revision}"
           project = Project.where(:identifier => repo_project_identifier).first
-          if project            
-            repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project            
+          if project
+            if repo_identifier != ""           
+              repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project
+            else
+              repository = Repository.where(:project_id => project.id).first if project
+            end            
             if repository
               Rails.logger.debug "Repository found #{repository.identifier}"
               projects = [] << projects if projects.is_a?(Project)
@@ -182,10 +190,12 @@ module RedmineXapian
                   repository_attachment.project_id = project.id
                   repository_attachment.description = dochash[:sample]
                   repository_attachment.repository_id = repository.id
-                  repository_attachment.id = id	          
+                  repository_attachment.id = id	      
+                  repository_attachment.url = dochash[:url]
+	          repository_attachment.revision = repo_revision
                   h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s, 
                     :project_id => repository_attachment.project_id, :description => repository_attachment.description,
-                    :repository_id => repository_attachment.repository_id }                          
+                    :repository_id => repository_attachment.repository_id, :url => repository_attachment.url, :revision => repository_attachment.revision}                          
                   Redmine::Search.cache_store.write("Repofile-#{repository_attachment.id}", h.to_s)               
                 else
                   Rails.logger.warn 'No projects to search in'

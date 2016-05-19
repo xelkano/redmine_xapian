@@ -89,9 +89,10 @@ module RedmineXapian
           # Plugin change end
         end
 
-        @scope = @object_types.select {|t| params[t]}        
-        @scope = @object_types if @scope.empty?        
-
+        @scope = @object_types.select {|t| params[t]} 
+        # Plugin change start - do not search repositories by default.		
+        @scope = @object_types.select {|t|"repofiles" != t} if @scope.empty?        
+        # Plugin change end
         fetcher = Redmine::Search::Fetcher.new(
           @question, User.current, @scope, projects_to_search,
           :all_words => @all_words, :titles_only => @titles_only, :attachments => @search_attachments, :open_issues => @open_issues,

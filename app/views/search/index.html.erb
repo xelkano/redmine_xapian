@@ -20,7 +20,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 %>
-
+<% content_for :header_tags do %>
+   <%= stylesheet_link_tag "redmine_xapian.css", :plugin => "redmine_xapian", :media => "screen" %>
+<% end %>
 <h2><%= l(:label_search) %></h2>
 
 <%= form_tag({}, :method => :get, :id => 'search-form') do %>
@@ -70,8 +72,10 @@
           <% # Plugin change start %>
           <%#= content_tag('span', h(e.project), :class => 'project') unless @project == e.project %>
           <%= content_tag('span', link_to(e.project, project_path(e.project)), :class => 'project') unless @project == e.project  %>
-          <% #Project change end %>
-          <%= link_to(highlight_tokens(e.event_title.truncate(255), @tokens), e.event_url) %>
+          <%= content_tag('span', h(e.format_identifier), :class => 'identifier') if defined?(e.format_identifier) && !e.format_identifier.empty? %> 
+          <% # Plugin change end %>
+          <%= link_to(highlight_tokens(e.event_title.truncate(255).split(': ').last, @tokens), e.event_url) %> 
+          
         <% # Plugin change start %>
         <% if e.event_type == 'attachment' %>
           <%= link_to_container(e) %>
