@@ -1,0 +1,12 @@
+/* Repository Search Branch/ Rev */
+#search-results .identifier {
+    background-color: #9DCBFA;
+    color: #FFF;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 11px;
+}
+
+dt.mercurial, dt.subversion, dt.git, dt.gitremote {
+	background-image: url('../images/repo.png');
+}

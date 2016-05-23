@@ -49,8 +49,9 @@ $verbose      = 0
 # Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
 $stem_langs	= ['english']
 
-# Project identifiers that will be indexed eg. [ 'prj_id1', 'prj_id2' ]
-$projects	= [ 'prj_id1', 'prj_id2' ]
+# Project identifiers that will be indexed eg. [ 'prj_id1', 'prj_id2' ]. 
+# Use [] to index all projects
+$projects	= []
 
 # Temporary directory for indexing, it can be tmpfs
 $tempdir	= '/tmp'
@@ -112,7 +113,7 @@ FORMAT_HANDLERS = {
 require 'optparse'
 
 VERSION = '0.1'
-SUPPORTED_SCM = %w(Subversion Darcs Mercurial Bazaar Git Filesystem)
+SUPPORTED_SCM = %w(Subversion Darcs Mercurial Bazaar Git GitRemote Filesystem)
 
 optparse = OptionParser.new do |opts|
   opts.banner = 'Usage: xapian_indexer.rb [OPTIONS...]'
@@ -233,10 +234,10 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
   return if entries.nil? || entries.size < 1
   log "Walk entries size: #{entries.size}"
   entries.each do |entry|
-    log "Walking into: #{entry.lastrev.time}"
+    log "Walking into: #{entry.lastrev.time}" if !entry.lastrev.nil? 
     if entry.is_dir?
       walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
-    elsif entry.is_file?
+    elsif entry.is_file? && !entry.lastrev.nil?
       add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path, 
         entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
     end
@@ -245,20 +246,24 @@ end
 
 def indexing_all(databasepath, indexconf, project, repository)  
   log "Indexing all: #{repo_name(repository)}"
-  if repository.branches
-    repository.branches.each do |branch|
-      log "Walking in branch: #{repo_name(repository)} - #{branch}"
-      walk(databasepath, indexconf, project, repository, branch, repository.entries(nil, branch))
+  begin
+    if repository.branches
+      repository.branches.each do |branch|
+        log "Walking in branch: #{repo_name(repository)} - #{branch}"
+        walk(databasepath, indexconf, project, repository, branch, repository.entries(nil, branch))
+      end
+    else
+      log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
+      walk(databasepath, indexconf, project, repository, nil, repository.entries(nil, nil))
     end
-  else
-    log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
-    walk(databasepath, indexconf, project, repository, nil, repository.entries(nil, nil))
-  end
-  if repository.tags
-    repository.tags.each do |tag|
-      log "Walking in tag: #{repo_name(repository)} - #{tag}"
-      walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
+    if repository.tags
+      repository.tags.each do |tag|
+        log "Walking in tag: #{repo_name(repository)} - #{tag}"
+        walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
+      end
     end
+  rescue Exception => e
+    log "#{repo_name(repository)} encountered an error and will be skipped: #{e.message}", true
   end
 end
 
@@ -498,6 +503,9 @@ unless $onlyfiles
       exit 1
     end     
   end  
+  unless $projects.count > 0
+    $projects = Project.visible.active.has_module(:repository).pluck(:identifier).to_a
+  end
   $projects.each do |identifier|
     begin            
       project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first      

@@ -28,7 +28,9 @@ class Repofile < ActiveRecord::Base
   column :project_id,   :integer
   column :filename, 	:string
   column :repository_id, :integer
-  
+  column :url, :string
+  column :revision, :string
+
   acts_as_searchable :columns => ["#{table_name}.filename", "#{table_name}.description"],
     :permission => :browse_repository, :date_column => :created_on, :project_key => :project_id
 
@@ -37,6 +39,8 @@ class Repofile < ActiveRecord::Base
   attr_accessor :project_id
   attr_accessor :filename
   attr_accessor :repository_id   
+  attr_accessor :url 
+  attr_accessor :revision   
 
   def event_title    
     self.filename
@@ -47,12 +51,14 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_url   
-    { :controller => 'repositories',
-			:action => 'entry',
-			:id => self.project_id,
-			:repository_id => self.repository_id,			
-			:path => self.filename,
-			:only_path => true }
+    #{ :controller => 'repositories',
+   #			:action => 'entry',
+   #			:id => self.project_id,
+   #			:repository_id => self.repository_id,			
+   #			:path => self.filename,
+   #
+   #			:only_path => true }
+   self.url
   end
 
   def event_description
@@ -77,6 +83,14 @@ class Repofile < ActiveRecord::Base
     @repository
   end
   
+  def identifier
+    self.revision.to_s
+  end  
+
+  def format_identifier
+      identifier
+  end
+
   def self.search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})      
     r = self.search(tokens, user, projects, options)        
     r.map{ |x| [x[0].to_i, x[1]] }
@@ -96,6 +110,8 @@ class Repofile < ActiveRecord::Base
         repofile.project_id = attributes[:project_id]
         repofile.description = attributes[:description]
         repofile.repository_id = attributes[:repository_id]
+        repofile.url = attributes[:url]
+        repofile.revision = attributes[:revision]
         results << repofile
         Redmine::Search.cache_store.delete(key)
       end
