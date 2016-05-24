@@ -111,7 +111,7 @@ module RedmineXapian
           # Plugin change end
         end
 
-        @scope = @object_types.select {|t| params[t]}        
+        @scope = @object_types.select {|t| params[t]} 
         # Plugin change start
         if Setting.plugin_redmine_xapian['save_search_scope'] == 'true'
           if @scope.empty?
