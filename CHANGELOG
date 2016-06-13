@@ -1,13 +1,21 @@
 Changelog for Redmine Xapian
 ==========================
 
-1.6.5 *2016-??-??*
+1.6.5 *2016-06-13*
 ------------------
 
   Search options saved in the user's preferences.
   Quick jump to DMSF documents (Dxxx)
+  Fixed an unhandled exception when repo doesn't exist on indexing
+  Fixed an exception when walking into an entry without the last revision
+  Allow walking all active project repositories
+  Allow searching repositories that don't have an identifier
+  Attempt to find revisions/ branches/ tags in docdash url and pull into repofile model
+  Add enhanced styling for repo search results - branch/rev/tag bubbles
+  Pass indexed url to the repofile model instead of rebuilding the url (issue with in-line url branch names)
 
-* New: #67 - Search options saved in the user's preferences.  
+* Bug: #68 - Search Repository not returning results in redmine 3.2
+* New: #67 - Search options saved in the user's preferences.
 
 1.6.4 *2015-12-18*
 ------------------

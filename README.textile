@@ -110,9 +110,8 @@ Indexing repositories of some projects:
 Once you have tested the script functionality, you can configure it for running every day at nights keeping your Xapian database up to date, for example:
 
 <pre>
-@daily * * * * /usr/bin/xapian_indexer.rb
+@daily www-data ruby /usr/bin/xapian_indexer.rb
 </pre>
-
 
 After files indexing and the plugin setup in the settings you can search attachments by name and content.
 
