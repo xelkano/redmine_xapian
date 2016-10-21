@@ -1,6 +1,15 @@
 Changelog for Redmine Xapian
 ==========================
 
+1.6.6 *2016-10-21*
+------------------
+
+  Maintenance release
+
+* Bug: #76 - Index all repositories
+* Bug: #74 - Search results for tickets truncated?
+
+
 1.6.5 *2016-06-13*
 ------------------
 
