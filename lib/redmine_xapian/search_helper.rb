@@ -23,20 +23,22 @@ module RedmineXapian
   module SearchHelper
     
     def link_to_container(attachment)
+      link = ''
       case attachment.container_type        
         when 'Message'
-          link_to(" - #{l(:label_message)}: #{attachment.container.subject}".truncate(255),
+          link = link_to("#{l(:label_message)}: #{attachment.container.subject}".truncate(255),
             board_message_path(attachment.container.board, attachment.container))
         when 'WikiPage'
-          link_to(" - #{l(:label_wiki)}: #{attachment.container.title}".truncate(255),
+          link = link_to("#{l(:label_wiki)}: #{attachment.container.title}".truncate(255),
             wiki_page_path(attachment.container))
         when 'Issue'
-          link_to(" - #{l(:label_issue)}: #{attachment.container.subject}".truncate(255),
+          link = link_to("#{l(:label_issue)}: #{attachment.container.subject}".truncate(255),
             issue_path(attachment.container))        
         when 'Project'
-          link_to(" - #{l(:label_file_plural)}",
+          link = link_to("#{l(:label_file_plural)}",
             project_files_path(attachment.container))
       end
+      link + ' / '
     end  
     
   end

@@ -73,14 +73,14 @@
           <% # Plugin change start %>
           <%#= content_tag('span', e.project, :class => 'project') unless @project == e.project %>
           <%= content_tag('span', link_to(e.project, project_path(e.project)), :class => 'project') unless @project == e.project  %>
+          <% if e.event_type == 'attachment' %>
+              <%= link_to_container(e) %>
+          <% else %>
+              <%= call_hook(:view_search_index_container, :object => e) %>
+          <% end %>
           <%= content_tag('span', h(e.format_identifier), :class => 'identifier') if defined?(e.format_identifier) && !e.format_identifier.empty? %> 
           <% # Plugin change end %>
           <%= link_to(highlight_tokens(e.event_title.truncate(255), @tokens), e.event_url) %>
-          <% # Plugin change start %>
-          <% if e.event_type == 'attachment' %>
-            <%= link_to_container(e) %>
-          <% end %>
-        <% # Plugin change end %>
         </dt>
         <dd><span class="description"><%= highlight_tokens(e.event_description, @tokens) %></span>
         <span class="author"><%= format_time(e.event_datetime) %></span></dd>

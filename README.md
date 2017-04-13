@@ -1,15 +1,16 @@
-h1. Redmine Xapian search plugin
+Redmine Xapian search plugin
+============================
 
-The current version of Redmine Xapian is **1.6.6**
+The current version of Redmine Xapian is **1.6.7**
 With this plugin you will be able to make searches by file name and by strings inside your documents through the Xapian search engine.
 This plugin can also index the files located in your repositories.
 This plugin replaces search controller, its view and search methods.
 
-h1. 1.  Installation and Setup
+## 1.  Installation and Setup
 
 A copy of the plugin can be downloaded from  Github at https://github.com/xelkano/redmine_xapian/downloads
 
-h2. 1.1. Required packages
+### 1.1. Required packages
 
 Redmine >= 3.0
 
@@ -37,29 +38,29 @@ From "Omega documentation":http://xapian.org/docs/omega/overview.html:
 
 On Debian you can use following command to install required indexing tools:
 
-<pre>
-# sudo apt-get install xapian-omega libxapian-dev xpdf poppler-utils antiword unzip \
+```
+sudo apt-get install xapian-omega libxapian-dev xpdf poppler-utils antiword unzip \
 catdoc libwpd-tools libwps-tools gzip unrtf catdvi djview djview3 uuid uuid-dev
-</pre>
+```
 
-h2. 1.2. Plugin installation
+### 1.2. Plugin installation
 
 Install redmine_xapian into the plugins directory with:
 
-<pre>
-# cd redmine/plugins
-# git clone https://github.com/xelkano/redmine_xapian.git
-# cd ..
-# bundle install
-# bundle exec rake redmine:plugins:migrate RAILS_ENV="production"
-</pre>
+```
+cd redmine/plugins
+git clone https://github.com/xelkano/redmine_xapian.git
+cd ..
+bundle install
+bundle exec rake redmine:plugins:migrate RAILS_ENV="production"
+```
 
 And after that restart the application server.
 
 Now, you can see new check boxes "Files" and "Repositories" on search screen, those allows you to search attachments by file name and its contents.
 Xapian plugin checks for ruby bindings before its startup. If the plugin can not find them, it is not activated and the following message is going to appear in Redmine log “REDMAIN_XAPIAN ERROR: No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby" If you see this message, please make sure that Xapian library are correctly installed for your ruby environment.
 
-h2. 1.3. Setup
+### 1.3. Setup
 
 First at all, go to the Redmine interface and in the plugins section configure the plugin. It's very important to set up correctly the directory that will contain the Xapian databases.
 
@@ -75,43 +76,43 @@ You have to take into account that the script needs a defined repository identif
 
 There is a rake task for setting up a default identifier for your repositories:
 
-<pre>
+```
 bundle exec rake redmine:xapian_set_identifiers identifier='main' RAILS_ENV="production"
-</pre>
+```
 
 Examples running the script:
 
 Run the script based in its configuration in verbose mode, index repositories and files:
 
-<pre>
-# ruby xapian_indexer.rb -v
-</pre>
+```
+ruby xapian_indexer.rb -v
+```
 
 Only index redmine files:
 
-<pre>
-# ruby xapian_indexer.rb -v -f
-</pre>
+```
+ruby xapian_indexer.rb -v -f
+```
 
 Only index repositories:
 
-<pre>
-# xapian_indexer.rb -v -r
-</pre>
+```
+xapian_indexer.rb -v -r
+```
 
 Indexing repositories of some projects:
 
-<pre>
-# xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
-</pre>
+```
+xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
+```
 
-+Configure a cron task for automatic indexing+
+**Configure a cron task for automatic indexing**
 
 Once you have tested the script functionality, you can configure it for running every day at nights keeping your Xapian database up to date, for example:
 
-<pre>
+```
 @daily www-data ruby /usr/bin/xapian_indexer.rb
-</pre>
+```
 
 After files indexing and the plugin setup in the settings you can search attachments by name and content.
 
@@ -119,8 +120,61 @@ To perform searches in a particular module such as Files, Documents,... it is
 mandatory to enable these modules in your projects and to have corresponding
 permissions view_*; Be sure it is checked.
 
-There is a one hook allowing plugins to implement a quick jump to an object:
+### Hooks
 
-<pre>
+There are a few hooks to customize the Xapian search plugin behaviour in your onw plugin:
+
+#### Quick jump to an object
+
+```
 :controller_search_quick_jump
-</pre>
+```
+
+An example of a direct jump to a document by entering D{ID} in DMSF plugin
+
+```
+    class ControllerSearchHook < RedmineDmsf::Hooks::Listener
+                        
+      def controller_search_quick_jump(context={})
+        if context.is_a?(Hash) 
+          question = context[:question]
+          if question.present?
+            if question.match(/^D(\d+)$/) && DmsfFile.visible.find_by_id($1.to_i)
+              return { :controller => 'dmsf_files', :action => 'show', :id => $1.to_i }
+            end
+          end
+        end        
+      end      
+                  
+    end
+```
+
+#### Parent container in searched results
+
+```
+:view_search_index_container
+```
+
+An example of displaying the parent folder of the searched document in DMSF plugin
+
+``` 
+    class ViewSearchFormHook < Redmine::Hook::ViewListener
+
+      def view_search_index_container(context={})
+        if context && context[:object].is_a?(DmsfFile)
+          dmsf_file = context[:object]
+          title = ''
+          if dmsf_file.dmsf_folder_id
+            dmsf_folder = DmsfFolder.find_by_id dmsf_file.dmsf_folder_id
+            title = dmsf_folder.title if dmsf_folder
+          else
+            title = dmsf_file.project.name
+          end
+          link_to(h(title),
+      dmsf_folder_path(:id => dmsf_file.project, :folder_id => dmsf_file.dmsf_folder_id),
+            :class => 'icon icon-folder') + ' / '
+        end
+      end
+
+    end
+```

@@ -144,8 +144,9 @@ module RedmineXapian
           @question = ""
         end
         render :layout => false if request.xhr?  
-        end
       end
+
+    end
     
   end
 end
