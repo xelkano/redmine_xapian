@@ -372,7 +372,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
   uri = generate_uri(project, repository, identifier, path)
   return unless uri
   text = nil
-  if Redmine::MimeType.is_type?('text', path) || (type == 'js')
+  if Redmine::MimeType.is_type?('text', path) || (%(js msg eml).include?(type))
     text = repository.cat(path, identifier)
   else
     fname = path.split('/').last.tr(' ', '_')
