@@ -192,7 +192,7 @@ end
 
 def supported_mime_type(entry)
   mtype = Redmine::MimeType.of(entry)    
-  return MIME_TYPES.include?(mtype) || Redmine::MimeType.is_type?('text', entry) || (mtype == 'application/javascript')  
+  return MIME_TYPES.include?(mtype) || Redmine::MimeType.is_type?('text', entry)
 end
 
 def add_log(repository, changeset, status, message = nil)
@@ -372,7 +372,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
   uri = generate_uri(project, repository, identifier, path)
   return unless uri
   text = nil
-  if Redmine::MimeType.is_type?('text', path) || (%(js msg eml).include?(type))
+  if Redmine::MimeType.is_type?('text', path) || (%(js).include?(type))
     text = repository.cat(path, identifier)
   else
     fname = path.split('/').last.tr(' ', '_')
