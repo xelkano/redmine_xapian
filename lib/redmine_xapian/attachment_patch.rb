@@ -92,7 +92,7 @@ module RedmineXapian
             .where(sql, Project::STATUS_ACTIVE).scoping do             
               where(tokens_condition(search_data)).scoping do                                
                 results = where(search_data.limit_options)                  
-                  .uniq
+                  .distinct
                   .pluck(searchable_options[:date_column], :id)                    
               end            
             end
@@ -109,7 +109,7 @@ module RedmineXapian
               .where(sql, Project::STATUS_ACTIVE).scoping do             
                 where(tokens_condition(search_data)).scoping do                                
                   results = where(search_data.limit_options)                    
-                    .uniq
+                    .distinct
                     .pluck(searchable_options[:date_column], :id)                    
                 end            
               end
@@ -126,7 +126,7 @@ module RedmineXapian
               .where(sql, Project::STATUS_ACTIVE).scoping do             
                 where(tokens_condition(search_data)).scoping do                                
                   results = where(search_data.limit_options)                    
-                    .uniq
+                    .distinct
                     .pluck(searchable_options[:date_column], :id)                    
                 end            
               end
@@ -141,7 +141,7 @@ module RedmineXapian
           .where(sql, Project::STATUS_ACTIVE).scoping do            
               where(tokens_condition(search_data)).scoping do                                
                 results = where(search_data.limit_options)                  
-                  .uniq
+                  .distinct
                   .pluck(searchable_options[:date_column], :id)                    
               end
             end                            
