@@ -69,7 +69,7 @@
     <h3><%= l(:label_result_plural) %> (<%= @result_count %>)</h3>
     <dl id="search-results">
       <% @results.each do |e| %>
-        <dt class="<%= e.event_type %>">
+          <dt class="<%= e.event_type %> icon icon-<%= e.event_type %>">
           <% # Plugin change start %>
           <%#= content_tag('span', e.project, :class => 'project') unless @project == e.project %>
           <%= content_tag('span', link_to(e.project, project_path(e.project)), :class => 'project') unless @project == e.project  %>
