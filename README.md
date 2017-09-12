@@ -2,19 +2,20 @@ Redmine Xapian search plugin
 ============================
 
 The current version of Redmine Xapian is **1.6.7**
-With this plugin you will be able to make searches by file name and by strings inside your documents through the Xapian search engine.
-This plugin can also index the files located in your repositories.
-This plugin replaces search controller, its view and search methods.
+With this plugin you will be able to make searches by file name and by strings inside your attachments through the Xapian 
+search engine (https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
+replaces search controller, its view and search methods.
 
 ## 1.  Installation and Setup
 
-A copy of the plugin can be downloaded from  Github at https://github.com/xelkano/redmine_xapian/downloads
+A copy of the plugin can be downloaded from  Github at https://github.com/xelkano/redmine_xapian/downloads.
 
 ### 1.1. Required packages
 
 Redmine >= 3.0
 
-To use "xapian":http://xapian.org search engine you must install libxapian-ruby and xapian-omega packages (on Ubuntu). To index some files with omega you may have to install some other packages like xpdf, antiword, ...
+To use the full-text search engine you must install ruby-xapian and xapian-omega packages. See https://xapian.org
+ for details. To index some files with omindex you may have to install some other packages like xpdf, antiword, ...
 
 From "Omega documentation":http://xapian.org/docs/omega/overview.html:
 
@@ -74,22 +75,33 @@ bundle exec rake redmine:plugins:migrate RAILS_ENV="production"
 
 And after that restart the application server.
 
-Now, you can see new check boxes "Files" and "Repositories" on search screen, those allows you to search attachments by file name and its contents.
-Xapian plugin checks for ruby bindings before its startup. If the plugin can not find them, it is not activated and the following message is going to appear in Redmine log “REDMAIN_XAPIAN ERROR: No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby" If you see this message, please make sure that Xapian library are correctly installed for your ruby environment.
+Now, you can see new check boxes "Files" and "Repositories" on search screen, those allows you to search attachments by 
+file name and its contents. Xapian plugin checks for ruby bindings before its startup. If the plugin can not find them,
+it is not activated and the following message is going to appear in Redmine log “No Xapian search engine interface for 
+Ruby installed" If you see this message, please make sure that a Xapian search engine interface is installed.
 
 ### 1.3. Setup
 
-First at all, go to the Redmine interface and in the plugins section configure the plugin. It's very important to set up correctly the directory that will contain the Xapian databases.
+First at all, go to the Redmine interface and in the plugins section configure the plugin. It's very important to set up 
+correctly the directory that will contain the Xapian databases.
 
 To use stemmed languages in searches, Xapian needs to generate stemmed forms for each language and store them in a database.
-Before you can use the plugin, you have to populate the Xapian databases for each stemmed language you want to use. From plugin version 1.6 a new script (xapian_indexer.rb) is included in the extra directory that is use to populate Xapian databases. This script is a wrapper for omindex binary, so omindex should not to be used anymore.
+Before you can use the plugin, you have to populate the Xapian databases for each stemmed language you want to use. 
+From plugin version 1.6 a new script (xapian_indexer.rb) is included in the extra directory that is use to populate Xapian
+databases. This script is a wrapper for omindex binary, so omindex should not to be used anymore.
 
-First edit the script file and configure the required variables, they are self-explanatory and most of them can be specified and overwritten through the command line.
+First edit the script file and configure the required variables, they are self-explanatory and most of them can be 
+specified and overwritten through the command line.
 
-To view command line help simply run "xapian_index.rb -h". To view the complete process you can run it using verbose flag (-v).
+To view command line help simply run "xapian_index.rb -h". To view the complete process you can run it using verbose 
+flag (-v).
 
-Note, that the first time you index a repository it can take a long time. After the first indexation the process is much faster.
-You have to take into account that the script needs a defined repository identifier for all repositories that will be indexed. The repository identifier is not required in redmine and can have null value for some of the repositories, so before indexing a repository you have to be sure that the repository has a defined identifier, otherwise the script will ignore it.
+Note, that the first time you index a repository it can take a long time. After the first indexation the process is much 
+faster.
+You have to take into account that the script needs a defined repository identifier for all repositories that will be 
+indexed. The repository identifier is not required in redmine and can have null value for some of the repositories, so 
+before indexing a repository you have to be sure that the repository has a defined identifier, otherwise the script 
+will ignore it.
 
 There is a rake task for setting up a default identifier for your repositories:
 
@@ -117,15 +129,16 @@ Only index repositories:
 xapian_indexer.rb -v -r
 ```
 
-Indexing repositories of some projects:
+Indexing repositories of some projects (valid for repositories indexing only):
 
 ```
 xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
 ```
 
-**Configure a cron task for automatic indexing**
+**Configure a cron task for an automatic indexing**
 
-Once you have tested the script functionality, you can configure it for running every day at nights keeping your Xapian database up to date, for example:
+Once you have tested the script functionality, you can configure it for running every day at nights keeping your Xapian
+database up to date, for example:
 
 ```
 @daily www-data ruby /usr/bin/xapian_indexer.rb

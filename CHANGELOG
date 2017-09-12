@@ -1,6 +1,21 @@
 Changelog for Redmine Xapian
 ==========================
 
+1.6.7 *2017-10-01*
+------------------
+
+Xapian bindings dependency changed
+
+IMPORTANT
+
+The plugin is independent of the gem xapian-full-alaveteli which has been replaced with ruby-xapian package. Therefore
+is recommended to uninstall xapian-full-alaveteli gem and install ruby-xapian package in order the full-text search
+is working.
+
+* New: #80 - eml files not being found
+* New: #79 - A better navigation in found results
+* Bug: #78 - Question. Can't open Xapian database
+
 1.6.6 *2016-10-21*
 ------------------
 
@@ -158,21 +173,3 @@ Changelog for Redmine Xapian
 -----
 
   First stable release
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

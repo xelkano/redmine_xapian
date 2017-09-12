@@ -3,7 +3,7 @@
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright (C) 2010    Xabier Elkano
-# Copyright (C) 2015-16 Karel Pičman <karel.picman@kontron.com>
+# Copyright (C) 2015-17 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -23,7 +23,8 @@ begin
   require 'xapian'
   $xapian_bindings_available = true
 rescue LoadError
-  Rails.logger.info 'REDMAIN_XAPIAN ERROR: No Ruby bindings for Xapian installed !!. PLEASE install Xapian search engine interface for Ruby.'
+  Rails.logger.warn %{No Xapian search engine interface for Ruby installed => Full-text search won't be available.
+                      Install a ruby-xapian package or an alternative Xapian binding (https://xapian.org).}
   $xapian_bindings_available = false
 else
   require 'redmine'
@@ -37,7 +38,7 @@ else
   author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
 	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.6.6'
+	version '1.6.7'
 	requires_redmine :version_or_higher => '3.0.0'
 
 	settings :partial => 'redmine_xapian_settings',
