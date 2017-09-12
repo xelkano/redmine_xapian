@@ -2,8 +2,8 @@ Redmine Xapian search plugin
 ============================
 
 The current version of Redmine Xapian is **1.6.7**
-With this plugin you will be able to make searches by file name and by strings inside your attachments through the Xapian 
-search engine (https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
+With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
+search engine](https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
 replaces search controller, its view and search methods.
 
 ## 1.  Installation and Setup
@@ -75,8 +75,8 @@ bundle exec rake redmine:plugins:migrate RAILS_ENV="production"
 
 And after that restart the application server.
 
-Now, you can see new check boxes "Files" and "Repositories" on search screen, those allows you to search attachments by 
-file name and its contents. Xapian plugin checks for ruby bindings before its startup. If the plugin can not find them,
+Now, you can see new check boxes _Files_ and _Repositories_ on the search screen, those allows you to search attachments 
+by file name and its contents. Xapian plugin checks for ruby bindings before its startup. If the plugin can not find them,
 it is not activated and the following message is going to appear in Redmine log “No Xapian search engine interface for 
 Ruby installed" If you see this message, please make sure that a Xapian search engine interface is installed.
 
@@ -93,7 +93,7 @@ databases. This script is a wrapper for omindex binary, so omindex should not to
 First edit the script file and configure the required variables, they are self-explanatory and most of them can be 
 specified and overwritten through the command line.
 
-To view command line help simply run "xapian_index.rb -h". To view the complete process you can run it using verbose 
+To view command line help simply run `xapian_index.rb -h`. To view the complete process you can run it using verbose 
 flag (-v).
 
 Note, that the first time you index a repository it can take a long time. After the first indexation the process is much 
