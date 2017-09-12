@@ -4,6 +4,7 @@ Changelog for Redmine Xapian
 1.6.7 *2017-09-12*
 ------------------
 
+A view hook for searched object container
 Xapian bindings dependency changed
 
 IMPORTANT
