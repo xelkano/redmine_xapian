@@ -19,40 +19,44 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require_dependency 'attachment'
-
 module RedmineXapian  
-  module AttachmentPatch    
-    include RedmineXapian::SearchStrategies
+  module AttachmentPatch
     
     def self.included(base)
-      base.send(:include, InstanceMethods)
-      base.extend(InstanceMethods)
-      base.class_eval do        
-        acts_as_searchable :columns => ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
-          :project_key => 'project_id',
-          :date_column => 'created_on'        
-        class << self
-          alias_method_chain :search_result_ranks_and_ids, :search_result_ranks_and_ids_ext          
-        end
+      base.class_eval do
+         Attachment.acts_as_searchable :columns =>
+           ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
+           :project_key => 'project_id',
+           :date_column => 'created_on'
      end
     end
 
-    module InstanceMethods
-      
-      def search_result_ranks_and_ids_with_search_result_ranks_and_ids_ext(tokens, user = User.current, projects = nil, options = {})      
-        r = search(tokens, user, projects, options)        
-        r.map{ |x| [x[0].to_i, x[1]] }
+    def self.prepended(base)
+      base.send(:prepend, EventMethods)
+      class << base
+        prepend SearchMethods
       end
-      
+    end
+
+    module EventMethods
+
       def event_description
-        desc = Redmine::Search.cache_store.fetch("Attachment-#{id}")                  
+        desc = Redmine::Search.cache_store.fetch("Attachment-#{id}")
         if desc
-          Redmine::Search.cache_store.delete("Attachment-#{id}")          
+          Redmine::Search.cache_store.delete("Attachment-#{id}")
         else
           desc = description
         end
         desc.force_encoding('UTF-8') if desc
+      end
+
+    end
+
+    module SearchMethods
+
+      def search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})
+        r = search(tokens, user, projects, options)
+        r.map{ |x| [x[0].to_i, x[1]] }
       end
             
     private
@@ -191,7 +195,9 @@ module RedmineXapian
       end
       
     end
+
   end
 end
 
 Attachment.send(:include, RedmineXapian::AttachmentPatch)
+Attachment.send(:prepend, RedmineXapian::AttachmentPatch)
