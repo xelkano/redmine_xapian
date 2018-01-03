@@ -17,6 +17,13 @@ Redmine >= 3.0
 To use the full-text search engine you must install ruby-xapian and xapian-omega packages. In case of using of Bitnami 
 stack or Ruby installed via RVM it might be necessary to install Xapian bindings from sources.  See https://xapian.org
  for details. To index some files with omindex you may have to install some other packages like xpdf, antiword, ...
+ 
+```
+sudo apt-get install xapian-omega ruby-xapian
+```
+
+To index some files with omega you may have to install some other packages like
+xpdf, antiword, ...
 
 From "Omega documentation":http://xapian.org/docs/omega/overview.html:
 
