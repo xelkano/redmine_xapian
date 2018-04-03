@@ -121,7 +121,7 @@ module RedmineXapian
           Rails.logger.debug "Attachment's docattach not nil..:  #{attachment}"
           if attachment.container
             Rails.logger.debug 'Adding attachment'
-            project = attachment.container.project
+            project = attachment.project
             container_type = attachment[:container_type]
             container_permission = SearchStrategies::ContainerTypeHelper.to_permission(container_type)
             can_view_container = user.allowed_to?(container_permission, project)
@@ -136,7 +136,7 @@ module RedmineXapian
             projects = [] << projects if projects.is_a?(Project)
             project_ids = projects.collect(&:id) if projects
 
-            if allowed && (project_ids.blank? || (project_ids.include?(attachment.container.project.id)))
+            if allowed && (project_ids.blank? || (attachment.project && project_ids.include?(attachment.project.id)))
               Redmine::Search.cache_store.write("Attachment-#{attachment.id}",
                 dochash[:sample].force_encoding('UTF-8')) if dochash[:sample]
               return attachment
