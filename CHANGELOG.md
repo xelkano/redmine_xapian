@@ -1,10 +1,23 @@
 Changelog for Redmine Xapian
 ==========================
 
-1.6.8 *????-??-??*
+1.6.8 *2018-04-06*
 ------------------
 
-Rails 5 compliance
+    Bugs fixing
+    --retry-failed options in xapian_indexer.rb
+    Rails 5 compliance
+    
+IMPORTANT
+
+1. `alias_method_chain` has been replaced with `prepend`. Consequently, there might occure conficts with plugins 
+which overwrite the same methods.     
+
+* Bug: #88 - pdf and Word(.doc) files are not seachable
+* New: #86 - alias_method_chain is deprecated
+* New: #85 - feture: Add "--retry-failed" to omindex in xapian_indexer.rb
+* Bug: #84 - Error: Plugin redmine_xapian was not found.
+   
 
 1.6.7 *2017-09-12*
 ------------------

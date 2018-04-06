@@ -27,7 +27,7 @@
 ################################################################################################
 
 # Redmine installation directory
-$redmine_root = '/opt/redmine'
+$redmine_root = '/home/kpicman/RubymineProjects/redmine'
 
 # Files location
 $files = 'files'
@@ -39,7 +39,7 @@ $scriptindex  = '/usr/bin/scriptindex'
 $omindex      = '/usr/bin/omindex'
 
 # Directory containing xapian databases for omindex (Attachments indexing)
-$dbrootpath   = '/var/tmp/omindex'
+$dbrootpath   = '/home/kpicman/RubymineProjects/redmine/omindex'
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
 $verbose      = 0
