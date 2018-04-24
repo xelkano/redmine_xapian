@@ -49,7 +49,7 @@ $verbose      = 0
 # Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
 $stem_langs	= ['english']
 
-# Project identifiers that will be indexed eg. [ 'prj_id1', 'prj_id2' ]. 
+# Project identifiers whose repositories will be indexed eg. [ 'prj_id1', 'prj_id2' ]
 # Use [] to index all projects
 $projects	= []
 
@@ -123,7 +123,7 @@ optparse = OptionParser.new do |opts|
   opts.separator('')  
   opts.separator('')
   opts.separator('Options:')
-  opts.on('-p', '--projects a,b,c', Array,     'Comma separated list of projects to index') { |p| $projects = p }
+  opts.on('-p', '--projects a,b,c', Array,     'Comma separated list of projects whose repositories will be indexed') { |p| $projects = p }
   opts.on('-s', '--stemming_lang a,b,c', Array,'Comma separated list of stemming languages for indexing') { |s| $stem_langs = s }  
   opts.on('-v', '--verbose',            'verbose') {$verbose += 1}
   opts.on('-f', '--files',              'Only index Redmine attachments') { $onlyfiles = 1 }
@@ -505,23 +505,19 @@ unless $onlyfiles
       log e.message, true
       exit 1
     end     
-  end  
-  unless $projects.count > 0
-    $projects = Project.visible.active.has_module(:repository).pluck(:identifier).to_a
   end
+  $projects = Project.visible.active.has_module(:repository).pluck(:identifier) if $projects.blank?
   $projects.each do |identifier|
-    begin            
-      project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first      
-      if project
-        log "- Indexing repositories for #{project}..."
-        repositories = project.repositories.select { |repository| repository.supports_cat? }
-        repositories.each do |repository|        
-          delete_log(repository) if ($resetlog)
-          indexing(databasepath, project, repository)        
-        end
-      else    
-        log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."      
+    project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first
+    if project
+      log "- Indexing repositories for #{project}..."
+      repositories = project.repositories.select { |repository| repository.supports_cat? }
+      repositories.each do |repository|
+        delete_log(repository) if ($resetlog)
+        indexing(databasepath, project, repository)
       end
+    else
+      log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."
     end
   end
 end
