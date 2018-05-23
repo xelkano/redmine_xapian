@@ -46,7 +46,7 @@ cs:
   label_save_search_scope: Ukládat volby vyhledávání
   text_save_search_scope: Volby vyhledávání budou při jejich změně uloženy v uživatelském profilu.
   label_enable_cjk_ngrams: Enable generation of n-grams from CJK text
-  text_enable_cjk_ngrams: "With this enabled, spans of CJK characters are split into unigrams and bigrams, with the
-    unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
-    option needs to have been used at index time.
-    e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
+  text_enable_cjk_ngrams: "Pokud je povoleno, sekvence čínských nebo japonských znaků jsou rozděleny  do jednotlivých
+    znaků nebo skupin znaků. Znaky si nesou informaci o jejich pozici. Znaky psané latinkou jsou rozděleny normálně do
+    slov. Odpovídající proměná prostředí musí být použita při indexaci.
+    např.: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
