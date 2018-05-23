@@ -57,11 +57,7 @@
   <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME' %> <%= l(:label_stem_some) %><br/>
   <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL' %> <%= l(:label_stem_all) %><br/>
   <em class="info">
-    <%= l(:text_stemming_info) %><br/>
-    &nbsp;&nbsp;<%= l(:text_stemming_none) %><br/>
-    &nbsp;&nbsp;<%= l(:text_stemming_some) %><br/>
-    &nbsp;&nbsp;<%= l(:text_stemming_all) %><br/>
-  <%= l(:text_stemming_note) %>
+    <%= l(:text_stemming_info) %>
   </em>
 </p>
 
@@ -70,5 +66,13 @@
   <%= check_box_tag 'settings[save_search_scope]', true, @settings['save_search_scope'] == 'true' %>
   <em class="info">
     <%= l(:text_save_search_scope) %>
+  </em>
+</p>
+
+<p>
+  <%= content_tag(:label, l(:label_enable_cjk_ngrams)) %>
+  <%= check_box_tag 'settings[enable_cjk_ngrams]', true, @settings['enable_cjk_ngrams'] == 'true' %>
+  <em class="info">
+    <%= l(:text_enable_cjk_ngrams) %>
   </em>
 </p>

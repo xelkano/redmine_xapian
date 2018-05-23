@@ -36,10 +36,17 @@ en:
   label_database_error: database error, please configure xapian
   label_repofile: Repository
   label_repofile_plural: Repositories  
-  text_stemming_info: "This controls how the query parser will apply the stemming algorithm. The default value is STEM_NONE. The possible values are:"
-  text_stemming_none: "STEM_NONE: Don't perform any stemming."
-  text_stemming_some: "STEM_SOME: Search for stemmed forms of terms except for those which start with a capital letter, or are followed by certain characters (currently:'/@<>=*[{\"'), or are used with operators which need positional information. Stemmed terms are prefixed with 'Z'."
-  text_stemming_all: "STEM_ALL: Search for stemmed forms of all words (note: no 'Z' prefix is added)."
-  text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.
+  text_stemming_info: "This controls how the query parser will apply the stemming algorithm. The default value is
+    STEM_NONE. The possible values are: STEM_NONE -  Don't perform any stemming, STEM_SOME - Search for stemmed forms
+    of terms except for those which start with a capital letter, or are followed by certain characters
+    (currently:'/@<>=*[{\"'), or are used with operators which need positional information. Stemmed terms are prefixed
+    with 'Z', STEM_ALL - Search for stemmed forms of all words (note: no 'Z' prefix is added)."
+  text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields -
+    boolean filter terms are never stemmed.
   label_save_search_scope: Save the search scope
   text_save_search_scope: The search options will be saved in the user's preferences when changed.
+  label_enable_cjk_ngrams: Enable generation of n-grams from CJK text
+  text_enable_cjk_ngrams: "With this enabled, spans of CJK characters are split into unigrams and bigrams, with the
+    unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
+    option needs to have been used at index time.
+    e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"

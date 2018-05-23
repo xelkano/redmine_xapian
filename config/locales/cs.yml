@@ -36,10 +36,17 @@ cs:
   label_database_error: Chyba databáze! Zkonfigurujte Xapian.
   label_repofile: Repozitář
   label_repofile_plural: Repozitáře
-  text_stemming_info: "Tímto se řídí jak parser dotazů použije stemovací algoritmus. Výchozí hodnota je STEM_NONE. Možné hodnoty jsou:"
-  text_stemming_none: "STEM_NONE: Neaplikuj žádný steming."
-  text_stemming_some: "STEM_SOME: Použij stemování pro výrazy, kromě těch, které začínají velkým písmenem nebo jsou následovány určitýmy znaky('/@<>=*[{\"') nebo jsou použité s operátory, které vyžadují informaci o pozici. Stemované výrazy začínají písmenem 'Z'."
-  text_stemming_all: "STEM_ALL: Hledej stemové výrazy ve všech slovech (prefix 'Z' není přidán)."
-  text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean filter terms are never stemmed.
+  text_stemming_info: "Tímto se řídí jak parser dotazů použije stemovací algoritmus. Výchozí hodnota je STEM_NONE.
+    Možné hodnoty jsou: STEM_NONE - Neaplikuj žádný steming, STEM_SOME - Použij stemování pro výrazy, kromě těch, které
+    začínají velkým písmenem nebo jsou následovány určitýmy znaky('/@<>=*[{\"') nebo jsou použité s operátory, které
+    vyžadují informaci o pozici. Stemované výrazy začínají písmenem 'Z', STEM_ALL - Hledej stemové výrazy ve všech
+    slovech (prefix 'Z' není přidán)"
+  text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields - boolean
+    filter terms are never stemmed.
   label_save_search_scope: Ukládat volby vyhledávání
   text_save_search_scope: Volby vyhledávání budou při jejich změně uloženy v uživatelském profilu.
+  label_enable_cjk_ngrams: Enable generation of n-grams from CJK text
+  text_enable_cjk_ngrams: "With this enabled, spans of CJK characters are split into unigrams and bigrams, with the
+    unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
+    option needs to have been used at index time.
+    e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"

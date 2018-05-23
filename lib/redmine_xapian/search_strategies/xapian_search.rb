@@ -70,7 +70,9 @@ module RedmineXapian
           qp.default_op = Xapian::Query::OP_OR
         end
 
-        query = qp.parse_query(query_string,Xapian::QueryParser::FLAG_WILDCARD)
+        flags = Xapian::QueryParser::FLAG_WILDCARD
+        flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if Setting.plugin_redmine_xapian['enable_cjk_ngrams'] == 'true'
+        query = qp.parse_query(query_string, flags)
         Rails.logger.debug "query_string is: #{query_string}"
         Rails.logger.debug "Parsed query is: #{query.description()}"
 
