@@ -22,6 +22,7 @@
 # English strings go here for Rails i18n
 en:
   label_enable_redmine_xapian: Enable xapian engine to allow searches on attachments and repositories
+
   label_index_database: Directory containing Xapian databases
   text_stemming: "Set the stemming language, the default is 'english'. Possible values are: %{languages}"  
   label_stemming_lang: Stemming Language  

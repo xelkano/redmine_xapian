@@ -22,6 +22,7 @@
 # Czech strings go here for Rails i18n
 cs:
   label_enable_redmine_xapian: Povolit Xapian pro vyhledávání v souborech a repositářích
+
   label_index_database: Adresář obsahující databázi Xapianu
   text_stemming: "Nastavit jazyk pro stemming, výchozí je 'english'. Možné hodnoty jsou: %{languages}"  
   label_stemming_lang: Jazyk stemmingu  
@@ -36,8 +37,8 @@ cs:
   label_database_error: Chyba databáze! Zkonfigurujte Xapian.
   label_repofile: Repozitář
   label_repofile_plural: Repozitáře
-  text_stemming_info: "Tímto se řídí jak parser dotazů použije stemovací algoritmus. Výchozí hodnota je STEM_NONE.
-    Možné hodnoty jsou: STEM_NONE - Neaplikuj žádný steming, STEM_SOME - Použij stemování pro výrazy, kromě těch, které
+  text_stemming_info: "Tímto se řídí, jak parser dotazů použije stemovací algoritmus. Výchozí hodnota je STEM_NONE.
+    Možné hodnoty jsou: STEM_NONE - Neaplikuj žádný steming, STEM_SOME - Použij stemování pro výrazy, kromě těch které
     začínají velkým písmenem nebo jsou následovány určitýmy znaky('/@<>=*[{\"') nebo jsou použité s operátory, které
     vyžadují informaci o pozici. Stemované výrazy začínají písmenem 'Z', STEM_ALL - Hledej stemové výrazy ve všech
     slovech (prefix 'Z' není přidán)"
@@ -45,7 +46,7 @@ cs:
     filter terms are never stemmed.
   label_save_search_scope: Ukládat volby vyhledávání
   text_save_search_scope: Volby vyhledávání budou při jejich změně uloženy v uživatelském profilu.
-  label_enable_cjk_ngrams: Enable generation of n-grams from CJK text
+  label_enable_cjk_ngrams: Povolit generování n-gramů pro CJK texty
   text_enable_cjk_ngrams: "Pokud je povoleno, sekvence čínských nebo japonských znaků jsou rozděleny  do jednotlivých
     znaků nebo skupin znaků. Znaky si nesou informaci o jejich pozici. Znaky psané latinkou jsou rozděleny normálně do
     slov. Odpovídající proměná prostředí musí být použita při indexaci.

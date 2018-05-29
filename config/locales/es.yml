@@ -22,6 +22,7 @@
 # Spain strings go here for Rails i18n
 es:
   label_enable_redmine_xapian: Habilitar xapian para búsquedas en ficheros and repositories
+
   label_index_database: Directorio que contiene las BD de xapian
   text_stemming: "Set the stemming language, the default is 'english'. Possible values are: %{languages}"  
   label_stemming_lang: Stemming Language  

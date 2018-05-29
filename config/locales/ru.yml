@@ -21,7 +21,8 @@
 
 # Russian strings go here for Rails i18n
 ru:
-  label_enable_redmine_xapian: Включить поисковую систему xapian, чтобы разрешить поиск в присоединённых файлах and repositories
+  label_enable_redmine_xapian: Включить поисковую систему xapian, чтобы разрешить поиск в присоединённых файлах and
+  repositories
   label_index_database: Каталог, содержащий базы данных Xapian
   text_stemming: "Установите язык стемминга, по умолчанию 'english'. Возможные значения are: %{languages}"  
   label_stemming_lang: Язык стемминга  
@@ -41,12 +42,12 @@ ru:
       of terms except for those which start with a capital letter, or are followed by certain characters
       (currently:'/@<>=*[{\"'), or are used with operators which need positional information. Stemmed terms are prefixed
       with 'Z', STEM_ALL - Search for stemmed forms of all words (note: no 'Z' prefix is added)."
-    text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields -
-      boolean filter terms are never stemmed.
-    label_save_search_scope: Save the search scope
-    text_save_search_scope: The search options will be saved in the user's preferences when changed.
-    label_enable_cjk_ngrams: Enable generation of n-grams from CJK text
-    text_enable_cjk_ngrams: "With this enabled, spans of CJK characters are split into unigrams and bigrams, with the
-      unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
-      option needs to have been used at index time.
-      e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
+  text_stemming_note: Note that the stemming algorithm is only applied to words in probabilistic fields -
+    boolean filter terms are never stemmed.
+  label_save_search_scope: Save the search scope
+  text_save_search_scope: The search options will be saved in the user's preferences when changed.
+  label_enable_cjk_ngrams: Enable generation of n-grams from CJK text
+  text_enable_cjk_ngrams: "With this enabled, spans of CJK characters are split into unigrams and bigrams, with the
+    unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
+    option needs to have been used at index time.
+    e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"

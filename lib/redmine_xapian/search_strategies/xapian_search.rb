@@ -49,7 +49,6 @@ module RedmineXapian
         # Combine the rest of the command line arguments with spaces between
         # them, so that simple queries don't have to be quoted at the shell
         # level.
-        #query_string = ARGV[1..-1].join(' ')
         query_string = tokens.map{ |x| !(x[-1,1].eql?'*')? x+'*': x }.join(' ')
         # Parse the query string to produce a Xapian::Query object.
         qp = Xapian::QueryParser.new()
