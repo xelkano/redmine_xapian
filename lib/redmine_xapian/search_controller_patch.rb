@@ -90,7 +90,8 @@ module RedmineXapian
         @object_types = @object_types.select do |o|
           case o
           when 'attachments'
-            User.current.allowed_to?('view_files'.to_sym, projects_to_search)
+            # Files/Attachments option is always visible
+            true
           when 'repofiles'
             User.current.allowed_to?('browse_repository'.to_sym, projects_to_search)
           else

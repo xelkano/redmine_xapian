@@ -51,3 +51,4 @@ de:
     unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
     option needs to have been used at index time.
     e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
+  label_file-attachment_plural: Dateien/Anhänge

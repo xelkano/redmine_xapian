@@ -51,3 +51,4 @@ cs:
     znaků nebo skupin znaků. Znaky si nesou informaci o jejich pozici. Znaky psané latinkou jsou rozděleny normálně do
     slov. Odpovídající proměná prostředí musí být použita při indexaci.
     např.: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
+  label_file-attachment_plural: Soubory/Přílohy

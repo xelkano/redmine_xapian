@@ -38,7 +38,13 @@
 
 <p id="search-types">
 <% @object_types.each do |t| %>
-<label><%= check_box_tag t, 1, @scope.include?(t) %> <%= link_to type_label(t), "#" %></label>
+        <label>
+          <%= check_box_tag t, 1, @scope.include?(t) %>
+          <% # Plugin change start %>
+          <%#= link_to type_label(t), "#" %>
+          <%= link_to type_label(t == 'attachments' ? 'file-attachment' : t), '#' %>
+          <% # Plugin change end %>
+        </label>
 <% end %>
 </p>
 <% # Plugin change start %>

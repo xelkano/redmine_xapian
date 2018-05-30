@@ -34,9 +34,9 @@ ru:
   label_stem_all: Полный стемминг
   label_default_stemming_lang: Установите язык стемминга по умолчанию
   label_default_stemming_strategy: Установите стратегию стемминга по умолчанию
-  label_database_error: Ошибка базы данных, пожалуйста, сконфигурируйте xapian  
-  label_repofile: Repository
-  label_repofile_plural: Repositories
+  label_database_error: Ошибка базы данных! Пожалуйста, сконфигурируйте Xapian.
+  label_repofile: Хранилище
+  label_repofile_plural: Хранилища
   text_stemming_info: "This controls how the query parser will apply the stemming algorithm. The default value is
       STEM_NONE. The possible values are: STEM_NONE -  Don't perform any stemming, STEM_SOME - Search for stemmed forms
       of terms except for those which start with a capital letter, or are followed by certain characters
@@ -51,3 +51,4 @@ ru:
     unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
     option needs to have been used at index time.
     e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
+  label_file-attachment_plural: Файлы/Прикреплённые файлы

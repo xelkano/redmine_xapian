@@ -34,9 +34,9 @@ eu:
   label_stem_all: Stem all
   label_default_stemming_lang: Set default stemming lang
   label_default_stemming_strategy: Set default stemming strategy 
-  label_database_error: Database error! Please configure xapian.
-  label_repofile: Repository
-  label_repofile_plural: Repositories
+  label_database_error: Database error! Please configure Xapian.
+  label_repofile: Biltegia
+  label_repofile_plural: Biltegiak
   text_stemming_info: "This controls how the query parser will apply the stemming algorithm. The default value is
       STEM_NONE. The possible values are: STEM_NONE -  Don't perform any stemming, STEM_SOME - Search for stemmed forms
       of terms except for those which start with a capital letter, or are followed by certain characters
@@ -51,3 +51,4 @@ eu:
     unigrams carrying positional information. Non-CJK characters are split into words as normal. The corresponding
     option needs to have been used at index time.
     e.g: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
+  label_file-attachment_plural: Fitxategiak/Attachments
