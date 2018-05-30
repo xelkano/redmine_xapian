@@ -506,7 +506,7 @@ unless $onlyfiles
       exit 1
     end     
   end
-  $projects = Project.visible.active.has_module(:repository).pluck(:identifier) if $projects.blank?
+  $projects = Project.active.has_module(:repository).pluck(:identifier) if $projects.blank?
   $projects.each do |identifier|
     project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first
     if project
