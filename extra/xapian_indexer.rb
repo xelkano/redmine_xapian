@@ -21,10 +21,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-################################################################################################
+require 'optparse'
+
+include Rails.application.routes.url_helpers
+
+########################################################################################################################
 # BEGIN Configuration parameters
 # Configure the following parameters (most of them can be configured through the command line):
-################################################################################################
+########################################################################################################################
 
 # Redmine installation directory
 $redmine_root = '/home/kpicman/RubymineProjects/redmine'
@@ -46,7 +50,8 @@ $verbose      = 0
 
 # Define stemmed languages to index attachments Eg. [ 'english', 'italian', 'spanish' ]
 # Repository database will be always indexed in english
-# Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish:  
+# Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins
+# norwegian porter portuguese romanian russian spanish swedish turkish:
 $stem_langs	= ['english']
 
 # Project identifiers whose repositories will be indexed eg. [ 'prj_id1', 'prj_id2' ]
@@ -65,9 +70,9 @@ $catppt		 = '/usr/bin/catppt'
 $unzip		 = '/usr/bin/unzip -o'
 $unrtf		 = '/usr/bin/unrtf -t text 2>/dev/null'
 
-################################################################################################
+########################################################################################################################
 # END Configuration parameters
-################################################################################################
+########################################################################################################################
 
 $environment = File.join($redmine_root, 'config/environment.rb')
 $project = nil
@@ -111,10 +116,7 @@ FORMAT_HANDLERS = {
   'rtf' => $unrtf
 }.freeze
 
-require 'optparse'
-
-VERSION = '0.1'
-SUPPORTED_SCM = %w(Subversion Darcs Mercurial Bazaar Git GitRemote Filesystem)
+VERSION = '0.2'.freeze
 
 optparse = OptionParser.new do |opts|
   opts.banner = 'Usage: xapian_indexer.rb [OPTIONS...]'
@@ -123,12 +125,15 @@ optparse = OptionParser.new do |opts|
   opts.separator('')  
   opts.separator('')
   opts.separator('Options:')
-  opts.on('-p', '--projects a,b,c', Array,     'Comma separated list of projects whose repositories will be indexed') { |p| $projects = p }
-  opts.on('-s', '--stemming_lang a,b,c', Array,'Comma separated list of stemming languages for indexing') { |s| $stem_langs = s }  
+  opts.on('-p', '--projects a,b,c', Array,
+          'Comma separated list of projects whose repositories will be indexed') { |p| $projects = p }
+  opts.on('-s', '--stemming_lang a,b,c', Array,
+          'Comma separated list of stemming languages for indexing') { |s| $stem_langs = s }
   opts.on('-v', '--verbose',            'verbose') {$verbose += 1}
   opts.on('-f', '--files',              'Only index Redmine attachments') { $onlyfiles = 1 }
   opts.on('-r', '--repositories',       'Only index Redmine repositories') { $onlyrepos = 1 }
-  opts.on('-e', '--environment ENV',    'Rails ENVIRONMENT (development, testing or production), default production') { |e| $env = e}
+  opts.on('-e', '--environment ENV',
+          'Rails ENVIRONMENT (development, testing or production), default production') { |e| $env = e}
   opts.on('-t', '--temp-dir PATH',      'Temporary directory for indexing'){ |t| $tempdir = t }  
   opts.on('-x', '--resetlog',           'Reset index log'){  $resetlog = 1 }
   opts.on('-V', '--version',            'show version and exit') { puts VERSION; exit}
@@ -146,11 +151,10 @@ optparse.parse!
 
 ENV['RAILS_ENV'] = $env
 
-STATUS_SUCCESS = 1
-STATUS_FAIL = -1
-    
-ADD_OR_UPDATE = 1
-DELETE = 0
+STATUS_SUCCESS = 1.freeze
+STATUS_FAIL = -1.freeze
+ADD_OR_UPDATE = 1.freeze
+DELETE = 0.freeze
  
 class IndexingError < StandardError; end
 
@@ -291,11 +295,16 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
     actions.each do |path, action|
       entry = repository.entry(path, identifier)
       if ((!entry.nil? && entry.is_file?) || action == DELETE)
-        log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}", true) if (entry.nil? && action != DELETE)
+        if (entry.nil? && action != DELETE)
+          log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}",
+              true)
+        end
         log "Entry to index #{entry.inspect}"
         lastrev = entry.lastrev unless entry.nil?
-        add_or_update_index(databasepath, indexconf, project, repository, 
-          identifier, path, lastrev, action, MIME_TYPES[Redmine::MimeType.of(path)]) if(supported_mime_type(path) || action == DELETE)
+        if(supported_mime_type(path) || action == DELETE)
+          add_or_update_index(databasepath, indexconf, project, repository, identifier, path, lastrev, action,
+                              MIME_TYPES[Redmine::MimeType.of(path)])
+        end
       end
     end
   end
@@ -312,19 +321,19 @@ def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_
 	if repository.branches
     repository.branches.each do |branch|
     log "Walking in branch: #{repo_name(repository)} - #{branch}"
-    walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets('', branch, diff_to.id - diff_from.id).select { |changeset| 
-      changeset.id > diff_from.id and changeset.id <= diff_to.id})
+    walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets('', branch,
+      diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	else
     log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
-    walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets('', nil, diff_to.id - diff_from.id).select { |changeset| 
-      changeset.id > diff_from.id and changeset.id <= diff_to.id})
+    walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets('', nil,
+      diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	if repository.tags
     repository.tags.each do |tag|
       log "Walking in tag: #{repo_name(repository)} - #{tag}"
-      walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets('', tag, diff_to.id - diff_from.id).select { |changeset| 
-          changeset.id > diff_from.id and changeset.id <= diff_to.id})
+      walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets('', tag,
+        diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
     end
 	end
 end
@@ -454,8 +463,6 @@ rescue LoadError
   log "Edit script and correct path", true
   exit 1
 end
-
-include Rails.application.routes.url_helpers
 
 log "Redmine environment [RAILS_ENV=#{$env}] correctly loaded ..."
 
