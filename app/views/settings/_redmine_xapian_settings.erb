@@ -28,9 +28,9 @@
 
 <p>
   <%= content_tag(:label, l(:label_index_database)) %>
-  <%= text_field_tag 'settings[index_database]', @settings['index_database'] %>
+  <%= text_field_tag 'settings[index_database]', @settings['index_database'], :size => 50 %>
   <em class="info">
-    <%= l(:label_default) %>: /var/tmp/omindex
+    <%= l(:label_default) %>: <%= File.expand_path('file_index', Rails.root) %>
   </em>
 </p>
 

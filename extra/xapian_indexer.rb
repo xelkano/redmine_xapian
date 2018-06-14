@@ -31,7 +31,7 @@ include Rails.application.routes.url_helpers
 ########################################################################################################################
 
 # Redmine installation directory
-$redmine_root = '/home/kpicman/RubymineProjects/redmine'
+$redmine_root = File.expand_path('../../../../', __FILE__)
 
 # Files location
 $files = 'files'
@@ -42,8 +42,8 @@ $scriptindex  = '/usr/bin/scriptindex'
 # omindex binary path
 $omindex      = '/usr/bin/omindex'
 
-# Directory containing xapian databases for omindex (Attachments indexing)
-$dbrootpath   = '/home/kpicman/RubymineProjects/redmine/omindex'
+# Directory containing Xapian databases for omindex (Attachments indexing)
+$dbrootpath = File.expand_path('file_index', $redmine_root)
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
 $verbose      = 0

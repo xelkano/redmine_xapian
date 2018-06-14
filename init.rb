@@ -44,7 +44,7 @@ else
 	settings :partial => 'redmine_xapian_settings',
     :default => {
       'enable' => 'true',
-      'index_database' => '/var/tmp/omindex',
+      'index_database' => File.expand_path('file_index', Rails.root),
       'stemming_lang' => 'english',
       'stemming_strategy' => 'STEM_SOME',
       'stem_on_search' => 'false',
