@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 #
 # This script is almost entirely built on the build script from redmine_backlogs
 # Please see: https://github.com/backlogs/redmine_backlogs
@@ -8,26 +8,11 @@ if [[ -e "$HOME/.xapian.rc" ]]; then
     source "$HOME/.xapian.rc"
 fi
 
-if [[ ! "$WORKSPACE" = /* ]] ||
-   [[ ! "$PATH_TO_REDMINE" = /* ]] ||
-   [[ ! "$PATH_TO_XAPIAN" = /* ]];
-then
-echo "You should set"\
-       " WORKSPACE, PATH_TO_REDMINE, PATH_TO_XAPIAN"\
-       " environment variables"
-  echo "You set:"\
-       "$WORKSPACE"\
-       "$PATH_TO_REDMINE"\
-       "$PATH_TO_XAPIAN"
-  exit 1;
-fi
-
 export PATH_TO_PLUGINS=./plugins
 export GENERATE_SECRET=generate_secret_token
 export MIGRATE_PLUGINS=redmine:plugins:migrate
 export REDMINE_GIT_REPO=git://github.com/redmine/redmine.git
-export REDMINE_GIT_TAG=master
-export BUNDLE_GEMFILE=$PATH_TO_REDMINE/Gemfile
+export REDMINE_GIT_TAG=3.4-stable
 
 clone_redmine()
 {
@@ -46,8 +31,8 @@ run_tests()
   cd $PATH_TO_REDMINE 
 
   # Run tests within application
-  bundle exec rake redmine:plugins:test:units NAME=redmine_xapian
-  bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian
+  bundle exec rake redmine:plugins:test:units NAME=redmine_xapian RAILS_ENV=test
+  bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian RAILS_ENV=test
 }
 
 uninstall()
