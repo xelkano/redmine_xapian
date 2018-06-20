@@ -151,10 +151,10 @@ optparse.parse!
 
 ENV['RAILS_ENV'] = $env
 
-STATUS_SUCCESS = 1.freeze
-STATUS_FAIL = -1.freeze
-ADD_OR_UPDATE = 1.freeze
-DELETE = 0.freeze
+STATUS_SUCCESS = 1
+STATUS_FAIL = -1
+ADD_OR_UPDATE = 1
+DELETE = 0
  
 class IndexingError < StandardError; end
 
