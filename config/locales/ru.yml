@@ -22,7 +22,7 @@
 # Russian strings go here for Rails i18n
 ru:
   label_enable_redmine_xapian: Включить поисковую систему xapian, чтобы разрешить поиск в присоединённых файлах and
-  repositories
+      repositories
   label_index_database: Каталог, содержащий базы данных Xapian
   text_stemming: "Установите язык стемминга, по умолчанию 'english'. Возможные значения are: %{languages}"  
   label_stemming_lang: Язык стемминга  
