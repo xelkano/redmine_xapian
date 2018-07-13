@@ -38,10 +38,11 @@ module RedmineXapian
         else
           @all_words = params[:all_words].present?
           @titles_only = params[:titles_only].present?
-          User.current.pref[:xapian_search_option] = []
-          User.current.pref[:xapian_search_option] << 'all_words' if @all_words
-          User.current.pref[:xapian_search_option] << 'titles_only' if @titles_only
-          User.current.pref.save
+          preferences = User.current.pref
+          preferences[:xapian_search_option] = []
+          preferences[:xapian_search_option] << 'all_words' if @all_words
+          preferences[:xapian_search_option] << 'titles_only' if @titles_only
+          preferences.save
         end
       else
         @all_words = params[:all_words] ? params[:all_words].present? : true
