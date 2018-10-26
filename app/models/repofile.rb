@@ -74,12 +74,12 @@ class Repofile < ActiveRecord::Base
   end 
   
   def project    
-    @project = Project.find_by_id self.project_id unless @project
+    @project = Project.find_by(id: self.project_id) unless @project
     @project
   end
   
   def repository
-    @repository = Repository.find_by_id self.repository_id unless @repository
+    @repository = Repository.find_by(id: self.repository_id) unless @repository
     @repository
   end
   

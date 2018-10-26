@@ -445,7 +445,7 @@ def system_or_raise(command)
 end
 
 def find_project(prt)        
-  project = Project.active.has_module(:repository).find_by_identifier(prt)
+  project = Project.active.has_module(:repository).find_by(identifier: prt)
   if project
     log "Project found: #{project}"
   else

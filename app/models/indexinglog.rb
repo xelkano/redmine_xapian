@@ -24,8 +24,8 @@ class Indexinglog < ActiveRecord::Base
   belongs_to :repository
   belongs_to :changeset
 
-  validates :repository_id, :presence => true
-  validates :changeset_id, :presence => true
+  validates :repository_id, presence: true
+  validates :changeset_id, presence: true
 
   attr_protected :repository_id
   attr_protected :changeset_id

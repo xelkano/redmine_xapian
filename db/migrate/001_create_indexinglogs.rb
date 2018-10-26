@@ -20,7 +20,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class CreateIndexinglogs < ActiveRecord::Migration
-  def self.up
+
+  def change
     create_table :indexinglogs do |t|
       t.column :repository_id, :integer
       t.column :changeset_id, :integer
@@ -31,7 +32,4 @@ class CreateIndexinglogs < ActiveRecord::Migration
     end
   end
 
-  def self.down
-    drop_table :indexinglogs
-  end
 end

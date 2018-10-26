@@ -42,7 +42,7 @@ module RedmineXapian
           preferences[:xapian_search_option] = []
           preferences[:xapian_search_option] << 'all_words' if @all_words
           preferences[:xapian_search_option] << 'titles_only' if @titles_only
-          preferences.save
+          preferences.save!
         end
       else
         @all_words = params[:all_words] ? params[:all_words].present? : true
@@ -110,7 +110,7 @@ module RedmineXapian
           @scope =  pref & @object_types if pref
         else
           User.current.pref[:xapian_search_scope] = @scope
-          User.current.pref.save
+          User.current.pref.save!
         end
       end
       # Plugin change end

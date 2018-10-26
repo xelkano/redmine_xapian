@@ -52,7 +52,7 @@ class XapianRepositoryIdentifier
     n = 0
     repositories.each_with_index do |rep, i|
       rep.identifier = @identifier
-      rep.save unless @dry_run
+      rep.save! unless @dry_run
       n += 1
       # Progress bar
       print "\r#{i * 100 / count}%"

@@ -20,11 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class AddIndexToIndexlogs < ActiveRecord::Migration
-  def self.up    
-    add_index :indexinglogs, :repository_id
+
+  def up
+    add_index :indexinglogs, :repository_id, name: :index_indexinglogs_on_repository_id
   end
 
-  def self.down    
+  def down
     remove_index :indexinglogs, :repository_id
   end
+
 end

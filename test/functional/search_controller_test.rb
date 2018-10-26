@@ -27,7 +27,7 @@ class SearchControllerTest < ActionController::TestCase
     :wiki_pages, :projects, :users
 
   def setup    
-    attachment = Attachment.find_by_id 1
+    attachment = Attachment.find_by(id: 1)
     if attachment
       @xapian_data = [[attachment.created_on, attachment.id]]
     else
