@@ -102,18 +102,19 @@ MIME_TYPES = {
 
 
 FORMAT_HANDLERS = {
-  'pdf' => $pdftotext,
-  'doc' => $catdoc,
-  'xls' => $xls2csv,
-  'ppt,pps' => $catppt,
-  'docx' => $unzip,
-  'xlsx' => $unzip,
-  'pptx' => $unzip,
-  'ppsx' => $unzip,
-  'ods'  => $unzip,
-  'odt'  => $unzip,
-  'odp'  => $unzip,
-  'rtf' => $unrtf
+  pdf: $pdftotext,
+  doc: $catdoc,
+  xls: $xls2csv,
+  ppt: $catppt,
+  pps: $catppt,
+  docx: $unzip,
+  xlsx: $unzip,
+  pptx: $unzip,
+  ppsx: $unzip,
+  ods: $unzip,
+  odt: $unzip,
+  odp: $unzip,
+  rtf: $unrtf
 }.freeze
 
 VERSION = '0.2'.freeze
@@ -179,13 +180,13 @@ def indexing(databasepath, project, repository)
       indexconf.write "body : index truncate=400 field=sample\n"
       indexconf.write "date: field=date\n"
       indexconf.close
-      unless latest_indexed
-        log "Repository #{repo_name(repository)} not indexed, indexing all"        
-        indexing_all(databasepath, indexconf, project, repository)
+      if latest_indexed
+        log "Repository #{repo_name(repository)} indexed, indexing diff"
+        indexing_diff(databasepath, indexconf, project, repository,
+                      latest_indexed.changeset, latest_changeset)
       else
-        log "Repository #{repo_name(repository)} indexed, indexing diff"        
-        indexing_diff(databasepath, indexconf, project, repository, 
-          latest_indexed.changeset, latest_changeset)
+        log "Repository #{repo_name(repository)} not indexed, indexing all"
+        indexing_all(databasepath, indexconf, project, repository)
       end
       indexconf.unlink
     rescue IndexingError => e
@@ -198,25 +199,25 @@ end
 
 def supported_mime_type(entry)
   mtype = Redmine::MimeType.of(entry)    
-  return MIME_TYPES.include?(mtype) || Redmine::MimeType.is_type?('text', entry)
+  MIME_TYPES.include?(mtype) || Redmine::MimeType.is_type?('text', entry)
 end
 
 def add_log(repository, changeset, status, message = nil)
   log = Indexinglog.where(:repository_id => repository.id).last
-  unless log
+  if log
+    log.changeset_id = changeset.id
+    log.status = status
+    log.message = message if message
+    log.save!
+    log "Log for repo #{repo_name(repository)} updated!"
+  else
     log = Indexinglog.new
     log.repository = repository
     log.changeset = changeset
     log.status = status
     log.message = message if message
     log.save!
-    log "New log for repo #{repo_name(repository)} saved!"    
-  else
-    log.changeset_id=changeset.id
-    log.status=status
-    log.message = message if message
-    log.save!
-    log "Log for repo #{repo_name(repository)} updated!"    
+    log "New log for repo #{repo_name(repository)} saved!"
   end
 end
 
@@ -240,7 +241,7 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
   return if entries.nil? || entries.size < 1
   log "Walk entries size: #{entries.size}"
   entries.each do |entry|
-    log "Walking into: #{entry.lastrev.time}" if !entry.lastrev.nil? 
+    log "Walking into: #{entry.lastrev.time}" if entry.lastrev
     if entry.is_dir?
       walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
     elsif entry.is_file? && !entry.lastrev.nil?
@@ -294,14 +295,14 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
     return unless actions
     actions.each do |path, action|
       entry = repository.entry(path, identifier)
-      if ((!entry.nil? && entry.is_file?) || action == DELETE)
-        if (entry.nil? && action != DELETE)
+      if (entry && entry.is_file?) || (action == DELETE)
+        if entry.nil? && (action != DELETE)
           log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}",
               true)
         end
         log "Entry to index #{entry.inspect}"
-        lastrev = entry.lastrev unless entry.nil?
-        if(supported_mime_type(path) || action == DELETE)
+        lastrev = entry.lastrev if entry
+        if supported_mime_type(path) || (action == DELETE)
           add_or_update_index(databasepath, indexconf, project, repository, identifier, path, lastrev, action,
                               MIME_TYPES[Redmine::MimeType.of(path)])
         end
@@ -339,7 +340,7 @@ def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_
 end
 
 def generate_uri(project, repository, identifier, path)
-	return url_for(:controller => 'repositories',
+	url_for(:controller => 'repositories',
 			:action => 'entry',
 			:id => project.identifier,
 			:repository_id => repository.identifier,
@@ -350,7 +351,7 @@ end
 
 def convert_to_text(fpath, type)
   text = nil
-  return text if !File.exist?(FORMAT_HANDLERS[type].split(' ').first)
+  return text unless File.exist?(FORMAT_HANDLERS[type].split(' ').first)
   case type
     when 'pdf'    
       text = `#{FORMAT_HANDLERS[type]} #{fpath} -`
@@ -375,7 +376,7 @@ def convert_to_text(fpath, type)
     else
       text = `#{FORMAT_HANDLERS[type]} #{fpath}`
   end
-  return text
+  text
 end
 
 def add_or_update_index(databasepath, indexconf, project, repository, identifier, 
@@ -387,7 +388,6 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     text = repository.cat(path, identifier)
   else
     fname = path.split('/').last.tr(' ', '_')
-    bstr = nil
     bstr = repository.cat(path, identifier)
     File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
       bs.write(bstr)
@@ -479,7 +479,7 @@ unless $onlyrepos
       exit 1
     end
     databasepath = File.join($dbrootpath, lang)
-    if not File.directory?(databasepath)
+    unless File.directory?(databasepath)
       log "#{databasepath} does not exist, creating ..."
       begin
         FileUtils.mkdir_p databasepath
@@ -504,7 +504,7 @@ unless $onlyfiles
     exit 1
   end
   databasepath = File.join($dbrootpath.rstrip, 'repodb')  
-  if not File.directory?(databasepath)
+  unless File.directory?(databasepath)
     log "Db directory #{databasepath} does not exist, creating..."
     begin
       FileUtils.mkdir_p databasepath

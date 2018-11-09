@@ -1,4 +1,4 @@
-# encoding: utf-8
+#!/bin/bash
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
@@ -19,10 +19,5 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-class AddIndexToIndexlogs < ActiveRecord::Migration
-
-  def change
-    add_index :indexinglogs, :repository_id
-  end
-
-end
+bundle exec rake redmine:plugins:test:units NAME=redmine_xapian
+bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian

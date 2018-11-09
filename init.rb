@@ -32,25 +32,26 @@ else
   require File.dirname(__FILE__) + '/lib/redmine_xapian/search_controller_patch'    
 
   Redmine::Plugin.register :redmine_xapian do
-	name 'Xapian search plugin'
-	author 'Xabier Elkano/Karel Pičman'
-  url 'http://www.redmine.org/plugins/xapian_search'
-  author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
+    name 'Xapian search plugin'
+    author 'Xabier Elkano/Karel Pičman'
+    url 'http://www.redmine.org/plugins/xapian_search'
+    author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
-	description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-	version '1.6.9 devel'
-	requires_redmine :version_or_higher => '3.0.0'
+    description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
+    version '1.6.9 devel'
+    requires_redmine version_or_higher: '3.0.0'
 
-	settings :partial => 'redmine_xapian_settings',
-    :default => {
-      'enable' => 'true',
-      'index_database' => File.expand_path('file_index', Rails.root),
-      'stemming_lang' => 'english',
-      'stemming_strategy' => 'STEM_SOME',
-      'stem_on_search' => 'false',
-      'stem_langs' => %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish),
-      'save_search_scope' => 'false',
-      'enable_cjk_ngrams' => 'false' }
+    settings partial: 'redmine_xapian_settings',
+      default: {
+        enable: true,
+        index_database: File.expand_path('file_index', Rails.root),
+        stemming_lang: 'english',
+        stemming_strategy: 'STEM_SOME',
+        stem_langs: %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
+          lovins norwegian porter portuguese romanian russian spanish swedish turkish),
+        save_search_scope: false,
+        enable_cjk_ngrams: false
+      }
    end
 
    Redmine::Search.map do |search|

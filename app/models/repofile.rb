@@ -43,56 +43,49 @@ class Repofile < ActiveRecord::Base
   attr_accessor :revision   
 
   def event_title    
-    self.filename
+    filename
   end
 
   def event_datetime    
-    self.created_on
+    created_on
   end
 
-  def event_url   
-    #{ :controller => 'repositories',
-   #			:action => 'entry',
-   #			:id => self.project_id,
-   #			:repository_id => self.repository_id,			
-   #			:path => self.filename,
-   #
-   #			:only_path => true }
-   self.url
+  def event_url
+   url
   end
 
   def event_description
-    self.description.force_encoding('UTF-8')
+    description.force_encoding('UTF-8')
   end
 	 
   def event_type
-    self.repo_type
+    repo_type
   end
 
   def repo_type
-    self.repository.type.split('::')[1].downcase
+    repository.type.split('::')[1].downcase
   end 
   
   def project    
-    @project = Project.find_by(id: self.project_id) unless @project
+    @project = Project.find_by(id: project_id) unless @project
     @project
   end
   
   def repository
-    @repository = Repository.find_by(id: self.repository_id) unless @repository
+    @repository = Repository.find_by(id: repository_id) unless @repository
     @repository
   end
   
   def identifier
-    self.revision.to_s
+    revision.to_s
   end  
 
   def format_identifier
-      identifier
+    identifier
   end
 
   def self.search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})      
-    r = self.search(tokens, user, projects, options)        
+    r = search(tokens, user, projects, options)
     r.map{ |x| [x[0].to_i, x[1]] }
   end
   
@@ -134,7 +127,7 @@ class Repofile < ActiveRecord::Base
 
     search_results = []        
    
-    if !options[:titles_only]
+    unless options[:titles_only]
       Rails.logger.debug "Call xapian search service for #{name.inspect}"          
       xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
       search_results.concat xapian_results unless xapian_results.blank?

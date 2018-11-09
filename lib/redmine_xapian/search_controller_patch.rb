@@ -30,12 +30,8 @@ module RedmineXapian
       # Plugin change start
       #@all_words = params[:all_words] ? params[:all_words].present? : true
       #@titles_only = params[:titles_only] ? params[:titles_only].present? : false
-      if Setting.plugin_redmine_xapian['save_search_scope'] == 'true'
-        unless params[:all_words]
-          pref = User.current.pref[:xapian_search_option]
-          @all_words =  pref ? pref.include?('all_words') : true
-          @titles_only =  pref ? pref.include?('titles_only') : false
-        else
+      if Setting.plugin_redmine_xapian['save_search_scope']
+        if params[:all_words]
           @all_words = params[:all_words].present?
           @titles_only = params[:titles_only].present?
           preferences = User.current.pref
@@ -43,6 +39,10 @@ module RedmineXapian
           preferences[:xapian_search_option] << 'all_words' if @all_words
           preferences[:xapian_search_option] << 'titles_only' if @titles_only
           preferences.save!
+        else
+          pref = User.current.pref[:xapian_search_option]
+          @all_words = pref ? pref.include?('all_words') : true
+          @titles_only = pref ? pref.include?('titles_only') : false
         end
       else
         @all_words = params[:all_words] ? params[:all_words].present? : true
@@ -104,7 +104,7 @@ module RedmineXapian
 
       @scope = @object_types.select {|t| params[t]}
       # Plugin change start
-      if Setting.plugin_redmine_xapian['save_search_scope'] == 'true'
+      if Setting.plugin_redmine_xapian['save_search_scope']
         if @scope.empty?
           pref = User.current.pref[:xapian_search_scope]
           @scope =  pref & @object_types if pref

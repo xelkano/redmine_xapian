@@ -77,7 +77,7 @@ module RedmineXapian
         search_results.concat search_for_wiki_page_attachments(user, search_data)
         search_results.concat search_for_project_files(user, search_data)
         
-        if !options[:titles_only]
+        unless options[:titles_only]
           Rails.logger.debug "Call xapian search service for #{name}"          
           xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
           search_results.concat xapian_results unless xapian_results.blank?
