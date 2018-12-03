@@ -43,14 +43,14 @@ else
 
     settings partial: 'redmine_xapian_settings',
       default: {
-        enable: true,
-        index_database: File.expand_path('file_index', Rails.root),
-        stemming_lang: 'english',
-        stemming_strategy: 'STEM_SOME',
-        stem_langs: %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
+        'enable' => true,
+        'index_database' => File.expand_path('file_index', Rails.root),
+        'stemming_lang' => 'english',
+        'stemming_strategy' => 'STEM_SOME',
+        'stem_langs' =>  %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
           lovins norwegian porter portuguese romanian russian spanish swedish turkish),
-        save_search_scope: false,
-        enable_cjk_ngrams: false
+        'save_search_scope' => false,
+        'enable_cjk_ngrams' => false
       }
    end
 
