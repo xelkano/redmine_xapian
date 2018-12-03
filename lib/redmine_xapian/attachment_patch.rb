@@ -81,7 +81,7 @@ module RedmineXapian
           Rails.logger.debug "Call xapian search service for #{name}"          
           xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
           search_results.concat xapian_results unless xapian_results.blank?
-          Rails.logger.debug "Call xapian search service for  #{name} completed"          
+          Rails.logger.debug "Call xapian search service for #{name} completed"
         end
         
         search_results
