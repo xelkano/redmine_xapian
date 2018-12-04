@@ -1,10 +1,14 @@
 Changelog for Redmine Xapian
 ==========================
 
-1.6.9 *????-??-??*
+1.6.9 *2018-12-04*
 ------------------
 
-    FLAG_CJK_NGRAM
+    Support for searching Chinese/Japanese characters
+        
+* Bug: #91 - Xapian not indexing repository if project configuration is blank Bug
+* Feature #90 - Question: How to make Japanese/Chinese characters searchable? Feature
+* Feature #72 - Fulltext search options mix up redmine-modules and attachement-location to search Feature
 
 1.6.8 *2018-04-06*
 ------------------
@@ -15,7 +19,7 @@ Changelog for Redmine Xapian
     
 IMPORTANT
 
-1. `alias_method_chain` has been replaced with `prepend`. Consequently, there might occure conficts with plugins 
+ `alias_method_chain` has been replaced with `prepend`. Consequently, there might occure conficts with plugins 
 which overwrite the same methods.     
 
 * Bug: #88 - pdf and Word(.doc) files are not seachable
@@ -27,8 +31,8 @@ which overwrite the same methods.
 1.6.7 *2017-09-12*
 ------------------
 
-A view hook for searched object container
-Xapian bindings dependency changed
+    A view hook for searched object container
+    Xapian bindings dependency changed
 
 IMPORTANT
 
@@ -43,7 +47,7 @@ is working.
 1.6.6 *2016-10-21*
 ------------------
 
-  Maintenance release
+    Maintenance release
 
 * Bug: #76 - Index all repositories
 * Bug: #74 - Search results for tickets truncated?
@@ -52,15 +56,15 @@ is working.
 1.6.5 *2016-06-13*
 ------------------
 
-  Search options saved in the user's preferences.
-  Quick jump to DMSF documents (Dxxx)
-  Fixed an unhandled exception when repo doesn't exist on indexing
-  Fixed an exception when walking into an entry without the last revision
-  Allow walking all active project repositories
-  Allow searching repositories that don't have an identifier
-  Attempt to find revisions/ branches/ tags in docdash url and pull into repofile model
-  Add enhanced styling for repo search results - branch/rev/tag bubbles
-  Pass indexed url to the repofile model instead of rebuilding the url (issue with in-line url branch names)
+      Search options saved in the user's preferences.
+      Quick jump to DMSF documents (Dxxx)
+      Fixed an unhandled exception when repo doesn't exist on indexing
+      Fixed an exception when walking into an entry without the last revision
+      Allow walking all active project repositories
+      Allow searching repositories that don't have an identifier
+      Attempt to find revisions/ branches/ tags in docdash url and pull into repofile model
+      Add enhanced styling for repo search results - branch/rev/tag bubbles
+      Pass indexed url to the repofile model instead of rebuilding the url (issue with in-line url branch names)
 
 * Bug: #68 - Search Repository not returning results in redmine 3.2
 * New: #67 - Search options saved in the user's preferences.
@@ -68,20 +72,20 @@ is working.
 1.6.4 *2015-12-18*
 ------------------
 
-  Full search as default in options
+    Full search as default in options
 
 1.6.3 *2015-09-11*
 ------------------
 
-  Searching in repositories
-  Unit tests
+      Searching in repositories
+      Unit tests
 
 * Bug: #59 - search.rb
 
 1.6.2 *2015-06-14*
 ------------------
 
-  Redmine 3.x compatibility  
+    Redmine 3.x compatibility  
 
 1.6.1
 -----
@@ -91,48 +95,49 @@ is working.
 1.6.0
 -----
 
-  Added support for repository indexing and search 
-  (thanks to Kosei Kitahara for his work on Redmine reposearch plugin and Prevas company for supporting).
+      Added support for repository indexing and search 
+      (thanks to Kosei Kitahara for his work on Redmine reposearch plugin and Prevas company for supporting).
 
 1.5.1
 -----
 
-  Support for Redmine 2.3
+     Support for Redmine 2.3
 
 1.5.0
 -----
 
-  New permission model + bug fixes + code cleaning + new pagination.
+    New permission model + bug fixes + code cleaning + new pagination.
 
 1.4.3
 -----
 
-  Compatibility for ruby1.9, tested on Redmine 2.0.3 + Ruby 1.9.2 + Rails 3.2.6
+    Compatibility for ruby1.9, tested on Redmine 2.0.3 + Ruby 1.9.2 + Rails 3.2.6
 
 1.4.1
 -----
 
-  Set logger to info
+    Set logger to info
 
 1.4.0
 -----
 
-  Compatibility for Redmine 2, tested on Redmine 2.0.3 + Ruby 1.8.7 + Rails 3.2.6
+    Compatibility for Redmine 2, tested on Redmine 2.0.3 + Ruby 1.8.7 + Rails 3.2.6
 
 1.3.0
 -----
 
-  Compatibility for Redmine 1.4, tested on 1.4.4
+    Compatibility for Redmine 1.4, tested on 1.4.4
 
 1.2.4
 -----
 
-  Minor bug fixes. Remove attachment permission, it is no longer needed.
+    Minor bug fixes. 
+    Remove attachment permission, it is no longer needed.
 
 1.2.3
 -----
 
-  Tested in Redmine 1.3.0
+    Tested in Redmine 1.3.0
 
 1.2.2
 -----
@@ -147,19 +152,19 @@ is working.
 1.2.0
 -----
 
-  Support for searches in multiple stemmed languages. 
-  Tested in Redmine 1.2.1 and xapian packages 1.2.7.
-  Bug fixes.
+      Support for searches in multiple stemmed languages. 
+      Tested in Redmine 1.2.1 and xapian packages 1.2.7.
+      Bug fixes.
 
 1.1.6
 -----
 
-  Fix issue on searches with article container
+    Fix issue on searches with article container
 
 1.1.5
 -----
 
-  Fix issue when knowledgebase plugin is not installed
+    Fix issue when knowledgebase plugin is not installed
 
 1.1.4
 -----
@@ -169,12 +174,12 @@ is working.
 1.1.3
 -----
 
-  Added support for article container to allow integration with knowledgebase plugin
+    Added support for article container to allow integration with knowledgebase plugin
 
 1.1.2
 -----
 
-  German localization added
+     German localization added
 
 * Bug: #2 - Installation problem
 
@@ -186,14 +191,14 @@ is working.
 1.1.0
 -----
 
-  Enhanced search results view screen.
+    Enhanced search results view screen.
 
 1.0.1
 -----
 
-   Attachments permission added because search_controller definitely needs it.
+    Attachments permission added because search_controller definitely needs it.
 
 1.0.0
 -----
 
-  First stable release
+    First stable release
