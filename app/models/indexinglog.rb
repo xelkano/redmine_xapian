@@ -27,6 +27,4 @@ class Indexinglog < ActiveRecord::Base
   validates :repository_id, presence: true
   validates :changeset_id, presence: true
 
-  attr_protected :repository_id
-  attr_protected :changeset_id
 end
