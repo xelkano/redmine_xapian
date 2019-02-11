@@ -23,8 +23,6 @@
 
 require 'optparse'
 
-include Rails.application.routes.url_helpers
-
 ########################################################################################################################
 # BEGIN Configuration parameters
 # Configure the following parameters (most of them can be configured through the command line):

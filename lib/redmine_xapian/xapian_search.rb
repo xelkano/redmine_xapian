@@ -24,6 +24,7 @@ require 'uri'
 module RedmineXapian
   module SearchStrategies
     module XapianSearch
+
       def xapian_search(tokens, limit_options, projects_to_search, all_words, user, xapian_file)
         Rails.logger.debug 'XapianSearch::xapian_search'
         xpattachments = []

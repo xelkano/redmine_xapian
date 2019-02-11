@@ -19,15 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-module RedmineXapian  
+module RedmineXapian
   module AttachmentPatch
     
     def self.included(base)
       base.class_eval do
-         Attachment.acts_as_searchable :columns =>
-           ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
-           :project_key => 'project_id',
-           :date_column => 'created_on'
+         Attachment.acts_as_searchable columns: ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
+           project_key: 'project_id',
+           date_column: 'created_on'
      end
     end
 
@@ -61,29 +60,19 @@ module RedmineXapian
             
     private
       
-      def search(tokens, user, projects = nil, options = {})     
-        Rails.logger.debug "Attachment::search"        
-        search_data = RedmineXapian::SearchStrategies::SearchData.new(
-          self,
-          tokens,
-          projects,
-          options,          
-          user,
-          name
-        )
-        search_results = []
-        search_results.concat search_for_issues_attachments(user, search_data)
+      def search(tokens, user, projects = nil, options = {})
+        Rails.logger.debug 'Attachment::search'
+        search_data = RedmineXapian::SearchStrategies::SearchData.new(self, tokens, projects, options, user, name)
+        search_results = search_for_issues_attachments(user, search_data)
         search_results.concat search_for_message_attachments(user, search_data)
         search_results.concat search_for_wiki_page_attachments(user, search_data)
         search_results.concat search_for_project_files(user, search_data)
-        
         unless options[:titles_only]
           Rails.logger.debug "Call xapian search service for #{name}"          
-          xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
+          xapian_results = XapianSearchService.search(search_data)
           search_results.concat xapian_results unless xapian_results.blank?
           Rails.logger.debug "Call xapian search service for #{name} completed"
         end
-        
         search_results
       end                                          
       
@@ -186,9 +175,7 @@ module RedmineXapian
         options = search_data.options
         columns = search_data.columns
         tokens = search_data.tokens
-
         columns = columns[0..0] if options[:titles_only]
-
         token_clauses = columns.collect {|column| "(LOWER(#{column}) LIKE ?)"}
         sql = (['(' + token_clauses.join(' OR ') + ')'] * tokens.size).join(options[:all_words] ? ' AND ' : ' OR ')
         [sql, * (tokens.collect {|w| "%#{w.downcase}%"} * token_clauses.size).sort]
@@ -199,5 +186,5 @@ module RedmineXapian
   end
 end
 
-Attachment.send(:include, RedmineXapian::AttachmentPatch)
+#Attachment.send(:include, RedmineXapian::AttachmentPatch)
 Attachment.send(:prepend, RedmineXapian::AttachmentPatch)

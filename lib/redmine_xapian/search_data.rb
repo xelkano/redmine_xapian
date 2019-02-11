@@ -21,6 +21,7 @@
 
 module RedmineXapian
   module SearchStrategies
+
     class SearchData
       attr_reader :tokens, :projects, :options,
         :find_options, :limit_options, :columns,
@@ -38,7 +39,6 @@ module RedmineXapian
         @columns = searchable_options[:columns]        
         @user = user
         @element = element
-        
         init_find_options(@options)
         init_limit_options(@options)
         init_scope_and_projects_conditions(@projects)        
@@ -51,7 +51,6 @@ module RedmineXapian
           if options[:offset]
             limit_options[:conditions] = "(#{searchable_options[:date_column]} " + (options[:before] ? '<' : '>') + "'#{connection.quoted_date(options[:offset])}')"
           end
-
           @limit_options = limit_options
         end
 
@@ -75,6 +74,8 @@ module RedmineXapian
         def connection
           @context.connection
         end
+
     end
+
   end
 end
