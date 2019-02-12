@@ -20,11 +20,11 @@
 
 desc <<-END_DESC
 Xapian set repository identifiers task
-  * Set a default identifier for repositories that haven't got it
+  Set a default identifier for repositories that haven't got one
 
 Available options:
-  *identifier - A text to be set as the identifier
-  *dry_run - test, no changes to the database
+  identifier - A text to be set as the identifier
+  dry_run - test, no changes to the database
 
 Example:
   bundle exec rake redmine:xapian_set_identifiers RAILS_ENV="production"
@@ -47,19 +47,19 @@ class XapianRepositoryIdentifier
   end
 
   def set_identifier
-    repositories = Repository.where('identifier IS NULL').all
-    count = repositories.count
-    n = 0
-    repositories.each_with_index do |rep, i|
-      rep.identifier = @identifier
-      rep.save! unless @dry_run
-      n += 1
+    repositories = Repository.where("identifier IS NULL OR identifier = ''")
+    count = repositories.all.size
+    i = 0
+    repositories.find_each do |r|
+      r.identifier = @identifier
+      r.save! unless @dry_run
+      i += 1
       # Progress bar
       print "\r#{i * 100 / count}%"
     end
     print "\r100%\n"
     # Result
-    puts "#{n}/#{Repository.count} repositories updated."
+    puts "#{i} of #{Repository.count} repositories have been updated."
   end
 
 end

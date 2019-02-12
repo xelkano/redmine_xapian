@@ -201,32 +201,21 @@ def supported_mime_type(entry)
 end
 
 def add_log(repository, changeset, status, message = nil)
-  my_log = Indexinglog.where(:repository_id => repository.id).last
-  if my_log
-    my_log.changeset_id = changeset.id
-    my_log.status = status
-    my_log.message = message if message
-    my_log.save!
+  log = Indexinglog.where(:repository_id => repository.id).last
+  if log
+    log.changeset_id = changeset.id
+    log.status = status
+    log.message = message #if message
+    log.save!
     my_log "Log for repo #{repo_name(repository)} updated!"
   else
-    my_log = Indexinglog.new
-    my_log.repository = repository
-    my_log.changeset = changeset
-    my_log.status = status
-    my_log.message = message if message
-    my_log.save!
-    my_log "New my_log for repo #{repo_name(repository)} saved!"
-  end
-end
-
-def update_log(repository, changeset, status, message = nil)
-  my_log = Indexinglog.where(:repository_id => repository.id).last
-  if my_log
-    my_log.changeset_id = changeset.id
-    my_log.status = status if status
-    my_log.message = message if message
-    my_log.save!
-    my_log "Log for repo #{repo_name(repository)} updated!"
+    log = Indexinglog.new
+    log.repository = repository
+    log.changeset = changeset
+    log.status = status
+    log.message = message #if message
+    log.save!
+    my_log "New log for repo #{repo_name(repository)} saved!"
   end
 end
 
@@ -269,6 +258,7 @@ def indexing_all(databasepath, indexconf, project, repository)
     end
   rescue Exception => e
     my_log "#{repo_name(repository)} encountered an error and will be skipped: #{e.message}", true
+    raise IndexingError.new(e.message)
   end
 end
 
@@ -338,7 +328,7 @@ def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_
 end
 
 def generate_uri(project, repository, identifier, path)
-	url_for(:controller => 'repositories',
+  Rails.application.routes.url_helpers.url_for(:controller => 'repositories',
 			:action => 'entry',
 			:id => project.identifier,
 			:repository_id => repository.identifier,

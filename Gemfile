@@ -19,5 +19,5 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-gem 'activerecord-tableless', '~> 1.0.1'
+gem 'activerecord-tablefree'
 gem 'will_paginate', '~> 3.0.0'

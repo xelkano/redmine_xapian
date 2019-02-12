@@ -20,23 +20,25 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module RedmineXapian
-  module SearchStrategies
-    class XapianSearchService
-      extend XapianSearch
 
-      class << self
-        def search(search_data)
-          Rails.logger.debug 'XapianSearch::search'
-          xapian_search(
-            search_data.tokens,            
-            search_data.limit_options,            
-            search_data.projects,
-            search_data.options[:all_words],
-            search_data.user,
-            search_data.element
-          )
-        end
+  class XapianSearchService
+    extend XapianSearch
+
+    class << self
+
+      def search(search_data)
+        Rails.logger.debug 'XapianSearch::search'
+        xapian_search(
+          search_data.tokens,
+          search_data.limit_options,
+          search_data.projects,
+          search_data.options[:all_words],
+          search_data.user,
+          search_data.element
+        )
       end
+
     end
   end
+
 end

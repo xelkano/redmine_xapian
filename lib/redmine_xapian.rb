@@ -20,9 +20,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # Libraries
-require File.dirname(__FILE__) + 'search_data'
-require File.dirname(__FILE__) + 'xapian_search_service'
+require 'redmine_xapian/search_data'
+require 'redmine_xapian/xapian_search_service'
 
 # Patches
-require File.dirname(__FILE__) + 'atches/attachment_patch'
-require File.dirname(__FILE__) + 'patches/search_controller_patch'
+require 'redmine_xapian/patches/attachment_patch'
+require 'redmine_xapian/patches/search_controller_patch'

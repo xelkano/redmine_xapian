@@ -36,13 +36,13 @@ class SearchControllerTest < ActionController::TestCase
   end
 
   def test_search_with_xapian
-    RedmineXapian::SearchStrategies::XapianSearchService.expects(:search).returns(@xapian_data).once    
+    XapianSearchService.expects(:search).returns(@xapian_data).once
     get :index, :q => 'xyz', :attachments => true, :titles_only => ''
     assert_response :success
   end
 
   def test_search_without_xapian
-    RedmineXapian::SearchStrategies::XapianSearchService.expects(:search).never    
+    XapianSearchService.expects(:search).never
     get :index, :q => 'xyz', :attachments => true, :titles_only => true
     assert_response :success
   end 

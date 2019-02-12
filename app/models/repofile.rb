@@ -20,13 +20,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class Repofile < ActiveRecord::Base
+  include RedmineXapian
  
-  has_no_table 
-    
-  column :description,    :string
-  column :created_on,   :datetime
-  column :project_id,   :integer
-  column :filename, 	:string
+  has_no_table
+
+  column :id, :integer
+  column :description, :string
+  column :created_on, :date_time
+  column :project_id, :integer
+  column :filename, :string
   column :repository_id, :integer
   column :url, :string
   column :revision, :string
@@ -40,7 +42,7 @@ class Repofile < ActiveRecord::Base
   attr_accessor :filename
   attr_accessor :repository_id   
   attr_accessor :url 
-  attr_accessor :revision   
+  attr_accessor :revision
 
   def event_title    
     filename
@@ -116,7 +118,7 @@ class Repofile < ActiveRecord::Base
   
   def self.search(tokens, user, projects, options)     
     Rails.logger.debug 'Repository::search'
-    search_data = RedmineXapian::SearchStrategies::SearchData.new(
+    search_data = SearchData.new(
       self,
       tokens,
       projects,
@@ -129,7 +131,7 @@ class Repofile < ActiveRecord::Base
    
     unless options[:titles_only]
       Rails.logger.debug "Call xapian search service for #{name.inspect}"          
-      xapian_results = RedmineXapian::SearchStrategies::XapianSearchService.search(search_data)
+      xapian_results = XapianSearchService.search(search_data)
       search_results.concat xapian_results unless xapian_results.blank?
       Rails.logger.debug "Call xapian search service for  #{name.inspect} completed"          
     end

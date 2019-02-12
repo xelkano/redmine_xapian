@@ -28,8 +28,7 @@ rescue LoadError
   $xapian_bindings_available = false
 else
   require 'redmine'
-  require File.dirname(__FILE__) + '/lib/redmine_xapian/attachment_patch'    
-  require File.dirname(__FILE__) + '/lib/redmine_xapian/search_controller_patch'    
+  require File.dirname(__FILE__) + '/lib/redmine_xapian'
 
   Redmine::Plugin.register :redmine_xapian do
     name 'Xapian search plugin'
