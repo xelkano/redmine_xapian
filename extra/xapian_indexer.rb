@@ -161,14 +161,12 @@ def repo_name(repository)
   repository.identifier.blank? ? 'main' : repository.identifier
 end
 
-def indexing(databasepath, project, repository)    
+def indexing(databasepath, project, repository)
     my_log "Fetch changesets: #{project.name} - #{repo_name(repository)}"
     repository.fetch_changesets    
-    repository.reload.changesets.reload    
-
+    repository.reload.changesets.reload
     latest_changeset = repository.changesets.first    
-    return unless latest_changeset    
-
+    return unless latest_changeset
     my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
     latest_indexed = Indexinglog.where(:repository_id => repository.id, :status => STATUS_SUCCESS).last
     my_log "Latest indexed: #{latest_indexed.inspect}"
@@ -205,7 +203,7 @@ def add_log(repository, changeset, status, message = nil)
   if log
     log.changeset_id = changeset.id
     log.status = status
-    log.message = message #if message
+    log.message = message
     log.save!
     my_log "Log for repo #{repo_name(repository)} updated!"
   else
@@ -213,11 +211,12 @@ def add_log(repository, changeset, status, message = nil)
     log.repository = repository
     log.changeset = changeset
     log.status = status
-    log.message = message #if message
+    log.message = message
     log.save!
     my_log "New log for repo #{repo_name(repository)} saved!"
   end
 end
+
 
 def delete_log(repository)
   Indexinglog.where(:repository_id => repository.id).delete_all
@@ -238,7 +237,7 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
   end
 end
 
-def indexing_all(databasepath, indexconf, project, repository)  
+def indexing_all(databasepath, indexconf, project, repository)
   my_log "Indexing all: #{repo_name(repository)}"
   begin
     if repository.branches
@@ -303,10 +302,8 @@ def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_
     my_log "Already indexed: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
     return
   end
-
 	my_log "Indexing diff: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
 	my_log "Indexing all: #{repo_name(repository)}"
-  
 	if repository.branches
     repository.branches.each do |branch|
     my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
@@ -382,7 +379,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     end
     text = convert_to_text("#{$tempdir}/#{fname}", type) if File.exist?("#{$tempdir}/#{fname}") and !bstr.nil?
     File.unlink("#{$tempdir}/#{fname}")
-  end  
+  end
   my_log "generated uri: #{uri}"
   my_log('Mime type text') if  Redmine::MimeType.is_type?('text', path)
   my_log "Indexing: #{path}"
@@ -402,7 +399,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
           itext.write("=#{line}")
         end
       end      
-    else      
+    else
       my_log "Path: #{path} should be deleted"
     end
     itext.close    
