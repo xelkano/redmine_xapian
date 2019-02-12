@@ -38,13 +38,13 @@ $files = 'files'
 $scriptindex  = '/usr/bin/scriptindex'
 
 # omindex binary path
-$omindex      = '/usr/bin/omindex'
+$omindex = '/usr/bin/omindex'
 
 # Directory containing Xapian databases for omindex (Attachments indexing)
 $dbrootpath = File.expand_path('file_index', $redmine_root)
 
 # Verbose output, values of 0 no verbose, greater than 0 verbose output
-$verbose      = 0
+$verbose = 0
 
 # Define stemmed languages to index attachments Eg. [ 'english', 'italian', 'spanish' ]
 # Repository database will be always indexed in english
@@ -134,7 +134,7 @@ optparse = OptionParser.new do |opts|
   opts.on('-e', '--environment ENV',
           'Rails ENVIRONMENT (development, testing or production), default production') { |e| $env = e}
   opts.on('-t', '--temp-dir PATH',      'Temporary directory for indexing'){ |t| $tempdir = t }  
-  opts.on('-x', '--resetlog',           'Reset index log'){  $resetlog = 1 }
+  opts.on('-x', '--resetlog',           'Reset index my_log'){  $resetlog = 1 }
   opts.on('-V', '--version',            'show version and exit') { puts VERSION; exit}
   opts.on('-h', '--help',               'show help and exit') { puts opts; exit }
   opts.on('-R', '--retry-failed', 'retry files which omindex failed to extract text') { $retryfailed = 1 }
@@ -162,16 +162,16 @@ def repo_name(repository)
 end
 
 def indexing(databasepath, project, repository)    
-    log "Fetch changesets: #{project.name} - #{repo_name(repository)}"
+    my_log "Fetch changesets: #{project.name} - #{repo_name(repository)}"
     repository.fetch_changesets    
     repository.reload.changesets.reload    
 
     latest_changeset = repository.changesets.first    
     return unless latest_changeset    
 
-    log "Latest revision: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
+    my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
     latest_indexed = Indexinglog.where(:repository_id => repository.id, :status => STATUS_SUCCESS).last
-    log "Latest indexed: #{latest_indexed.inspect}"
+    my_log "Latest indexed: #{latest_indexed.inspect}"
     begin
       indexconf = Tempfile.new('index.conf', $tempdir)
       indexconf.write "url : field boolean=Q unique=Q\n"
@@ -179,11 +179,11 @@ def indexing(databasepath, project, repository)
       indexconf.write "date: field=date\n"
       indexconf.close
       if latest_indexed
-        log "Repository #{repo_name(repository)} indexed, indexing diff"
+        my_log "Repository #{repo_name(repository)} indexed, indexing diff"
         indexing_diff(databasepath, indexconf, project, repository,
                       latest_indexed.changeset, latest_changeset)
       else
-        log "Repository #{repo_name(repository)} not indexed, indexing all"
+        my_log "Repository #{repo_name(repository)} not indexed, indexing all"
         indexing_all(databasepath, indexconf, project, repository)
       end
       indexconf.unlink
@@ -191,7 +191,7 @@ def indexing(databasepath, project, repository)
       add_log(repository, latest_changeset, STATUS_FAIL, e.message)
     else
       add_log(repository, latest_changeset, STATUS_SUCCESS)
-      log "Successfully indexed: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
+      my_log "Successfully indexed: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
     end
 end
 
@@ -201,45 +201,45 @@ def supported_mime_type(entry)
 end
 
 def add_log(repository, changeset, status, message = nil)
-  log = Indexinglog.where(:repository_id => repository.id).last
-  if log
-    log.changeset_id = changeset.id
-    log.status = status
-    log.message = message if message
-    log.save!
-    log "Log for repo #{repo_name(repository)} updated!"
+  my_log = Indexinglog.where(:repository_id => repository.id).last
+  if my_log
+    my_log.changeset_id = changeset.id
+    my_log.status = status
+    my_log.message = message if message
+    my_log.save!
+    my_log "Log for repo #{repo_name(repository)} updated!"
   else
-    log = Indexinglog.new
-    log.repository = repository
-    log.changeset = changeset
-    log.status = status
-    log.message = message if message
-    log.save!
-    log "New log for repo #{repo_name(repository)} saved!"
+    my_log = Indexinglog.new
+    my_log.repository = repository
+    my_log.changeset = changeset
+    my_log.status = status
+    my_log.message = message if message
+    my_log.save!
+    my_log "New my_log for repo #{repo_name(repository)} saved!"
   end
 end
 
 def update_log(repository, changeset, status, message = nil)
-  log = Indexinglog.where(:repository_id => repository.id).last
-  if log
-    log.changeset_id = changeset.id
-    log.status = status if status
-    log.message = message if message
-    log.save!
-    log "Log for repo #{repo_name(repository)} updated!"    
+  my_log = Indexinglog.where(:repository_id => repository.id).last
+  if my_log
+    my_log.changeset_id = changeset.id
+    my_log.status = status if status
+    my_log.message = message if message
+    my_log.save!
+    my_log "Log for repo #{repo_name(repository)} updated!"
   end
 end
 
 def delete_log(repository)
   Indexinglog.where(:repository_id => repository.id).delete_all
-  log "Log for repo #{repo_name(repository)} removed!"  
+  my_log "Log for repo #{repo_name(repository)} removed!"
 end
 
 def walk(databasepath, indexconf, project, repository, identifier, entries)  
   return if entries.nil? || entries.size < 1
-  log "Walk entries size: #{entries.size}"
+  my_log "Walk entries size: #{entries.size}"
   entries.each do |entry|
-    log "Walking into: #{entry.lastrev.time}" if entry.lastrev
+    my_log "Walking into: #{entry.lastrev.time}" if entry.lastrev
     if entry.is_dir?
       walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
     elsif entry.is_file? && !entry.lastrev.nil?
@@ -250,30 +250,30 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
 end
 
 def indexing_all(databasepath, indexconf, project, repository)  
-  log "Indexing all: #{repo_name(repository)}"
+  my_log "Indexing all: #{repo_name(repository)}"
   begin
     if repository.branches
       repository.branches.each do |branch|
-        log "Walking in branch: #{repo_name(repository)} - #{branch}"
+        my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
         walk(databasepath, indexconf, project, repository, branch, repository.entries(nil, branch))
       end
     else
-      log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
+      my_log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
       walk(databasepath, indexconf, project, repository, nil, repository.entries(nil, nil))
     end
     if repository.tags
       repository.tags.each do |tag|
-        log "Walking in tag: #{repo_name(repository)} - #{tag}"
+        my_log "Walking in tag: #{repo_name(repository)} - #{tag}"
         walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
       end
     end
   rescue Exception => e
-    log "#{repo_name(repository)} encountered an error and will be skipped: #{e.message}", true
+    my_log "#{repo_name(repository)} encountered an error and will be skipped: #{e.message}", true
   end
 end
 
 def walkin(databasepath, indexconf, project, repository, identifier, changesets)
-    log "Walking into #{changesets.inspect}"
+    my_log "Walking into #{changesets.inspect}"
     return unless changesets or changesets.size <= 0
     changesets.sort! { |a, b| a.id <=> b.id }
 
@@ -284,7 +284,7 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
     #   * R - Replaced
     #   * D - Deleted
     changesets.each do |changeset|
-      log "Changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
+      my_log "Changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
       next unless changeset.filechanges
       changeset.filechanges.each do |change|        
         actions[change.path] = (change.action == 'D') ? DELETE : ADD_OR_UPDATE        
@@ -295,10 +295,10 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
       entry = repository.entry(path, identifier)
       if (entry && entry.is_file?) || (action == DELETE)
         if entry.nil? && (action != DELETE)
-          log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}",
+          my_log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}",
               true)
         end
-        log "Entry to index #{entry.inspect}"
+        my_log "Entry to index #{entry.inspect}"
         lastrev = entry.lastrev if entry
         if supported_mime_type(path) || (action == DELETE)
           add_or_update_index(databasepath, indexconf, project, repository, identifier, path, lastrev, action,
@@ -310,27 +310,27 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
 
 def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_to)  
   if diff_from.id >= diff_to.id
-    log "Already indexed: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"    
+    my_log "Already indexed: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
     return
   end
 
-	log "Indexing diff: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
-	log "Indexing all: #{repo_name(repository)}"
+	my_log "Indexing diff: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
+	my_log "Indexing all: #{repo_name(repository)}"
   
 	if repository.branches
     repository.branches.each do |branch|
-    log "Walking in branch: #{repo_name(repository)} - #{branch}"
+    my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
     walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets('', branch,
       diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	else
-    log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
+    my_log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
     walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets('', nil,
       diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
 	end
 	if repository.tags
     repository.tags.each do |tag|
-      log "Walking in tag: #{repo_name(repository)} - #{tag}"
+      my_log "Walking in tag: #{repo_name(repository)} - #{tag}"
       walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets('', tag,
         diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
     end
@@ -369,7 +369,7 @@ def convert_to_text(fpath, type)
         text = File.read(fout)
         FileUtils.rm_rf("#{$tempdir}/temp") 
       rescue Exception => e
-        log "Error: #{e.to_s} reading #{fout}", true
+        my_log "Error: #{e.to_s} reading #{fout}", true
       end
     else
       text = `#{FORMAT_HANDLERS[type]} #{fpath}`
@@ -393,9 +393,9 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     text = convert_to_text("#{$tempdir}/#{fname}", type) if File.exist?("#{$tempdir}/#{fname}") and !bstr.nil?
     File.unlink("#{$tempdir}/#{fname}")
   end  
-  log "generated uri: #{uri}"
-  log('Mime type text') if  Redmine::MimeType.is_type?('text', path)
-  log "Indexing: #{path}"
+  my_log "generated uri: #{uri}"
+  my_log('Mime type text') if  Redmine::MimeType.is_type?('text', path)
+  my_log "Indexing: #{path}"
   begin
     itext = Tempfile.new('filetoindex.tmp', $tempdir) 
     itext.write("url=#{uri.to_s}\n")
@@ -413,20 +413,20 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
         end
       end      
     else      
-      log "Path: #{path} should be deleted"
+      my_log "Path: #{path} should be deleted"
     end
     itext.close    
-    log "TEXT #{itext.path} generated"
-    log "Index command: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}"    
+    my_log "TEXT #{itext.path} generated"
+    my_log "Index command: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}"
     system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path}")
     itext.unlink    
-    log 'New doc added to xapian database'
+    my_log 'New doc added to xapian database'
   rescue Exception => e        
-    log e.message, true
+    my_log e.message, true
   end
 end
 
-def log(text, error = false)  
+def my_log(text, error = false)
   if error
     $stderr.puts text
   elsif $verbose > 0    
@@ -445,69 +445,69 @@ end
 def find_project(prt)        
   project = Project.active.has_module(:repository).find_by(identifier: prt)
   if project
-    log "Project found: #{project}"
+    my_log "Project found: #{project}"
   else
-    log "Project #{prt} not found", true
+    my_log "Project #{prt} not found", true
   end    
   @project = project
 end
 
-log "Trying to load Redmine environment <<#{$environment}>>..."
+my_log "Trying to load Redmine environment <<#{$environment}>>..."
 
 begin
  require $environment
 rescue LoadError
-  log "Redmine #{$environment} cannot be loaded!! Be sure the redmine installation directory is correct!", true
-  log "Edit script and correct path", true
+  my_log "Redmine #{$environment} cannot be loaded!! Be sure the redmine installation directory is correct!", true
+  my_log "Edit script and correct path", true
   exit 1
 end
 
-log "Redmine environment [RAILS_ENV=#{$env}] correctly loaded ..."
+my_log "Redmine environment [RAILS_ENV=#{$env}] correctly loaded ..."
 
 # Indexing files
 unless $onlyrepos
   unless File.exist?($omindex)
-    log "#{$omindex} does not exist, exiting...", true
+    my_log "#{$omindex} does not exist, exiting...", true
     exit 1
   end
   $stem_langs.each do | lang |
     filespath = File.join($redmine_root, $files)
     unless File.directory?(filespath)
-      log "An error while accessing #{filespath}, exiting...", true
+      my_log "An error while accessing #{filespath}, exiting...", true
       exit 1
     end
     databasepath = File.join($dbrootpath, lang)
     unless File.directory?(databasepath)
-      log "#{databasepath} does not exist, creating ..."
+      my_log "#{databasepath} does not exist, creating ..."
       begin
         FileUtils.mkdir_p databasepath
       rescue Exception => e
-        log e.message, true
+        my_log e.message, true
         exit 1
       end      
     end
     cmd = "#{$omindex} -s #{lang} --db #{databasepath} #{filespath} --url / --depth-limit=0"
     cmd << ' -v' if $verbose > 0
     cmd << ' --retry-failed' if $retryfailed
-    log cmd    
+    my_log cmd
     system_or_raise (cmd)
   end
-  log 'Redmine files indexed'
+  my_log 'Redmine files indexed'
 end
 
 # Indexing repositories
 unless $onlyfiles
   unless File.exist?($scriptindex)
-    log "#{$scriptindex} does not exist, exiting...", true
+    my_log "#{$scriptindex} does not exist, exiting...", true
     exit 1
   end
   databasepath = File.join($dbrootpath.rstrip, 'repodb')  
   unless File.directory?(databasepath)
-    log "Db directory #{databasepath} does not exist, creating..."
+    my_log "Db directory #{databasepath} does not exist, creating..."
     begin
       FileUtils.mkdir_p databasepath
     rescue Exception => e
-      log e.message, true
+      my_log e.message, true
       exit 1
     end     
   end
@@ -515,14 +515,14 @@ unless $onlyfiles
   $projects.each do |identifier|
     project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first
     if project
-      log "- Indexing repositories for #{project}..."
+      my_log "- Indexing repositories for #{project}..."
       repositories = project.repositories.select { |repository| repository.supports_cat? }
       repositories.each do |repository|
         delete_log(repository) if ($resetlog)
         indexing(databasepath, project, repository)
       end
     else
-      log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."
+      my_log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."
     end
   end
 end
