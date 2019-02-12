@@ -134,7 +134,7 @@ optparse = OptionParser.new do |opts|
   opts.on('-e', '--environment ENV',
           'Rails ENVIRONMENT (development, testing or production), default production') { |e| $env = e}
   opts.on('-t', '--temp-dir PATH',      'Temporary directory for indexing'){ |t| $tempdir = t }  
-  opts.on('-x', '--resetlog',           'Reset index my_log'){  $resetlog = 1 }
+  opts.on('-x', '--resetlog',           'Reset index log'){  $resetlog = 1 }
   opts.on('-V', '--version',            'show version and exit') { puts VERSION; exit}
   opts.on('-h', '--help',               'show help and exit') { puts opts; exit }
   opts.on('-R', '--retry-failed', 'retry files which omindex failed to extract text') { $retryfailed = 1 }
