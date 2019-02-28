@@ -36,18 +36,22 @@
 <label><%= check_box_tag 'titles_only', 1, @titles_only %> <%= l(:label_search_titles_only) %></label>
 </p>
 
+<fieldset class="box">
+<legend><%= toggle_checkboxes_link('p#search-types input') %></legend>
 <p id="search-types">
-<% @object_types.each do |t| %>
-        <label>
-          <%= check_box_tag t, 1, @scope.include?(t) %>
-          <% # Plugin change start %>
-          <%#= link_to type_label(t), "#" %>
-          <%= link_to type_label(t == 'attachments' ? 'file-attachment' : t), '#' %>
-          <% # Plugin change end %>
-        </label>
-<% end %>
+  <% @object_types.each do |t| %>
+    <label>
+      <%= check_box_tag t, 1, @scope.include?(t) %>
+      <%# Plugin change do %>
+        <%#= link_to type_label(t), "#" %>
+        <%= link_to type_label(t == 'attachments' ? 'file-attachment' : t), '#' %>
+      <%# end %>
+    </label>
+  <% end %>
 </p>
-<% # Plugin change start %>
+</fieldset>
+
+  <% # Plugin change start %>
 <!--
 <fieldset class="collapsible collapsed">
   <legend onclick="toggleFieldset(this);"><%#= l(:label_options) %></legend>
