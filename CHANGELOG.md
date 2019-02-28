@@ -1,6 +1,15 @@
 Changelog for Redmine Xapian
 ==========================
 
+2.0.0 *2019-02-28*
+------------------
+
+    Compatibility with Redmine 4.0.0
+    
+
+* Bug: #95 - Exception thrown when I run ruby xapian_indexer.rb -v -f
+* New: #94 - Please make it compatible with Redmine 4.0.0 
+
 1.6.9 *2018-12-04*
 ------------------
 

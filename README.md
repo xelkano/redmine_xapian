@@ -1,7 +1,7 @@
 Redmine Xapian search plugin
 ============================
 
-The current version of Redmine Xapian is **1.6.9** [![Build Status](https://api.travis-ci.org/danmunn/redmine_dmsf.png)](https://travis-ci.org/xelkano/redmine_xapian)
+The current version of Redmine Xapian is **2.0.0** [![Build Status](https://api.travis-ci.org/danmunn/redmine_dmsf.png)](https://travis-ci.org/xelkano/redmine_xapian)
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
 search engine](https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
 replaces search controller, its view and search methods.
@@ -12,7 +12,7 @@ A copy of the plugin can be downloaded from  Github at https://github.com/xelkan
 
 ### 1.1. Required packages
 
-Redmine >= 3.0
+Redmine >= 4.0
 
 To use the full-text search engine you must install ruby-xapian and xapian-omega packages. In case of using of Bitnami 
 stack or Ruby installed via RVM it might be necessary to install Xapian bindings from sources.  See https://xapian.org
