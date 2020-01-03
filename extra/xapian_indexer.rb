@@ -1,6 +1,7 @@
 #!/usr/bin/ruby -W0
 
 # encoding: utf-8
+# frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
@@ -115,7 +116,7 @@ FORMAT_HANDLERS = {
   rtf: $unrtf
 }.freeze
 
-VERSION = '0.2'.freeze
+VERSION = '0.2'
 
 optparse = OptionParser.new do |opts|
   opts.banner = 'Usage: xapian_indexer.rb [OPTIONS...]'
@@ -255,7 +256,7 @@ def indexing_all(databasepath, indexconf, project, repository)
         walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
       end
     end
-  rescue Exception => e
+  rescue => e
     my_log "#{repo_name(repository)} encountered an error and will be skipped: #{e.message}", true
     raise IndexingError.new(e.message)
   end
@@ -355,7 +356,7 @@ def convert_to_text(fpath, type)
       begin
         text = File.read(fout)
         FileUtils.rm_rf("#{$tempdir}/temp") 
-      rescue Exception => e
+      rescue => e
         my_log "Error: #{e.to_s} reading #{fout}", true
       end
     else
@@ -408,7 +409,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path}")
     itext.unlink    
     my_log 'New doc added to xapian database'
-  rescue Exception => e        
+  rescue => e
     my_log e.message, true
   end
 end
@@ -468,12 +469,12 @@ unless $onlyrepos
       my_log "#{databasepath} does not exist, creating ..."
       begin
         FileUtils.mkdir_p databasepath
-      rescue Exception => e
+      rescue => e
         my_log e.message, true
         exit 1
       end      
     end
-    cmd = "#{$omindex} -s #{lang} --db #{databasepath} #{filespath} --url / --depth-limit=0"
+    cmd = +"#{$omindex} -s #{lang} --db #{databasepath} #{filespath} --url / --depth-limit=0"
     cmd << ' -v' if $verbose > 0
     cmd << ' --retry-failed' if $retryfailed
     my_log cmd
@@ -493,7 +494,7 @@ unless $onlyfiles
     my_log "Db directory #{databasepath} does not exist, creating..."
     begin
       FileUtils.mkdir_p databasepath
-    rescue Exception => e
+    rescue => e
       my_log e.message, true
       exit 1
     end     

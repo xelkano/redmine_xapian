@@ -1,4 +1,5 @@
 # encoding: utf-8
+# frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
@@ -27,7 +28,7 @@ class AttachmentTest < ActiveSupport::TestCase
     :roles
 
   def setup    
-    @admin = User.active.where(:admin => true).first
+    @admin = User.active.where(admin: true).first
     @projects_to_search = Project.active.all    
   end
 
@@ -37,12 +38,12 @@ class AttachmentTest < ActiveSupport::TestCase
       ['xyz'], 
       @admin, 
       @projects_to_search, 
-      { :all_words => true,        
-        :titles_only => '',    
-        :offset => nil,
-        :before => false,
-        :user_stem_lang => '',
-        :user_stem_strategy => ''})
+      { all_words: true,
+        titles_only: '',
+        offset: nil,
+        before: false,
+        user_stem_lang: '',
+        user_stem_strategy: ''})
     assert true
   end
       

@@ -1,4 +1,5 @@
 # encoding: utf-8
+# frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
@@ -186,7 +187,7 @@ module RedmineXapian
                 repository_attachment.filename = repo_filename
                 begin
                   repository_attachment.created_on = dochash[:date].to_datetime
-                rescue Exception => e
+                rescue => e
                   Rails.logger.error e.message
                   repository_attachment.created_on = Time.at(0)
                 end

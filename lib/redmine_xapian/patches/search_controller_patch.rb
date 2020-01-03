@@ -1,4 +1,5 @@
 # encoding: utf-8
+# frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
@@ -91,7 +92,7 @@ module RedmineXapian
             @project
           end
 
-        @object_types = Redmine::Search.available_search_types.dup
+        @object_types = Redmine::Search.available_search_types
         if projects_to_search.is_a? Project
           # don't search projects
           @object_types.delete('projects')

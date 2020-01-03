@@ -1,4 +1,5 @@
 # encoding: utf-8
+# frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
@@ -79,7 +80,7 @@ module RedmineXapian
 
         def search_for_issues_attachments(user, search_data)
           results = []
-          sql = "#{Attachment.table_name}.container_type = 'Issue' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_issues)}"
+          sql = +"#{Attachment.table_name}.container_type = 'Issue' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_issues)}"
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
           Attachment.joins("JOIN #{Issue.table_name} ON #{Attachment.table_name}.container_id = #{Issue.table_name}.id")
             .joins("JOIN #{Project.table_name} ON #{Issue.table_name}.project_id = #{Project.table_name}.id")
@@ -95,7 +96,7 @@ module RedmineXapian
 
         def search_for_message_attachments(user, search_data)
           results = []
-          sql = "#{Attachment.table_name}.container_type = 'Message' AND #{Project.table_name}.status = ?"
+          sql = +"#{Attachment.table_name}.container_type = 'Message' AND #{Project.table_name}.status = ?"
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
           Attachment.joins("JOIN #{Message.table_name} ON #{Attachment.table_name}.container_id = #{Message.table_name}.id")
             .joins("JOIN #{Board.table_name} ON #{Board.table_name}.id = #{Message.table_name}.board_id")
@@ -112,7 +113,7 @@ module RedmineXapian
 
         def search_for_wiki_page_attachments(user, search_data)
           results = []
-          sql = "#{Attachment.table_name}.container_type = 'WikiPage' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_wiki_pages)}"
+          sql = +"#{Attachment.table_name}.container_type = 'WikiPage' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_wiki_pages)}"
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
           Attachment.joins("JOIN #{WikiPage.table_name} ON #{Attachment.table_name}.container_id = #{WikiPage.table_name}.id")
             .joins("JOIN #{Wiki.table_name} ON #{Wiki.table_name}.id = #{WikiPage.table_name}.wiki_id")
@@ -129,7 +130,7 @@ module RedmineXapian
 
         def search_for_project_files(user, search_data)
           results = []
-          sql = "container_type = 'Project' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_files)}"
+          sql = +"container_type = 'Project' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_files)}"
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
           Attachment.joins("JOIN #{Project.table_name} ON #{Project.table_name}.id = container_id")
             .where(sql, Project::STATUS_ACTIVE).scoping do
@@ -155,7 +156,7 @@ module RedmineXapian
         end
 
         def container_name
-          container_name = ': '
+          container_name = +': '
           if container.is_a? Issue
             container_name += container[:subject].to_s
           elsif container.is_a? WikiPage

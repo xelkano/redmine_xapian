@@ -19,5 +19,5 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-bundle exec rake redmine:plugins:test:units NAME=redmine_xapian
-bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian
+bundle exec rake redmine:plugins:test:units NAME=redmine_xapian RAILS_ENV=test
+bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian RAILS_ENV=test

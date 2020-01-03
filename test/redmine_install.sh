@@ -12,7 +12,7 @@ export PATH_TO_PLUGINS=./plugins
 export GENERATE_SECRET=generate_secret_token
 export MIGRATE_PLUGINS=redmine:plugins:migrate
 export REDMINE_GIT_REPO=git://github.com/redmine/redmine.git
-export REDMINE_GIT_TAG=3.4-stable
+export REDMINE_GIT_TAG=4.1-stable
 
 clone_redmine()
 {
