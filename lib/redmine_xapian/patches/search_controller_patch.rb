@@ -27,8 +27,7 @@ module RedmineXapian
       SearchController.helper ::RedmineXapian::SearchHelper
 
       def index
-        @question = params[:q] || ""
-        @question.strip!
+        @question = params[:q]&.strip || ""
         # Plugin change do
         #@all_words = params[:all_words] ? params[:all_words].present? : true
         #@titles_only = params[:titles_only] ? params[:titles_only].present? : false
