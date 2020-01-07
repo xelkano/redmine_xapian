@@ -32,6 +32,14 @@ class AttachmentTest < ActiveSupport::TestCase
     @projects_to_search = Project.active.all    
   end
 
+  def test_plugin
+    begin
+      plugin = Plugin.find('redmine_xapian')
+    rescue PluginNotFound
+      assert false, "Plugin 'redmine_xapian' not found; pwd = '#{Dir.pwd}'; ls = '#{Dir.entries('.').join('\n')}'"
+    end
+  end
+
   
   def test_attachment_search
     Attachment.search_result_ranks_and_ids(
