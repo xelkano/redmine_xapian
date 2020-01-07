@@ -36,7 +36,7 @@ class AttachmentTest < ActiveSupport::TestCase
     begin
       plugin = Redmine::Plugin.find('redmine_xapian')
     rescue => e
-      assert false, "#{e.message}; pwd = '#{Dir.pwd}'; ls = '#{Dir.entries('plugins').join(' ')}'"
+      assert false, "#{e.message}; pwd = '#{Dir.pwd}'; plugin_dir = '#{File.join(Rails.root, 'plugins')}'; ls = '#{Dir.entries('plugins').join(' ')}'"
     end
   end
 
