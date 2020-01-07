@@ -30,6 +30,8 @@ class SearchControllerTest < Redmine::ControllerTest
   def setup    
     attachment = Attachment.find_by(id: 1)
     @xapian_data = attachment ? [[attachment.created_on, attachment.id]] : []
+    Setting.load_available_settings
+    Setting.load_plugin_settings
   end
 
   def test_search_with_xapian
