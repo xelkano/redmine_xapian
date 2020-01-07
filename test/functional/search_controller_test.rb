@@ -20,10 +20,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require 'simplecov'
 require File.dirname(__FILE__) + '/../test_helper'
 
-class SearchControllerTest < ActionController::TestCase
+class SearchControllerTest < Redmine::ControllerTest
+  tests SearchController
   fixtures :attachments, :changesets, :documents, :issues, :messages, :news, 
     :wiki_pages, :projects, :users
 
@@ -34,14 +34,14 @@ class SearchControllerTest < ActionController::TestCase
 
   def test_search_with_xapian
     RedmineXapian::XapianSearchService.expects(:search).returns(@xapian_data).once
-    #get :index, params: { q: 'xyz', attachments: true, titles_only: '' }
-    #assert_response :success
+    get :index, params: { q: 'xyz', attachments: true, titles_only: '' }
+    assert_response :success
   end
 
   def test_search_without_xapian
     RedmineXapian::XapianSearchService.expects(:search).never
-    #get :index, params: { q: 'xyz', attachments: true, titles_only: true }
-    #assert_response :success
+    get :index, params: { q: 'xyz', attachments: true, titles_only: true }
+    assert_response :success
   end 
 
 end

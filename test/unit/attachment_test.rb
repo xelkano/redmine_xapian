@@ -20,8 +20,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require 'simplecov'
 require File.dirname(__FILE__) + '/../test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../../lib/redmine_xapian')
 
 class AttachmentTest < ActiveSupport::TestCase
   fixtures :users, :projects, :issues, :issue_statuses, :documents, :attachments, 

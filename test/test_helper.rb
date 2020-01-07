@@ -20,17 +20,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-if RUBY_VERSION >= '1.9'
+require 'simplecov'
 
-  SimpleCov.start do
-    redmine_xapian_base = File.expand_path(File.dirname(__FILE__) + '/../')
-    root redmine_xapian_base
-    add_group 'Models', 'app/models'
-    add_group 'Controllers', 'app/controllers'
-    add_group 'Helpers', 'app/helpers'
-    add_group 'Views', 'app/views'
-    add_group 'Lib', 'lib'
-  end
+SimpleCov.start do
+  add_group 'Models', 'plugins/redmine_xapian/app/models'
+  add_group 'Views', 'plugins/redmine_xapian/app/views'
+  add_group 'Config', 'plugins/redmine_xapian/config'
+  add_group 'Library', 'plugins/redmine_xapian/lib'
+  add_group 'Test', 'plugins/redmine_xapian/test'
 end
 
 # Load the normal Rails helper
