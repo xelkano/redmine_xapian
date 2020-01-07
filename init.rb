@@ -41,7 +41,7 @@ else
     version '2.0.1 devel'
     requires_redmine version_or_higher: '4.0.0'
 
-    settings partial: 'redmine_xapian_settings',
+    settings partial: 'settings/redmine_xapian_settings',
       default: {
         'enable' => true,
         'index_database' => File.expand_path('file_index', Rails.root),
