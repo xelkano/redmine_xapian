@@ -35,8 +35,8 @@ class AttachmentTest < ActiveSupport::TestCase
   def test_plugin
     begin
       plugin = Plugin.find('redmine_xapian')
-    rescue PluginNotFound
-      assert false, "Plugin 'redmine_xapian' not found; pwd = '#{Dir.pwd}'; ls = '#{Dir.entries('.').join('\n')}'"
+    rescue => e
+      assert false, "#{e.message}; pwd = '#{Dir.pwd}'; ls = '#{Dir.entries('.').join('\n')}'"
     end
   end
 
