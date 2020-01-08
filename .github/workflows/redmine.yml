@@ -9,18 +9,9 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - v2.4.x
-          - v2.5.x
           - v2.6.x
         redmine:
-          - 3.4-stable
           - 4.0-stable
-          - master
-        exclude:
-          - ruby: v2.5.x
-            redmine: 3.4-stable
-          - ruby: v2.6.x
-            redmine: 3.4-stable
 
     steps:
       - uses: actions/checkout@v1
