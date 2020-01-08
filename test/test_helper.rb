@@ -32,3 +32,10 @@ end
 
 # Load the normal Rails helper
 require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')
+
+# Register plugins
+begin
+  plugin = Redmine::Plugin.find('redmine_xapian')
+rescue => e
+  Redmine::Plugin.load
+end

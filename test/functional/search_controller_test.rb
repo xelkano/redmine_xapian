@@ -33,8 +33,7 @@ class SearchControllerTest < Redmine::ControllerTest
   end
 
   def test_search_with_xapian
-    # TODO: Doesn't work in GitHub Actions
-    #RedmineXapian::XapianSearchService.expects(:search).returns(@xapian_data).once
+    RedmineXapian::XapianSearchService.expects(:search).returns(@xapian_data).once
     get :index, params: { q: 'xyz', attachments: true, titles_only: '' }
     assert_response :success
   end

@@ -31,8 +31,7 @@ module RedmineXapian
         # Plugin change do
         #@all_words = params[:all_words] ? params[:all_words].present? : true
         #@titles_only = params[:titles_only] ? params[:titles_only].present? : false
-        # TODO: Setting.plugin_redmine_xapia doesn't work in GitHub Actions
-        if defined?(Setting.plugin_redmine_xapian) && Setting.plugin_redmine_xapian['save_search_scope']
+        if Setting.plugin_redmine_xapian['save_search_scope']
           if params[:all_words]
             @all_words = params[:all_words].present?
             @titles_only = params[:titles_only].present?
@@ -116,7 +115,7 @@ module RedmineXapian
         @scope = @object_types.select {|t| params[t]}
         # Plugin change do
         # TODO: Setting.plugin_redmine_xapia doesn't work in GitHub Actions
-        if defined?(Setting.plugin_redmine_xapian) && Setting.plugin_redmine_xapian['save_search_scope']
+        if Setting.plugin_redmine_xapian['save_search_scope']
           if @scope.empty?
             pref = User.current.pref[:xapian_search_scope]
             @scope =  pref & @object_types if pref

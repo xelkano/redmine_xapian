@@ -32,17 +32,14 @@ class AttachmentTest < ActiveSupport::TestCase
     @projects_to_search = Project.active.all    
   end
 
-  def test_plugin
+  def test_truth
     begin
       plugin = Redmine::Plugin.find('redmine_xapian')
     rescue => e
-      assert Dir.exists?(File.join(Rails.root, 'plugins', 'redmine_xapian'))
-      assert Dir.exists?(File.join(Dir.pwd, 'plugins', 'redmine_xapian'))
-      assert false, "#{e.message}; pwd = '#{Dir.pwd}'; plugin_dir = '#{File.join(Rails.root, 'plugins')}'; ls = '#{Dir.entries('plugins').join(' ')}'; plugins: #{Redmine::Plugin.all}"
+      assert false, "Plugin 'redmine_xapian' is not registered"
     end
   end
 
-  
   def test_attachment_search
     Attachment.search_result_ranks_and_ids(
       ['xyz'], 
