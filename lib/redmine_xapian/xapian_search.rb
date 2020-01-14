@@ -41,8 +41,8 @@ module RedmineXapian
 
       begin
         database = Xapian::Database.new(databasepath)
-      rescue => error
-        Rails.logger.error "Can't open Xapian database #{$databasepath} - #{error.inspect}"
+      rescue => e
+        Rails.logger.error "Can't open Xapian database #{databasepath} - #{e.inspect}"
         return nil
       end
 
