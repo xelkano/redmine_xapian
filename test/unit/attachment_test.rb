@@ -32,11 +32,7 @@ class AttachmentTest < ActiveSupport::TestCase
   end
 
   def test_truth
-    begin
-      plugin = Redmine::Plugin.find('redmine_xapian')
-    rescue => e
-      assert false, "Plugin 'redmine_xapian' is not registered"
-    end
+    assert_kind_of User, @admin
   end
 
   def test_attachment_search
