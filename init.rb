@@ -38,8 +38,8 @@ else
     author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
     description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-    version '2.0.1 devel'
-    requires_redmine version_or_higher: '4.0.0'
+    version '2.0.1'
+    requires_redmine version_or_higher: '4.1.0'
 
     settings partial: 'settings/redmine_xapian_settings',
       default: {
