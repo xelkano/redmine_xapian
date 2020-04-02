@@ -70,7 +70,7 @@ module RedmineXapian
 
         # Plugin change do
         # A hook allowing plugins to implement a quick jump to an object
-        ret = call_hook(:controller_search_quick_jump, { :question => @question })
+        ret = call_hook(:controller_search_quick_jump, { question: @question })
         ret.each do |path|
           if path
             redirect_to path
@@ -104,9 +104,9 @@ module RedmineXapian
               # Files/Attachments option is always visible
               true
             when 'repofiles'
-              User.current.allowed_to?('browse_repository'.to_sym, projects_to_search)
+              User.current.allowed_to? 'browse_repository'.to_sym, projects_to_search
             else
-              User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)
+              User.current.allowed_to? "view_#{o}".to_sym, projects_to_search
             end
           end
           # end
@@ -114,7 +114,7 @@ module RedmineXapian
 
         @scope = @object_types.select {|t| params[t]}
         # Plugin change do
-        # TODO: Setting.plugin_redmine_xapia doesn't work in GitHub Actions
+        # TODO: Setting.plugin_redmine_xapian doesn't work in GitHub Actions
         if Setting.plugin_redmine_xapian['save_search_scope']
           if @scope.empty?
             pref = User.current.pref[:xapian_search_scope]

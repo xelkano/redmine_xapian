@@ -145,13 +145,13 @@ module RedmineXapian
 
         def container_url
           if container.is_a? Issue
-            issue_path(:id => container[:id])
+            issue_path id: container[:id]
           elsif container.is_a? WikiPage
-            wiki_path(:project_id => container.project.identifier, :id => container[:title])
+            wiki_path project_id: container.project.identifier, id: container[:title]
           elsif container.is_a? Message
-            message_path(:board_id => container[:board_id], :id => container[:id])
+            message_path board_id: container[:board_id], id: container[:id]
           elsif container.is_a? Version
-            attachment_path(:project_id => container[:project_id])
+            attachment_path project_id: container[:project_id]
           end
         end
 
@@ -170,7 +170,7 @@ module RedmineXapian
         end
 
         def search_options(search_data, search_joins_query)
-          search_data.find_options.merge(:joins => search_joins_query)
+          search_data.find_options.merge joins: search_joins_query
         end
 
         def tokens_condition(search_data)
@@ -189,5 +189,5 @@ module RedmineXapian
   end
 end
 
-Attachment.send(:include, RedmineXapian::Patches::AttachmentPatch)
-Attachment.send(:prepend, RedmineXapian::Patches::AttachmentPatch)
+Attachment.send :include, RedmineXapian::Patches::AttachmentPatch
+Attachment.send :prepend, RedmineXapian::Patches::AttachmentPatch

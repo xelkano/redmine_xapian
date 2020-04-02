@@ -169,7 +169,7 @@ def indexing(databasepath, project, repository)
     latest_changeset = repository.changesets.first    
     return unless latest_changeset
     my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
-    latest_indexed = Indexinglog.where(:repository_id => repository.id, :status => STATUS_SUCCESS).last
+    latest_indexed = Indexinglog.where(repository_id: repository.id, status: STATUS_SUCCESS).last
     my_log "Latest indexed: #{latest_indexed.inspect}"
     begin
       indexconf = Tempfile.new('index.conf', $tempdir)
@@ -187,9 +187,9 @@ def indexing(databasepath, project, repository)
       end
       indexconf.unlink
     rescue IndexingError => e
-      add_log(repository, latest_changeset, STATUS_FAIL, e.message)
+      add_log repository, latest_changeset, STATUS_FAIL, e.message
     else
-      add_log(repository, latest_changeset, STATUS_SUCCESS)
+      add_log repository, latest_changeset, STATUS_SUCCESS
       my_log "Successfully indexed: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
     end
 end
@@ -200,7 +200,7 @@ def supported_mime_type(entry)
 end
 
 def add_log(repository, changeset, status, message = nil)
-  log = Indexinglog.where(:repository_id => repository.id).last
+  log = Indexinglog.where(repository_id: repository.id).last
   if log
     log.changeset_id = changeset.id
     log.status = status
@@ -220,7 +220,7 @@ end
 
 
 def delete_log(repository)
-  Indexinglog.where(:repository_id => repository.id).delete_all
+  Indexinglog.where(repository_id: repository.id).delete_all
   my_log "Log for repo #{repo_name(repository)} removed!"
 end
 
@@ -326,13 +326,8 @@ def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_
 end
 
 def generate_uri(project, repository, identifier, path)
-  Rails.application.routes.url_helpers.url_for(:controller => 'repositories',
-			:action => 'entry',
-			:id => project.identifier,
-			:repository_id => repository.identifier,
-			:rev => identifier,
-			:path => repository.relative_path(path),
-			:only_path => true)
+  Rails.application.routes.url_helpers.url_for controller: 'repositories', action: 'entry', id: project.identifier,
+			repository_id: repository.identifier, rev: identifier, path: repository.relative_path(path), only_path: true
 end
 
 def convert_to_text(fpath, type)
@@ -340,9 +335,9 @@ def convert_to_text(fpath, type)
   return text unless File.exist?(FORMAT_HANDLERS[type].split(' ').first)
   case type
     when 'pdf'    
-      text = `#{FORMAT_HANDLERS[type]} #{fpath} -`
+      text = "#{FORMAT_HANDLERS[type]} #{fpath} -"
     when /(xlsx|docx|odt|pptx)/i
-      system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", :out=>'/dev/null'
+      system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", out: '/dev/null'
       case type
         when 'xlsx'
           fout = "#{$tempdir}/temp/xl/sharedStrings.xml"
@@ -355,12 +350,12 @@ def convert_to_text(fpath, type)
         end                
       begin
         text = File.read(fout)
-        FileUtils.rm_rf("#{$tempdir}/temp") 
+        FileUtils.rm_rf "#{$tempdir}/temp"
       rescue => e
         my_log "Error: #{e.to_s} reading #{fout}", true
       end
     else
-      text = `#{FORMAT_HANDLERS[type]} #{fpath}`
+      text = "#{FORMAT_HANDLERS[type]} #{fpath}"
   end
   text
 end
@@ -378,8 +373,8 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
       bs.write(bstr)
     end
-    text = convert_to_text("#{$tempdir}/#{fname}", type) if File.exist?("#{$tempdir}/#{fname}") and !bstr.nil?
-    File.unlink("#{$tempdir}/#{fname}")
+    text = convert_to_text("#{$tempdir}/#{fname}", type) if File.exist?("#{$tempdir}/#{fname}") && !bstr.nil?
+    File.unlink "#{$tempdir}/#{fname}"
   end
   my_log "generated uri: #{uri}"
   my_log('Mime type text') if  Redmine::MimeType.is_type?('text', path)
@@ -406,7 +401,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     itext.close    
     my_log "TEXT #{itext.path} generated"
     my_log "Index command: #{$scriptindex} -s #{$user_stem_lang} #{databasepath} #{indexconf.path} #{itext.path}"
-    system_or_raise("#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path}")
+    system_or_raise "#{$scriptindex} -s english #{databasepath} #{indexconf.path} #{itext.path}"
     itext.unlink    
     my_log 'New doc added to xapian database'
   rescue => e

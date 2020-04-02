@@ -92,7 +92,7 @@ module RedmineXapian
       matchset.matches.each do |m|
         if xapian_file == 'Repofile'
           if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
-            dochash = { :date => $1, :sample => $2, :url => URI.unescape($3) }
+            dochash = { date: $1, sample: $2, url: URI.unescape($3) }
             repo_file = process_repo_file(projects_to_search, dochash, user, i)
             if repo_file
               xpattachments << repo_file
@@ -166,14 +166,14 @@ module RedmineXapian
         Rails.logger.debug "Repository identifier: #{repo_identifier}"
         repo_filename = $6
         Rails.logger.debug "Repository file: #{repo_filename}"
-        repo_revision = (!$2.nil? ? $2 : "") + (!$4.nil? ? $4 : "") + (!$5.nil? ? $5 : "") +(!$7.nil? ? $7 : "")
+        repo_revision = (!$2.nil? ? $2 : '') + (!$4.nil? ? $4 : '') + (!$5.nil? ? $5 : '') +(!$7.nil? ? $7 : '')
         Rails.logger.debug "Repository revision: #{repo_revision}"
-        project = Project.where(:identifier => repo_project_identifier).first
+        project = Project.where(identifier: repo_project_identifier).first
         if project
-          if repo_identifier != ""
-            repository = Repository.where(:project_id => project.id, :identifier => repo_identifier).first if project
+          if repo_identifier != ''
+            repository = Repository.where(project_id: project.id, identifier: repo_identifier).first if project
           else
-            repository = Repository.where(:project_id => project.id).first if project
+            repository = Repository.where(project_id: project.id).first if project
           end
           if repository
             Rails.logger.debug "Repository found #{repository.identifier}"
@@ -195,7 +195,7 @@ module RedmineXapian
                 if dochash[:sample]
                   if dochash[:sample] != 'UTF-8'
                     repository_attachment.description = dochash[:sample].encode('UTF-8', dochash[:sample].encoding,
-                     :invalid => :replace, :undef => :replace)
+                     invalid: :replace, undef: :replace)
                   else
                     repository_attachment.description = dochash[:sample]
                   end
@@ -204,10 +204,11 @@ module RedmineXapian
                 repository_attachment.id = id
                 repository_attachment.url = dochash[:url]
                 repository_attachment.revision = repo_revision
-                h = { :filename => repository_attachment.filename, :created_on => repository_attachment.created_on.to_s,
-                  :project_id => repository_attachment.project_id, :description => repository_attachment.description,
-                  :repository_id => repository_attachment.repository_id, :url => repository_attachment.url, :revision => repository_attachment.revision }
-                Redmine::Search.cache_store.write("Repofile-#{repository_attachment.id}", h.to_s)
+                h = { filename: repository_attachment.filename, created_on: repository_attachment.created_on.to_s,
+                      project_id: repository_attachment.project_id, description: repository_attachment.description,
+                      repository_id: repository_attachment.repository_id, url: repository_attachment.url,
+                      revision: repository_attachment.revision }
+                Redmine::Search.cache_store.write "Repofile-#{repository_attachment.id}", h.to_s
               else
                 Rails.logger.warn 'No projects to search in'
               end
@@ -228,10 +229,10 @@ module RedmineXapian
 
     def get_database_path(xapian_file)
       if xapian_file == 'Repofile'
-        File.join(Setting.plugin_redmine_xapian['index_database'].rstrip, 'repodb')
+        File.join Setting.plugin_redmine_xapian['index_database'].rstrip, 'repodb'
       else
-        File.join(Setting.plugin_redmine_xapian['index_database'].rstrip,
-          Setting.plugin_redmine_xapian['stemming_lang'].rstrip )
+        File.join Setting.plugin_redmine_xapian['index_database'].rstrip,
+          Setting.plugin_redmine_xapian['stemming_lang'].rstrip
       end
     end
 

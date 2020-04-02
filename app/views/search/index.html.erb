@@ -20,9 +20,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 %>
+
+<% # Plugin change do %>
 <% content_for :header_tags do %>
-   <%= stylesheet_link_tag "redmine_xapian.css", :plugin => "redmine_xapian", :media => "screen" %>
+   <%= stylesheet_link_tag 'redmine_xapian.css', plugin: 'redmine_xapian', media: 'screen' %>
 <% end %>
+<% #end %>
+
 <h2><%= l(:label_search) %></h2>
 
 <%= form_tag({}, :method => :get, :id => 'search-form') do %>
@@ -51,7 +55,7 @@
 </p>
 </fieldset>
 
-  <% # Plugin change start %>
+  <% # Plugin change do %>
 <!--
 <fieldset class="collapsible collapsed">
   <legend onclick="toggleFieldset(this);"><%#= l(:label_options) %></legend>
@@ -82,14 +86,14 @@
           <dt class="<%= e.event_type %> icon icon-<%= e.event_type %>">
           <% # Plugin change start %>
           <%#= content_tag('span', e.project, :class => 'project') unless @project == e.project %>
-          <%= content_tag('span', link_to(e.project, project_path(e.project)), :class => 'project') unless @project == e.project  %>
+          <%= content_tag('span', link_to(e.project, project_path(e.project)), class: 'project') unless @project == e.project  %>
           <% if e.event_type == 'attachment' %>
-              <%= link_to_container(e) %>
+              <%= link_to_container e %>
           <% else %>
-              <%= call_hook(:view_search_index_container, :object => e) %>
+              <%= call_hook :view_search_index_container, object: e %>
           <% end %>
-          <%= content_tag('span', h(e.format_identifier), :class => 'identifier') if defined?(e.format_identifier) && !e.format_identifier.empty? %> 
-          <% # Plugin change end %>
+          <%= content_tag('span', h(e.format_identifier), class: 'identifier') if defined?(e.format_identifier) && !e.format_identifier.empty? %>
+          <% # end %>
           <%= link_to(highlight_tokens(e.event_title.truncate(255), @tokens), e.event_url) %>
         </dt>
         <dd><span class="description"><%= highlight_tokens(e.event_description, @tokens) %></span>

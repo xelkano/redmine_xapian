@@ -60,7 +60,7 @@ module RedmineXapian
       end
 
       def init_find_options(options)
-        find_options = {:include => searchable_options[:include]}
+        find_options = { include: searchable_options[:include] }
         find_options[:order] = "#{searchable_options[:order_column]} " + (options[:before] ? 'DESC' : 'ASC')
         @find_options = find_options
       end

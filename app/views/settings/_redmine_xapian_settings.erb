@@ -22,36 +22,36 @@
 %>
 
 <p>
-  <%= content_tag(:label, l(:label_enable_redmine_xapian)) %>
+  <%= content_tag :label, l(:label_enable_redmine_xapian) %>
   <%= check_box_tag 'settings[enable]', true, @settings['enable'] %>
 </p>
 
 <p>
-  <%= content_tag(:label, l(:label_index_database)) %>
-  <%= text_field_tag 'settings[index_database]', @settings['index_database'], :size => 50 %>
+  <%= content_tag :label, l(:label_index_database) %>
+  <%= text_field_tag 'settings[index_database]', @settings['index_database'], size: 50 %>
   <em class="info">
-    <%= l(:label_default) %>: <%= File.expand_path('file_index', Rails.root) %>
+    <%= l(:label_default) %>: <%= File.expand_path 'file_index', Rails.root %>
   </em>
 </p>
 
 <% stem_langs = %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins norwegian porter portuguese romanian russian spanish swedish turkish) %>
 
 <p>  
-  <%= content_tag(:label, l(:label_default_stemming_lang)) %>
-  <%= select_tag('settings[stemming_lang]', options_for_select(stem_langs, @settings['stemming_lang'])) %>
+  <%= content_tag :label, l(:label_default_stemming_lang) %>
+  <%= select_tag 'settings[stemming_lang]', options_for_select(stem_langs, @settings['stemming_lang']) %>
   <em class="info">
-    <%= l(:text_stemming, :languages => stem_langs.join(', ')) %> <%= "#{l(:label_default)}: #{stem_langs[2]}" %>
+    <%= l(:text_stemming, languages: stem_langs.join(', ')) %> <%= "#{l(:label_default)}: #{stem_langs[2]}" %>
   </em>
 </p>
     
 <p>
-  <%= content_tag(:label, l(:label_search_languages)) %>
-  <%= select_tag('settings[stem_langs]', options_for_select(stem_langs, @settings['stem_langs']), multiple: true) %>
+  <%= content_tag :label, l(:label_search_languages) %>
+  <%= select_tag 'settings[stem_langs]', options_for_select(stem_langs, @settings['stem_langs']), multiple: true %>
 </p>
 
 <p>
-  <%= content_tag(:label, l(:label_default_stemming_strategy))%>
-  <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', :checked => true %> <%= l(:label_stem_none) %> (<%= l(:label_default) %>)<br/>
+  <%= content_tag :label, l(:label_default_stemming_strategy) %>
+  <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', checked: true %> <%= l(:label_stem_none) %> (<%= l(:label_default) %>)<br/>
   <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME' %> <%= l(:label_stem_some) %><br/>
   <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL' %> <%= l(:label_stem_all) %><br/>
   <em class="info">
@@ -60,7 +60,7 @@
 </p>
 
 <p>
-  <%= content_tag(:label, l(:label_save_search_scope)) %>
+  <%= content_tag :label, l(:label_save_search_scope) %>
   <%= check_box_tag 'settings[save_search_scope]', true, @settings['save_search_scope'] %>
   <em class="info">
     <%= l(:text_save_search_scope) %>

@@ -34,8 +34,8 @@ class Repofile < ActiveRecord::Base
   column :url, :string
   column :revision, :string
 
-  acts_as_searchable :columns => ["#{table_name}.filename", "#{table_name}.description"],
-    :permission => :browse_repository, :date_column => :created_on, :project_key => :project_id
+  acts_as_searchable columns: ["#{table_name}.filename", "#{table_name}.description"],
+    permission: :browse_repository, date_column: :created_on, project_key: :project_id
 
   attr_accessor :description 
   attr_accessor :created_on
@@ -58,7 +58,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_description
-    description.force_encoding('UTF-8')
+    description.force_encoding 'UTF-8'
   end
 	 
   def event_type
@@ -88,7 +88,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def self.search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})      
-    r = search(tokens, user, projects, options)
+    r = search tokens, user, projects, options
     r.map{ |x| [x[0].to_i, x[1]] }
   end
   
@@ -96,9 +96,9 @@ class Repofile < ActiveRecord::Base
     results = []
     ids.each do |id|
       key = "Repofile-#{id}"
-      value = Redmine::Search.cache_store.fetch(key)
+      value = Redmine::Search.cache_store.fetch key
       if value
-        attributes = eval(value)
+        attributes = eval value
         repofile = Repofile.new        
         repofile.id = id
         repofile.filename = attributes[:filename]
@@ -109,7 +109,7 @@ class Repofile < ActiveRecord::Base
         repofile.url = attributes[:url]
         repofile.revision = attributes[:revision]
         results << repofile
-        Redmine::Search.cache_store.delete(key)
+        Redmine::Search.cache_store.delete key
       end
     end  
     results
@@ -119,24 +119,14 @@ class Repofile < ActiveRecord::Base
   
   def self.search(tokens, user, projects, options)     
     Rails.logger.debug 'Repository::search'
-    search_data = SearchData.new(
-      self,
-      tokens,
-      projects,
-      options,          
-      user,
-      name
-    )
-
-    search_results = []        
-   
+    search_data = SearchData.new self, tokens, projects, options, user, name
+    search_results = []
     unless options[:titles_only]
       Rails.logger.debug "Call xapian search service for #{name.inspect}"          
-      xapian_results = XapianSearchService.search(search_data)
+      xapian_results = XapianSearchService.search search_data
       search_results.concat xapian_results unless xapian_results.blank?
       Rails.logger.debug "Call xapian search service for  #{name.inspect} completed"          
     end
-
     search_results
   end           
 
