@@ -20,4 +20,3 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 gem 'activerecord-tablefree'
-gem 'will_paginate', '~> 3.0.0'
