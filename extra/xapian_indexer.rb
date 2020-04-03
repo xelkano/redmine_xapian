@@ -473,7 +473,7 @@ unless $onlyrepos
     cmd << ' -v' if $verbose > 0
     cmd << ' --retry-failed' if $retryfailed
     my_log cmd
-    system_or_raise (cmd)
+    system_or_raise cmd
   end
   my_log 'Redmine files indexed'
 end

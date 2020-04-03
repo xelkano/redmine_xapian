@@ -20,14 +20,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# Libraries
-require 'redmine_xapian/search_data'
-require 'redmine_xapian/xapian_search_service'
+module RedmineXapian
+  module Hooks
+    module Views
 
-# Patches
-require 'redmine_xapian/patches/attachment_patch'
-require 'redmine_xapian/patches/search_controller_patch'
+      include Redmine::Hook
 
-# Hooks
-# Views
-require 'redmine_xapian/hooks/views/base_view_hooks'
+      class ViewBaseHook < RedmineXapian::Hooks::Views::ViewListener
+
+        def view_layouts_base_html_head(context={})
+          if context[:controller].class.name == 'SearchController'
+            "\n".html_safe + stylesheet_link_tag('redmine_xapian', plugin: :redmine_xapian)
+          end
+        end
+
+      end
+
+    end
+  end
+end

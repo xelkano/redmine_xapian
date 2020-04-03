@@ -4,8 +4,8 @@
 # Please see: https://github.com/backlogs/redmine_backlogs
 #
 
-if [[ -e "$HOME/.xapian.rc" ]]; then
-    source "$HOME/.xapian.rc"
+if [[ -e "${HOME}/.xapian.rc" ]]; then
+    source "${HOME}/.xapian.rc"
 fi
 
 export PATH_TO_PLUGINS=./plugins
@@ -17,10 +17,10 @@ export REDMINE_GIT_TAG=4.1-stable
 clone_redmine()
 {
   set -e # exit if clone fails
-  rm -rf $PATH_TO_REDMINE
-  git clone -b $REDMINE_GIT_TAG --depth=100 --quiet $REDMINE_GIT_REPO $PATH_TO_REDMINE
-  cd $PATH_TO_REDMINE
-  git checkout $REDMINE_GIT_TAG  
+  rm -rf ${PATH_TO_REDMINE}
+  git clone -b ${REDMINE_GIT_TAG} --depth=100 --quiet ${REDMINE_GIT_REPO} ${PATH_TO_REDMINE}
+  cd ${PATH_TO_REDMINE}
+  git checkout ${REDMINE_GIT_TAG}
 }
 
 run_tests()
@@ -28,7 +28,7 @@ run_tests()
   # exit if tests fail
   set -e
 
-  cd $PATH_TO_REDMINE 
+  cd ${PATH_TO_REDMINE}
 
   # Run tests within application
   bundle exec rake redmine:plugins:test:units NAME=redmine_xapian RAILS_ENV=test
@@ -39,10 +39,10 @@ uninstall()
 {
   set -e # exit if migrate fails
 
-  cd $PATH_TO_REDMINE
+  cd ${PATH_TO_REDMINE}
 
   # clean up database
-  bundle exec rake $MIGRATE_PLUGINS NAME=redmine_xapian VERSION=0 RAILS_ENV=test  
+  bundle exec rake ${MIGRATE_PLUGINS} NAME=redmine_xapian VERSION=0 RAILS_ENV=test
 }
 
 run_install()
@@ -51,17 +51,17 @@ run_install()
   set -e
 
   # cd to redmine folder
-  cd $PATH_TO_REDMINE
+  cd ${PATH_TO_REDMINE}
   echo current directory is `pwd`
 
   # Create a link to the Xapian plugin
-  ln -sf $PATH_TO_XAPIAN $PATH_TO_PLUGINS/redmine_xapian
+  ln -sf ${PATH_TO_XAPIAN} ${PATH_TO_PLUGINS}/redmine_xapian
   
   # Install gems
   mkdir -p vendor/bundle
 
   # Copy database.yml
-  cp $WORKSPACE/database.yml config/
+  cp ${WORKSPACE}/database.yml config/
   
   bundle install --path vendor/bundle
 
@@ -72,10 +72,10 @@ run_install()
   bundle exec rake redmine:load_default_data REDMINE_LANG=en RAILS_ENV=test
 
   # Generate session store/secret token
-  bundle exec rake $GENERATE_SECRET
+  bundle exec rake ${GENERATE_SECRET}
   
   # Run Xapian database migrations
-  bundle exec rake $MIGRATE_PLUGINS RAILS_ENV=test  
+  bundle exec rake ${MIGRATE_PLUGINS} RAILS_ENV=test
 }
 
 while getopts :irtu opt
