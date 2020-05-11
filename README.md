@@ -78,10 +78,11 @@ cd redmine/plugins
 git clone https://github.com/xelkano/redmine_xapian.git
 cd ..
 bundle install
-bundle exec rake redmine:plugins:migrate RAILS_ENV="production"
+RAILS_ENV=production bundle exec rake db:migrate
+RAILS_ENV=production bundle exec rake redmine:plugins:migrate NAME=redmine_xapian 
 ```
 
-And after that restart the application server.
+And after that restart the application server, e.g. `systemctl restart apache2`
 
 Now, you can see new check boxes _Files_ and _Repositories_ on the search screen, those allows you to search attachments 
 by file name and its contents. Xapian plugin checks for ruby bindings before its startup. If the plugin can not find them,
