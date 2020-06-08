@@ -22,11 +22,9 @@
 
 begin
   require 'xapian'
-  $xapian_bindings_available = true
 rescue LoadError
   Rails.logger.warn %{No Xapian search engine interface for Ruby installed => Full-text search won't be available.
                       Install a ruby-xapian package or an alternative Xapian binding (https://xapian.org).}
-  $xapian_bindings_available = false
 else
   require 'redmine'
   require File.dirname(__FILE__) + '/lib/redmine_xapian'
