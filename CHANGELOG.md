@@ -1,7 +1,7 @@
 Changelog for Redmine Xapian
 ==========================
 
-2.0.2 *????-??-??*
+2.0.2 *2020-06-12*
 ------------------
 
     Maintenace release
