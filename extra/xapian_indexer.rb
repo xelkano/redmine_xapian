@@ -126,7 +126,7 @@ optparse = OptionParser.new do |opts|
   opts.separator('')
   opts.separator('Options:')
   opts.on('-p', '--projects a,b,c', Array,
-          'Comma separated list of projects whose repositories will be indexed') { |p| $projects = p }
+          'Comma separated list of identifiers of projects whose repositories will be indexed') { |p| $projects = p }
   opts.on('-s', '--stemming_lang a,b,c', Array,
           'Comma separated list of stemming languages for indexing') { |s| $stem_langs = s }
   opts.on('-v', '--verbose',            'verbose') {$verbose += 1}
@@ -142,7 +142,7 @@ optparse = OptionParser.new do |opts|
   opts.separator('')
   opts.separator('Examples:')
   opts.separator('  xapian_indexer.rb -f -s english,italian -v')
-  opts.separator('  xapian_indexer.rb -p project_id -x -t /tmpfs -v')
+  opts.separator('  xapian_indexer.rb -p project_identifier -x -t /tmpfs -v')
   opts.separator('')
   opts.summary_width = 25
 end
@@ -164,7 +164,7 @@ end
 
 def indexing(databasepath, project, repository)
     my_log "Fetch changesets: #{project.name} - #{repo_name(repository)}"
-    repository.fetch_changesets    
+    repository.fetch_changesets
     repository.reload.changesets.reload
     latest_changeset = repository.changesets.first    
     return unless latest_changeset
@@ -228,11 +228,11 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
   return if entries.nil? || entries.size < 1
   my_log "Walk entries size: #{entries.size}"
   entries.each do |entry|
-    my_log "Walking into: #{entry.lastrev.time}" if entry.lastrev
+    my_log "Walking into: #{entry.lastrev&.time}"
     if entry.is_dir?
-      walk(databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier))
+      walk databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier)
     elsif entry.is_file? && !entry.lastrev.nil?
-      add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path, 
+      add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path,
         entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
     end
   end
@@ -244,16 +244,16 @@ def indexing_all(databasepath, indexconf, project, repository)
     if repository.branches
       repository.branches.each do |branch|
         my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
-        walk(databasepath, indexconf, project, repository, branch, repository.entries(nil, branch))
+        walk databasepath, indexconf, project, repository, branch, repository.entries(nil, branch)
       end
     else
       my_log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
-      walk(databasepath, indexconf, project, repository, nil, repository.entries(nil, nil))
+      walk databasepath, indexconf, project, repository, nil, repository.entries(nil, nil)
     end
     if repository.tags
       repository.tags.each do |tag|
         my_log "Walking in tag: #{repo_name(repository)} - #{tag}"
-        walk(databasepath, indexconf, project, repository, tag, repository.entries(nil, tag))
+        walk databasepath, indexconf, project, repository, tag, repository.entries(nil, tag)
       end
     end
   rescue => e
@@ -285,8 +285,8 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
       entry = repository.entry(path, identifier)
       if (entry && entry.is_file?) || (action == DELETE)
         if entry.nil? && (action != DELETE)
-          my_log("Error indexing path: #{path.inspect}, action: #{action.inspect}, identifier: #{identifier.inspect}",
-              true)
+          my_log "Error indexing path: #{path.inspect}, action: #{action.inspect},
+            identifier: #{identifier.inspect}", true
         end
         my_log "Entry to index #{entry.inspect}"
         lastrev = entry.lastrev if entry
@@ -360,8 +360,7 @@ def convert_to_text(fpath, type)
   text
 end
 
-def add_or_update_index(databasepath, indexconf, project, repository, identifier, 
-    path, lastrev, action, type)  
+def add_or_update_index(databasepath, indexconf, project, repository, identifier, path, lastrev, action, type)
   uri = generate_uri(project, repository, identifier, path)
   return unless uri
   text = nil
@@ -370,7 +369,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
   else
     fname = path.split('/').last.tr(' ', '_')
     bstr = repository.cat(path, identifier)
-    File.open( "#{$tempdir}/#{fname}", 'wb+') do | bs |
+    File.open( "#{$tempdir}/#{fname}", 'wb+') do |bs|
       bs.write(bstr)
     end
     text = convert_to_text("#{$tempdir}/#{fname}", type) if File.exist?("#{$tempdir}/#{fname}") && !bstr.nil?
@@ -384,15 +383,15 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
     itext.write("url=#{uri.to_s}\n")
     if action != DELETE
       sdate = lastrev.time || Time.at(0).in_time_zone
-      itext.write("date=#{sdate.to_s}\n")
+      itext.write "date=#{sdate.to_s}\n"
       body = nil
-      text.force_encoding('UTF-8')
+      text.force_encoding 'UTF-8'
       text.each_line do |line|        
         if body.blank? 
-          itext.write("body=#{line}")
+          itext.write "body=#{line}"
           body = 1
         else
-          itext.write("=#{line}")
+          itext.write "=#{line}"
         end
       end      
     else
@@ -484,7 +483,7 @@ unless $onlyfiles
     my_log "#{$scriptindex} does not exist, exiting...", true
     exit 1
   end
-  databasepath = File.join($dbrootpath.rstrip, 'repodb')  
+  databasepath = File.join($dbrootpath.rstrip, 'repodb')
   unless File.directory?(databasepath)
     my_log "Db directory #{databasepath} does not exist, creating..."
     begin
@@ -496,13 +495,13 @@ unless $onlyfiles
   end
   $projects = Project.active.has_module(:repository).pluck(:identifier) if $projects.blank?
   $projects.each do |identifier|
-    project = Project.active.has_module(:repository).where(:identifier => identifier).preload(:repository).first
+    project = Project.active.has_module(:repository).where(identifier: identifier).preload(:repository).first
     if project
       my_log "- Indexing repositories for #{project}..."
       repositories = project.repositories.select { |repository| repository.supports_cat? }
       repositories.each do |repository|
-        delete_log(repository) if ($resetlog)
-        indexing(databasepath, project, repository)
+        delete_log(repository) if $resetlog
+        indexing databasepath, project, repository
       end
     else
       my_log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."
