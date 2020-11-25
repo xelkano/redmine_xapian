@@ -1,10 +1,12 @@
 Changelog for Redmine Xapian
 ==========================
 
-2.0.3 *????-??-??*
+2.0.3 *2020-11-25*
 ------------------
 
-    ?
+    Maintenace release
+    
+* Bug: #106 - Can't open Xapian database on redmine 4.1.1
 
 2.0.2 *2020-06-12*
 ------------------

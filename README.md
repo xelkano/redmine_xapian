@@ -1,7 +1,7 @@
 Redmine Xapian search plugin
 ============================
 
-The current version of Redmine Xapian is **2.0.3 devel**. 
+The current version of Redmine Xapian is **2.0.3**. 
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
 search engine](https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
 replaces search controller, its view and search methods.
@@ -25,7 +25,7 @@ sudo apt-get install xapian-omega ruby-xapian
 To index some files with omega you may have to install some other packages like
 xpdf, antiword, ...
 
-From "Omega documentation":http://xapian.org/docs/omega/overview.html:
+From "Omega documentation":https://xapian.org/docs/omega/overview.html:
 
    * HTML (.html, .htm, .shtml, .shtm, .xhtml, .xhtm)
    * PHP (.php) - our HTML parser knows to ignore PHP code
