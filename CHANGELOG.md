@@ -1,6 +1,9 @@
 Changelog for Redmine Xapian
 ==========================
 
+2.0.4 *????-??-??*
+------------------
+
 2.0.3 *2020-11-25*
 ------------------
 
@@ -51,8 +54,8 @@ which overwrite the same methods.
 
 * Bug: #88 - pdf and Word(.doc) files are not seachable
 * New: #86 - alias_method_chain is deprecated
-* New: #85 - feture: Add "--retry-failed" to omindex in xapian_indexer.rb
-* Bug: #84 - Error: Plugin redmine_xapian was not found.
+* New: #85 - Add "--retry-failed" to omindex in xapian_indexer.rb
+* Bug: #84 - Plugin redmine_xapian was not found.
    
 
 1.6.7 *2017-09-12*
