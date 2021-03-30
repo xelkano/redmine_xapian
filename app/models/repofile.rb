@@ -54,7 +54,7 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_url
-   url
+    File.join Redmine::Utils::relative_url_root, url
   end
 
   def event_description
