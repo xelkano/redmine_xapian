@@ -64,7 +64,7 @@ From "Omega documentation":https://xapian.org/docs/omega/overview.html:
 On Debian you can use following command to install some of the required indexing tools:
 
 ```
-sudo apt-get install xapian-omega libxapian-dev xpdf poppler-utils \
+sudo apt-get install xapian-omega libxapian-dev poppler-utils \
     antiword unzip catdoc libwpd-tools libwps-tools gzip unrtf catdvi \
     djview djview3 uuid uuid-dev xz-utils libemail-outlook-message-perl
 ```
