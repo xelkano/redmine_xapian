@@ -1,8 +1,12 @@
 Changelog for Redmine Xapian
 ==========================
 
-2.0.4 *????-??-??*
+2.0.4 *2021-04-30*
 ------------------
+
+    Maintenance release
+
+* Bug: #109 - Bad repository link on search results
 
 2.0.3 *2020-11-25*
 ------------------
@@ -21,12 +25,10 @@ Changelog for Redmine Xapian
 
     Compatibility with Redmine 4.1.0
 
-
 2.0.0 *2019-02-28*
 ------------------
 
     Compatibility with Redmine 4.0.0
-    
 
 * Bug: #95 - Exception thrown when I run ruby xapian_indexer.rb -v -f
 * New: #94 - Please make it compatible with Redmine 4.0.0 
@@ -81,7 +83,6 @@ is working.
 
 * Bug: #76 - Index all repositories
 * Bug: #74 - Search results for tickets truncated?
-
 
 1.6.5 *2016-06-13*
 ------------------
