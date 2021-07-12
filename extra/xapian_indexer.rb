@@ -167,8 +167,10 @@ def indexing(databasepath, project, repository)
     repository.fetch_changesets
     repository.reload.changesets.reload
     latest_changeset = repository.changesets.first    
-    return unless latest_changeset
-    my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
+    revision = latest_changeset ? latest_changeset.revision : nil
+    if revision
+      my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{revision}"
+    end
     latest_indexed = Indexinglog.where(repository_id: repository.id, status: STATUS_SUCCESS).last
     my_log "Latest indexed: #{latest_indexed.inspect}"
     begin
@@ -177,7 +179,7 @@ def indexing(databasepath, project, repository)
       indexconf.write "body : index truncate=400 field=sample\n"
       indexconf.write "date: field=date\n"
       indexconf.close
-      if latest_indexed
+      if latest_changeset && latest_indexed
         my_log "Repository #{repo_name(repository)} indexed, indexing diff"
         indexing_diff(databasepath, indexconf, project, repository,
                       latest_indexed.changeset, latest_changeset)
@@ -190,7 +192,7 @@ def indexing(databasepath, project, repository)
       add_log repository, latest_changeset, STATUS_FAIL, e.message
     else
       add_log repository, latest_changeset, STATUS_SUCCESS
-      my_log "Successfully indexed: #{project.name} - #{repo_name(repository)} - #{latest_changeset.revision}"
+      my_log "Successfully indexed: #{project.name} - #{repo_name(repository)} - #{revision}"
     end
 end
 
