@@ -101,19 +101,19 @@ MIME_TYPES = {
 
 
 FORMAT_HANDLERS = {
-  pdf: $pdftotext,
-  doc: $catdoc,
-  xls: $xls2csv,
-  ppt: $catppt,
-  pps: $catppt,
-  docx: $unzip,
-  xlsx: $unzip,
-  pptx: $unzip,
-  ppsx: $unzip,
-  ods: $unzip,
-  odt: $unzip,
-  odp: $unzip,
-  rtf: $unrtf
+  'pdf' => $pdftotext,
+  'doc' => $catdoc,
+  'xls' => $xls2csv,
+  'ppt' => $catppt,
+  'pps' => $catppt,
+  'docx' => $unzip,
+  'xlsx' => $unzip,
+  'pptx' => $unzip,
+  'ppsx' => $unzip,
+  'ods' => $unzip,
+  'odt' => $unzip,
+  'odp' => $unzip,
+  'rtf' => $unrtf
 }.freeze
 
 VERSION = '0.2'
