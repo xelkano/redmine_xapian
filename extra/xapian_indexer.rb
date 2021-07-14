@@ -224,6 +224,11 @@ def delete_log(repository)
   my_log "Log for repo #{repo_name(repository)} removed!"
 end
 
+def delete_log_by_repo_id(repo_id)
+  Indexinglog.where(repository_id: repo_id).delete_all
+  my_log "Log for zombied repo #{repo_id} removed!"
+end
+
 def walk(databasepath, indexconf, project, repository, identifier, entries)  
   return if entries.nil? || entries.size < 1
   my_log "Walk entries size: #{entries.size}"
@@ -504,6 +509,13 @@ unless $onlyfiles
       end
     else
       my_log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."
+    end
+  end
+  if $resetlog
+    existing_repo_ids = Repository.all.to_a.map(&:id)
+    zombied_repo_ids = Indexinglog.where.not(:repository_id => existing_repo_ids).to_a.map(&:repository_id).uniq
+    zombied_repo_ids.each do |zombied_repo_id|
+      delete_log_by_repo_id(zombied_repo_id)
     end
   end
 end
