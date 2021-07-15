@@ -136,6 +136,7 @@ optparse = OptionParser.new do |opts|
           'Rails ENVIRONMENT (development, testing or production), default production') { |e| $env = e}
   opts.on('-t', '--temp-dir PATH',      'Temporary directory for indexing'){ |t| $tempdir = t }  
   opts.on('-x', '--resetlog',           'Reset index log'){  $resetlog = 1 }
+  opts.on('-X', '--reset-database',     'Reset database'){  $resetdatabase = 1 }
   opts.on('-V', '--version',            'show version and exit') { puts VERSION; exit}
   opts.on('-h', '--help',               'show help and exit') { puts opts; exit }
   opts.on('-R', '--retry-failed', 'retry files which omindex failed to extract text') { $retryfailed = 1 }
@@ -463,6 +464,9 @@ unless $onlyrepos
       exit 1
     end
     databasepath = File.join($dbrootpath, lang)
+    if File.directory?(databasepath) && $resetdatabase
+      FileUtils.rm_rf(databasepath)
+    end
     unless File.directory?(databasepath)
       my_log "#{databasepath} does not exist, creating ..."
       begin
@@ -488,6 +492,9 @@ unless $onlyfiles
     exit 1
   end
   databasepath = File.join($dbrootpath.rstrip, 'repodb')
+  if File.directory?(databasepath) && $resetdatabase
+    FileUtils.rm_rf(databasepath)
+  end
   unless File.directory?(databasepath)
     my_log "Db directory #{databasepath} does not exist, creating..."
     begin
