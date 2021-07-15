@@ -46,7 +46,7 @@ class Repofile < ActiveRecord::Base
   attr_accessor :revision
 
   def event_title    
-    filename
+    filename.force_encoding 'UTF-8'
   end
 
   def event_datetime    
@@ -54,7 +54,8 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_url
-    File.join Redmine::Utils::relative_url_root, url
+    #url = File.join Redmine::Utils::relative_url_root, url
+    url.force_encoding 'UTF-8'
   end
 
   def event_description
