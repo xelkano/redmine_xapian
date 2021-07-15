@@ -339,7 +339,7 @@ def generate_uri(project, repository, identifier, path)
 end
 
 def convert_to_text(fpath, type)
-  text = nil
+  text = ""
   return text unless File.exist?(FORMAT_HANDLERS[type].split(' ').first)
   case type
     when 'pdf'    
@@ -348,19 +348,21 @@ def convert_to_text(fpath, type)
       system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", out: '/dev/null'
       case type
         when 'xlsx'
-          fout = "#{$tempdir}/temp/xl/sharedStrings.xml"
+          fouts = ["#{$tempdir}/temp/xl/sharedStrings.xml"]
         when 'docx'
-          fout = "#{$tempdir}/temp/word/document.xml"
+          fouts = ["#{$tempdir}/temp/word/document.xml"]
         when 'odt'
-          fout = "#{$tempdir}/temp/content.xml"
+          fouts = ["#{$tempdir}/temp/content.xml"]
         when 'pptx'
-          fout = "#{$tempdir}/temp/docProps/app.xml"
+          fouts = Dir["#{$tempdir}/temp/ppt/slides/*.xml"]
         end                
       begin
-        text = File.read(fout)
+        fouts.each do |fout|
+          text += File.read(fout) + "\n"
+        end
         FileUtils.rm_rf "#{$tempdir}/temp"
       rescue => e
-        my_log "Error: #{e.to_s} reading #{fout}", true
+        my_log "Error: #{e.to_s} reading #{fouts.inspect}", true
       end
     else
       text = `#{FORMAT_HANDLERS[type]} #{fpath}`
