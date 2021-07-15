@@ -26,6 +26,6 @@ class Indexinglog < ActiveRecord::Base
   belongs_to :changeset
 
   validates :repository_id, presence: true
-  validates :changeset_id, presence: true
+  # validates :changeset_id, presence: true
 
 end
