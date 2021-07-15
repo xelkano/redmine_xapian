@@ -204,7 +204,7 @@ end
 def add_log(repository, changeset, status, message = nil)
   log = Indexinglog.where(repository_id: repository.id).last
   if log
-    log.changeset_id = changeset.id
+    log.changeset_id = changeset ? changeset.id : -1
     log.status = status
     log.message = message
     log.save!
