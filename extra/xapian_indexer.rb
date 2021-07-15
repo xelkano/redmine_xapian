@@ -192,7 +192,7 @@ def indexing(databasepath, project, repository)
       add_log repository, latest_changeset, STATUS_FAIL, e.message
     else
       add_log repository, latest_changeset, STATUS_SUCCESS
-      my_log "Successfully indexed: #{project.name} - #{repo_name(repository)} - #{revision}"
+      my_log "Successfully indexed: " + [project.name, repo_name(repository), revision].reject(&:blank?).join(" - ")
     end
 end
 
