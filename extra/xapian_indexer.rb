@@ -101,19 +101,19 @@ MIME_TYPES = {
 
 
 FORMAT_HANDLERS = {
-  pdf: $pdftotext,
-  doc: $catdoc,
-  xls: $xls2csv,
-  ppt: $catppt,
-  pps: $catppt,
-  docx: $unzip,
-  xlsx: $unzip,
-  pptx: $unzip,
-  ppsx: $unzip,
-  ods: $unzip,
-  odt: $unzip,
-  odp: $unzip,
-  rtf: $unrtf
+  'pdf' => $pdftotext,
+  'doc' => $catdoc,
+  'xls' => $xls2csv,
+  'ppt' => $catppt,
+  'pps' => $catppt,
+  'docx' => $unzip,
+  'xlsx' => $unzip,
+  'pptx' => $unzip,
+  'ppsx' => $unzip,
+  'ods' => $unzip,
+  'odt' => $unzip,
+  'odp' => $unzip,
+  'rtf' => $unrtf
 }.freeze
 
 VERSION = '0.2'
@@ -224,6 +224,11 @@ end
 def delete_log(repository)
   Indexinglog.where(repository_id: repository.id).delete_all
   my_log "Log for repo #{repo_name(repository)} removed!"
+end
+
+def delete_log_by_repo_id(repo_id)
+  Indexinglog.where(repository_id: repo_id).delete_all
+  my_log "Log for zombied repo #{repo_id} removed!"
 end
 
 def walk(databasepath, indexconf, project, repository, identifier, entries)  
@@ -337,7 +342,7 @@ def convert_to_text(fpath, type)
   return text unless File.exist?(FORMAT_HANDLERS[type].split(' ').first)
   case type
     when 'pdf'    
-      text = "#{FORMAT_HANDLERS[type]} #{fpath} -"
+      text = `#{FORMAT_HANDLERS[type]} #{fpath} -`
     when /(xlsx|docx|odt|pptx)/i
       system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", out: '/dev/null'
       case type
@@ -357,7 +362,7 @@ def convert_to_text(fpath, type)
         my_log "Error: #{e.to_s} reading #{fout}", true
       end
     else
-      text = "#{FORMAT_HANDLERS[type]} #{fpath}"
+      text = `#{FORMAT_HANDLERS[type]} #{fpath}`
   end
   text
 end
@@ -440,9 +445,8 @@ my_log "Trying to load Redmine environment <<#{$environment}>>..."
 
 begin
  require $environment
-rescue LoadError
-  my_log "Redmine #{$environment} cannot be loaded!! Be sure the redmine installation directory is correct!", true
-  my_log "Edit script and correct path", true
+rescue LoadError => e
+  my_log e.message, true
   exit 1
 end
 
@@ -507,6 +511,13 @@ unless $onlyfiles
       end
     else
       my_log "Project identifier #{identifier} not found or repository module not enabled, ignoring..."
+    end
+  end
+  if $resetlog
+    existing_repo_ids = Repository.all.to_a.map(&:id)
+    zombied_repo_ids = Indexinglog.where.not(:repository_id => existing_repo_ids).to_a.map(&:repository_id).uniq
+    zombied_repo_ids.each do |zombied_repo_id|
+      delete_log_by_repo_id(zombied_repo_id)
     end
   end
 end
