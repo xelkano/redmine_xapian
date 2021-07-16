@@ -156,7 +156,7 @@ STATUS_SUCCESS = 1
 STATUS_FAIL = -1
 ADD_OR_UPDATE = 1
 DELETE = 0
- 
+
 class IndexingError < StandardError; end
 
 def repo_name(repository)
@@ -164,37 +164,37 @@ def repo_name(repository)
 end
 
 def indexing(databasepath, project, repository)
-    my_log "Fetch changesets: #{project.name} - #{repo_name(repository)}"
-    repository.fetch_changesets
-    repository.reload.changesets.reload
-    latest_changeset = repository.changesets.first    
-    revision = latest_changeset ? latest_changeset.revision : nil
-    if revision
-      my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{revision}"
-    end
-    latest_indexed = Indexinglog.where(repository_id: repository.id, status: STATUS_SUCCESS).last
-    my_log "Latest indexed: #{latest_indexed.inspect}"
-    begin
-      indexconf = Tempfile.new('index.conf', $tempdir)
-      indexconf.write "url : field boolean=Q unique=Q\n"
-      indexconf.write "body : index truncate=400 field=sample\n"
-      indexconf.write "date: field=date\n"
-      indexconf.close
-      if latest_changeset && latest_indexed
-        my_log "Repository #{repo_name(repository)} indexed, indexing diff"
-        indexing_diff(databasepath, indexconf, project, repository,
-                      latest_indexed.changeset, latest_changeset)
-      else
-        my_log "Repository #{repo_name(repository)} not indexed, indexing all"
-        indexing_all(databasepath, indexconf, project, repository)
-      end
-      indexconf.unlink
-    rescue IndexingError => e
-      add_log repository, latest_changeset, STATUS_FAIL, e.message
+  my_log "Fetch changesets: #{project.name} - #{repo_name(repository)}"
+  repository.fetch_changesets
+  repository.reload.changesets.reload
+  latest_changeset = repository.changesets.first    
+  revision = latest_changeset ? latest_changeset.revision : nil
+  if revision
+    my_log "Latest revision: #{project.name} - #{repo_name(repository)} - #{revision}"
+  end
+  latest_indexed = Indexinglog.where(repository_id: repository.id, status: STATUS_SUCCESS).last
+  my_log "Latest indexed: #{latest_indexed.inspect}"
+  begin
+    indexconf = Tempfile.new('index.conf', $tempdir)
+    indexconf.write "url : field boolean=Q unique=Q\n"
+    indexconf.write "body : index truncate=400 field=sample\n"
+    indexconf.write "date: field=date\n"
+    indexconf.close
+    if latest_changeset && latest_indexed
+      my_log "Repository #{repo_name(repository)} indexed, indexing diff"
+      indexing_diff(databasepath, indexconf, project, repository,
+                    latest_indexed.changeset, latest_changeset)
     else
-      add_log repository, latest_changeset, STATUS_SUCCESS
-      my_log "Successfully indexed: " + [project.name, repo_name(repository), revision].reject(&:blank?).join(" - ")
+      my_log "Repository #{repo_name(repository)} not indexed, indexing all"
+      indexing_all(databasepath, indexconf, project, repository)
     end
+    indexconf.unlink
+  rescue IndexingError => e
+    add_log repository, latest_changeset, STATUS_FAIL, e.message
+  else
+    add_log repository, latest_changeset, STATUS_SUCCESS
+    my_log "Successfully indexed: " + [project.name, repo_name(repository), revision].reject(&:blank?).join(" - ")
+  end
 end
 
 def supported_mime_type(entry)
@@ -241,7 +241,7 @@ def walk(databasepath, indexconf, project, repository, identifier, entries)
       walk databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier)
     elsif entry.is_file? && !entry.lastrev.nil?
       add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path,
-        entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
+                          entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
     end
   end
 end
@@ -271,101 +271,101 @@ def indexing_all(databasepath, indexconf, project, repository)
 end
 
 def walkin(databasepath, indexconf, project, repository, identifier, changesets)
-    my_log "Walking into #{changesets.inspect}"
-    return unless changesets or changesets.size <= 0
-    changesets.sort! { |a, b| a.id <=> b.id }
+  my_log "Walking into #{changesets.inspect}"
+  return unless changesets or changesets.size <= 0
+  changesets.sort! { |a, b| a.id <=> b.id }
 
-    actions = Hash::new
-    # SCM actions
-    #   * A - Add
-    #   * M - Modified
-    #   * R - Replaced
-    #   * D - Deleted
-    changesets.each do |changeset|
-      my_log "Changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
-      next unless changeset.filechanges
-      changeset.filechanges.each do |change|        
-        actions[change.path] = (change.action == 'D') ? DELETE : ADD_OR_UPDATE        
-      end
+  actions = Hash::new
+  # SCM actions
+  #   * A - Add
+  #   * M - Modified
+  #   * R - Replaced
+  #   * D - Deleted
+  changesets.each do |changeset|
+    my_log "Changeset changes for #{changeset.id} #{changeset.filechanges.inspect}"
+    next unless changeset.filechanges
+    changeset.filechanges.each do |change|        
+      actions[change.path] = (change.action == 'D') ? DELETE : ADD_OR_UPDATE        
     end
-    return unless actions
-    actions.each do |path, action|
-      entry = repository.entry(path, identifier)
-      if (entry && entry.is_file?) || (action == DELETE)
-        if entry.nil? && (action != DELETE)
-          my_log "Error indexing path: #{path.inspect}, action: #{action.inspect},
+  end
+  return unless actions
+  actions.each do |path, action|
+    entry = repository.entry(path, identifier)
+    if (entry && entry.is_file?) || (action == DELETE)
+      if entry.nil? && (action != DELETE)
+        my_log "Error indexing path: #{path.inspect}, action: #{action.inspect},
             identifier: #{identifier.inspect}", true
-        end
-        my_log "Entry to index #{entry.inspect}"
-        lastrev = entry.lastrev if entry
-        if supported_mime_type(path) || (action == DELETE)
-          add_or_update_index(databasepath, indexconf, project, repository, identifier, path, lastrev, action,
-                              MIME_TYPES[Redmine::MimeType.of(path)])
-        end
+      end
+      my_log "Entry to index #{entry.inspect}"
+      lastrev = entry.lastrev if entry
+      if supported_mime_type(path) || (action == DELETE)
+        add_or_update_index(databasepath, indexconf, project, repository, identifier, path, lastrev, action,
+                            MIME_TYPES[Redmine::MimeType.of(path)])
       end
     end
   end
+end
 
 def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_to)  
   if diff_from.id >= diff_to.id
     my_log "Already indexed: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
     return
   end
-	my_log "Indexing diff: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
-	my_log "Indexing all: #{repo_name(repository)}"
-	if repository.branches
+  my_log "Indexing diff: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
+  my_log "Indexing all: #{repo_name(repository)}"
+  if repository.branches
     repository.branches.each do |branch|
-    my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
-    walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets('', branch,
-      diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
-	end
-	else
+      my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
+      walkin(databasepath, indexconf, project, repository, branch, repository.latest_changesets('', branch,
+             diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+    end
+  else
     my_log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
     walkin(databasepath, indexconf, project, repository, nil, repository.latest_changesets('', nil,
-      diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
-	end
-	if repository.tags
+           diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+  end
+  if repository.tags
     repository.tags.each do |tag|
       my_log "Walking in tag: #{repo_name(repository)} - #{tag}"
       walkin(databasepath, indexconf, project, repository, tag, repository.latest_changesets('', tag,
-        diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
+             diff_to.id - diff_from.id).select { |changeset| changeset.id > diff_from.id and changeset.id <= diff_to.id})
     end
-	end
+  end
 end
 
 def generate_uri(project, repository, identifier, path)
   Rails.application.routes.url_helpers.url_for controller: 'repositories', action: 'entry', id: project.identifier,
-			repository_id: repository.identifier, rev: identifier, path: repository.relative_path(path), only_path: true
+    repository_id: repository.identifier, rev: identifier, path: repository.relative_path(path), only_path: true
 end
 
 def convert_to_text(fpath, type)
   text = ""
   return text unless File.exist?(FORMAT_HANDLERS[type].split(' ').first)
   case type
-    when 'pdf'    
-      text = `#{FORMAT_HANDLERS[type]} #{fpath} -`
-    when /(xlsx|docx|odt|pptx)/i
-      system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", out: '/dev/null'
-      case type
-        when 'xlsx'
-          fouts = ["#{$tempdir}/temp/xl/sharedStrings.xml"]
-        when 'docx'
-          fouts = ["#{$tempdir}/temp/word/document.xml"]
-        when 'odt'
-          fouts = ["#{$tempdir}/temp/content.xml"]
-        when 'pptx'
-          fouts = Dir["#{$tempdir}/temp/ppt/slides/*.xml"]
-        end                
-      begin
-        fouts.each do |fout|
-          text += File.read(fout) + "\n"
-        end
-        FileUtils.rm_rf "#{$tempdir}/temp"
-      rescue => e
-        my_log "Error: #{e.to_s} reading #{fouts.inspect}", true
+  when 'pdf'    
+    text = `#{FORMAT_HANDLERS[type]} #{fpath} -`
+  when /(xlsx|docx|odt|pptx)/i
+    system "#{$unzip} -d #{$tempdir}/temp #{fpath} > /dev/null", out: '/dev/null'
+    case type
+    when 'xlsx'
+      fouts = ["#{$tempdir}/temp/xl/sharedStrings.xml"]
+    when 'docx'
+      fouts = ["#{$tempdir}/temp/word/document.xml"]
+    when 'odt'
+      fouts = ["#{$tempdir}/temp/content.xml"]
+    when 'pptx'
+      fouts = Dir["#{$tempdir}/temp/ppt/slides/*.xml"]
+    end                
+    begin
+      fouts.each do |fout|
+        text += File.read(fout) + "\n"
       end
-    else
-      text = `#{FORMAT_HANDLERS[type]} #{fpath}`
+      FileUtils.rm_rf "#{$tempdir}/temp"
+    rescue => e
+      my_log "Error: #{e.to_s} reading #{fouts.inspect}", true
+    end
+  else
+    text = `#{FORMAT_HANDLERS[type]} #{fpath}`
   end
   text
 end
