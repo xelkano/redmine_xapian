@@ -182,11 +182,14 @@ def indexing(databasepath, project, repository)
     indexconf.close
     if latest_changeset && latest_indexed
       my_log "Repository #{repo_name(repository)} indexed, indexing diff"
-      indexing_diff(databasepath, indexconf, project, repository,
+      indexing_diff_by_changesets(databasepath, indexconf, project, repository,
                     latest_indexed.changeset, latest_changeset)
+    elsif latest_indexed
+      my_log "Repository #{repo_name(repository)} indexed, indexing diff by time"
+      indexing_diff_by_time(databasepath, indexconf, project, repository, latest_indexed.updated_at)
     else
       my_log "Repository #{repo_name(repository)} not indexed, indexing all"
-      indexing_all(databasepath, indexconf, project, repository)
+      indexing_diff_by_time(databasepath, indexconf, project, repository, nil)
     end
     indexconf.unlink
   rescue IndexingError => e
@@ -232,36 +235,38 @@ def delete_log_by_repo_id(repo_id)
   my_log "Log for zombied repo #{repo_id} removed!"
 end
 
-def walk(databasepath, indexconf, project, repository, identifier, entries)  
+def walk(databasepath, indexconf, project, repository, identifier, entries, time_last_indexed)
   return if entries.nil? || entries.size < 1
   my_log "Walk entries size: #{entries.size}"
   entries.each do |entry|
     my_log "Walking into: #{entry.lastrev&.time}"
     if entry.is_dir?
-      walk databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier)
+      walk databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier), time_last_indexed
     elsif entry.is_file? && !entry.lastrev.nil?
-      add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path,
-                          entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)	
+      if time_last_indexed.nil? || entry.lastrev.time > time_last_indexed
+        add_or_update_index(databasepath, indexconf, project, repository, identifier, entry.path,
+                            entry.lastrev, ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)]) if supported_mime_type(entry.path)
+      end
     end
   end
 end
 
-def indexing_all(databasepath, indexconf, project, repository)
+def indexing_diff_by_time(databasepath, indexconf, project, repository, time_last_indexed)
   my_log "Indexing all: #{repo_name(repository)}"
   begin
     if repository.branches
       repository.branches.each do |branch|
         my_log "Walking in branch: #{repo_name(repository)} - #{branch}"
-        walk databasepath, indexconf, project, repository, branch, repository.entries(nil, branch)
+        walk databasepath, indexconf, project, repository, branch, repository.entries(nil, branch), time_last_indexed
       end
     else
       my_log "Walking in branch: #{repo_name(repository)} - [NOBRANCH]"
-      walk databasepath, indexconf, project, repository, nil, repository.entries(nil, nil)
+      walk databasepath, indexconf, project, repository, nil, repository.entries(nil, nil), time_last_indexed
     end
     if repository.tags
       repository.tags.each do |tag|
         my_log "Walking in tag: #{repo_name(repository)} - #{tag}"
-        walk databasepath, indexconf, project, repository, tag, repository.entries(nil, tag)
+        walk databasepath, indexconf, project, repository, tag, repository.entries(nil, tag), time_last_indexed
       end
     end
   rescue => e
@@ -306,7 +311,7 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets)
   end
 end
 
-def indexing_diff(databasepath, indexconf, project, repository, diff_from, diff_to)  
+def indexing_diff_by_changesets(databasepath, indexconf, project, repository, diff_from, diff_to)
   if diff_from.id >= diff_to.id
     my_log "Already indexed: #{repo_name(repository)} (from: #{diff_from.id} to #{diff_to.id})"
     return
