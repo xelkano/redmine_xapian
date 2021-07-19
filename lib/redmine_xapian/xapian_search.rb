@@ -159,7 +159,7 @@ module RedmineXapian
       Rails.logger.debug "Repository date: #{dochash[:date]}"
       Rails.logger.debug "Repository sample field: #{dochash[:sample]}"
       repository_attachment = nil
-      if dochash[:url] =~ /^\/projects\/(.+)\/repository\/(?:revisions\/(.*)\/|([a-zA-Z_0-9]*)\/)?(?:revisions\/(.*))?\/?entry\/(?:(?:branches|tags)\/(.+?)\/)?(.+?)(?:\?rev=(.*))?$/
+      if dochash[:url] =~ /^#{Redmine::Utils::relative_url_root}\/projects\/(.+)\/repository\/(?:revisions\/(.*)\/|([a-zA-Z_0-9]*)\/)?(?:revisions\/(.*))?\/?entry\/(?:(?:branches|tags)\/(.+?)\/)?(.+?)(?:\?rev=(.*))?$/
         repo_project_identifier = $1
         Rails.logger.debug "Project identifier: #{repo_project_identifier}"
         repo_identifier = $3
