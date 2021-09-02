@@ -194,8 +194,7 @@ module RedmineXapian
                 repository_attachment.project_id = project.id
                 if dochash[:sample]
                   if dochash[:sample].encoding.to_s != 'UTF-8'
-                    repository_attachment.description = dochash[:sample].encode('UTF-8', dochash[:sample].encoding,
-                     invalid: :replace, undef: :replace)
+                    repository_attachment.description = dochash[:sample].force_encoding('UTF-8')
                   else
                     repository_attachment.description = dochash[:sample]
                   end
