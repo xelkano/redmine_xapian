@@ -4,7 +4,7 @@ Changelog for Redmine Xapian
 2.0.5 *2021-10-08*
 ------------------
 
-    Indexing if Redmine is rum in a sub-uri
+    Indexing if Redmine is run in a sub-uri
     An option to delete the index database
     Chinese characters in file names and in searched text fixed
     Indexing of file system repositories
