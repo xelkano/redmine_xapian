@@ -1,6 +1,26 @@
 Changelog for Redmine Xapian
 ==========================
 
+2.0.5 *2021-10-08*
+------------------
+
+    Indexing if Redmine is rum in a sub-uri
+    An option to delete the index database
+    Chinese characters in file names and in searched text fixed
+    Indexing of file system repositories
+
+* Bug: #124 - Fix url parsing
+* New: #123 - indexing_diff_by_time: only index those updated or added after last i…
+* Bug: #121 - pptx indexing: reading from docProps/app.xml -> ppt/slides/*.xml
+* New: #120 - Add -X option for deleting database
+* Bug: #119 - Fix for chinese-title-file
+* Bug: #116 - Re-solve #88 pdf and Word(.doc) files are not seachable
+* New: #115 - extra/xapian_indexer.rb -x: remove log for zombied repos
+* Bug: #114 - "<repo_name> encountered an error and will be skipped: undefined method `split' for nil:NilClass
+* New: ##113 - Make filesystem repository searchable
+* Bug: #112 - Fix encoding condition
+* Bug: #111 - In search result, chinese description is garbled
+
 2.0.4 *2021-04-30*
 ------------------
 
