@@ -1,9 +1,6 @@
-#!/bin/bash
+# Redmine plugin for Document Management System "Features"
 #
-# Redmine Xapian is a Redmine plugin to allow attachments searches by content.
-#
-# Copyright © 2010    Xabier Elkano
-# Copyright © 2015-21 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2011-21 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# PosgreSQL file definition for GitLab Continous Integration
 
-bundle exec rake redmine:plugins:test:units NAME=redmine_xapian RAILS_ENV=test
-bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian RAILS_ENV=test
+test:
+  adapter: postgresql
+  database: test
+  username: redmine
+  password: redmine
+  host: localhost
