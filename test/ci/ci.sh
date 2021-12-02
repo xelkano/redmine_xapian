@@ -77,7 +77,7 @@ RAILS_ENV=test bundle exec rake redmine:plugins:migrate
 RAILS_ENV=test REDMINE_LANG=en bundle exec rake redmine:load_default_data
 
 # Run Redmine tests
-RAILS_ENV=test bundle exec rake test
+#RAILS_ENV=test bundle exec rake test
 
 # Run Xapian tests
 bundle exec rake redmine:plugins:test:units NAME=redmine_dmsf RAILS_ENV=test
