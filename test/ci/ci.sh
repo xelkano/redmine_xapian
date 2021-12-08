@@ -80,8 +80,8 @@ RAILS_ENV=test REDMINE_LANG=en bundle exec rake redmine:load_default_data
 #RAILS_ENV=test bundle exec rake test
 
 # Run Xapian tests
-bundle exec rake redmine:plugins:test:units NAME=redmine_dmsf RAILS_ENV=test
-bundle exec rake redmine:plugins:test:functionals NAME=redmine_dmsf RAILS_ENV=test
+bundle exec rake redmine:plugins:test:units NAME=redmine_xapian RAILS_ENV=test
+bundle exec rake redmine:plugins:test:functionals NAME=redmine_xapian RAILS_ENV=test
 
 # Clean up database from the plugin changes
 bundle exec rake redmine:plugins:migrate NAME=redmine_xapian VERSION=0 RAILS_ENV=test
