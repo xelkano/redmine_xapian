@@ -20,24 +20,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-class Repofile < ActiveRecord::Base
+class Repofile
   include RedmineXapian
- 
-  has_no_table
+  include ActiveModel::Model
+  include ActiveRecord::Reflection
+  include Redmine::Acts::Searchable
 
-  column :id, :integer
-  column :description, :string
-  column :created_on, :date_time
-  column :project_id, :integer
-  column :filename, :string
-  column :repository_id, :integer
-  column :url, :string
-  column :revision, :string
+  acts_as_searchable columns: ['filename', 'description'],
+                     permission: :browse_repository, date_column: :created_on, project_key: :project_id
 
-  acts_as_searchable columns: ["#{table_name}.filename", "#{table_name}.description"],
-    permission: :browse_repository, date_column: :created_on, project_key: :project_id
-
-  attr_accessor :description 
+  attr_accessor :id
+  attr_accessor :description
   attr_accessor :created_on
   attr_accessor :project_id
   attr_accessor :filename
@@ -54,7 +47,6 @@ class Repofile < ActiveRecord::Base
   end
 
   def event_url
-    #url = File.join Redmine::Utils::relative_url_root, url
     url.force_encoding 'UTF-8'
   end
 

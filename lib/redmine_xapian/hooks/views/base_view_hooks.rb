@@ -24,9 +24,7 @@ module RedmineXapian
   module Hooks
     module Views
 
-      include Redmine::Hook
-
-      class ViewBaseHook < RedmineXapian::Hooks::Views::ViewListener
+      class BaseViewHooks < Redmine::Hook::ViewListener
 
         def view_layouts_base_html_head(context={})
           if context[:controller].class.name == 'SearchController'
