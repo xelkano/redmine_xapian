@@ -4,6 +4,7 @@ Redmine Xapian search plugin
 The current version of Redmine Xapian is **2.0.5**. 
 
 [![pipeline status](https://gitlab.kontron.com/redmine-plugins/redmine_xapian/badges/master/pipeline.svg)](https://gitlab.kontron.com/redmine-plugins/redmine_xapian/-/commits/master)
+[![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
 
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
 search engine](https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
