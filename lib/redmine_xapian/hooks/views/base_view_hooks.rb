@@ -4,7 +4,7 @@
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
-# Copyright © 2015-21 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2015-22 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -24,9 +24,7 @@ module RedmineXapian
   module Hooks
     module Views
 
-      include Redmine::Hook
-
-      class ViewBaseHook < RedmineXapian::Hooks::Views::ViewListener
+      class BaseViewHooks < Redmine::Hook::ViewListener
 
         def view_layouts_base_html_head(context={})
           if context[:controller].class.name == 'SearchController'
