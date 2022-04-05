@@ -165,7 +165,7 @@ permissions view_*; Be sure it is checked.
 
 ### Hooks
 
-There are a few hooks to customize the Xapian search plugin behaviour in your onw plugin:
+There are a few hooks to customize the Xapian search plugin behaviour in your own plugin:
 
 #### Quick jump to an object
 
