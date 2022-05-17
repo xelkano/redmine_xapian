@@ -27,7 +27,10 @@ rescue LoadError
                       Install a ruby-xapian package or an alternative Xapian binding (https://xapian.org).}
 else
   require 'redmine'
-  require File.dirname(__FILE__) + '/lib/redmine_xapian'
+  # All files in lib sub-folder are already loaded by Zeitwerk
+  if RedmineApp::Application.config.autoloader != :zeitwerk
+    require File.dirname(__FILE__) + '/lib/redmine_xapian'
+  end
 
   Redmine::Plugin.register :redmine_xapian do
     name 'Xapian search plugin'
