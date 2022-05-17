@@ -1,7 +1,7 @@
 Redmine Xapian search plugin
 ============================
 
-The current version of Redmine Xapian is **3.0.0**. 
+The current version of Redmine Xapian is **3.0.1 devel**. 
 
 [![pipeline status](https://gitlab.kontron.com/redmine-plugins/redmine_xapian/badges/master/pipeline.svg)](https://gitlab.kontron.com/redmine-plugins/redmine_xapian/-/commits/master)
 [![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
