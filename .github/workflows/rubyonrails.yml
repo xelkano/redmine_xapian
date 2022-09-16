@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
-      NAME: redmine_dmsf
+      NAME: redmine_xapian
     steps:
       - name: Clone Redmine
         # Get the latest stable Redmine
@@ -85,7 +85,7 @@ jobs:
       - name: Link the plugin
         # Link the plugin to the redmine folder
         run: | 
-          ln -s $(pwd) /opt/redmine/plugins/redmine_dmsf
+          ln -s $(pwd) /opt/redmine/plugins/redmine_xapian
       - name: Install Ruby and gems
         uses: ruby/setup-ruby@0a29871fe2b0200a17a4497bae54fe5df0d973aa # v1.115.3
         with:
