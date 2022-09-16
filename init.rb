@@ -20,40 +20,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-begin
-  require 'xapian'
-rescue LoadError
-  Rails.logger.warn %{No Xapian search engine interface for Ruby installed => Full-text search won't be available.
-                      Install a ruby-xapian package or an alternative Xapian binding (https://xapian.org).}
-else
-  require 'redmine'
-  require File.dirname(__FILE__) + '/lib/redmine_xapian'
+require 'redmine'
+require File.dirname(__FILE__) + '/lib/redmine_xapian'
 
-  Redmine::Plugin.register :redmine_xapian do
-    name 'Xapian search plugin'
-    author 'Xabier Elkano/Karel Pičman'
-    url 'https://www.redmine.org/plugins/xapian_search'
-    author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
+Redmine::Plugin.register :redmine_xapian do
+  name 'Xapian search plugin'
+  author 'Xabier Elkano/Karel Pičman'
+  url 'https://www.redmine.org/plugins/xapian_search'
+  author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
-    description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-    version '3.0.1 devel'
-    requires_redmine version_or_higher: '4.1.0'
+  description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
+  version '3.0.1 devel'
+  requires_redmine version_or_higher: '4.1.0'
 
-    settings partial: 'settings/redmine_xapian_settings',
-      default: {
-        'enable' => true,
-        'index_database' => File.expand_path('file_index', Rails.root),
-        'stemming_lang' => 'english',
-        'stemming_strategy' => 'STEM_SOME',
-        'stem_langs' =>  %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
-          lovins norwegian porter portuguese romanian russian spanish swedish turkish),
-        'save_search_scope' => false,
-        'enable_cjk_ngrams' => false
-      }
-   end
+  settings partial: 'settings/redmine_xapian_settings',
+    default: {
+      'enable' => true,
+      'index_database' => File.expand_path('file_index', Rails.root),
+      'stemming_lang' => 'english',
+      'stemming_strategy' => 'STEM_SOME',
+      'stem_langs' =>  %w(danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
+        lovins norwegian porter portuguese romanian russian spanish swedish turkish),
+      'save_search_scope' => false,
+      'enable_cjk_ngrams' => false
+    }
+ end
 
-   Redmine::Search.map do |search|
-     search.register :attachments
-     search.register :repofiles
-  end
-end
+ Redmine::Search.map do |search|
+   search.register :attachments
+   search.register :repofiles
+ end

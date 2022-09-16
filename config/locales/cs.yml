@@ -52,3 +52,5 @@ cs:
     slov. Odpovídající proměná prostředí musí být použita při indexaci.
     např.: XAPIAN_CJK_NGRAM=true ruby plugins/redmine_xapian/extra/xapian_indexer.rb -fv"
   label_file-attachment_plural: Soubory/Přílohy
+  warning_xapian_not_available: Rozhraní Xapianu pro Ruby není nainstalováno => Full=textové vyhledávání není k 
+    dispozici. Nainstalujte balíček ruby-xapian nebo Xapian binding ze https://xapian.org.
