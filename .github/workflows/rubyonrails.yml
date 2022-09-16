@@ -77,6 +77,11 @@ jobs:
       RAILS_ENV: test
       NAME: redmine_xapian
     steps:
+      - - name: Install dependencies
+          # Install necessary packages
+          run: |
+            sudo apt update
+            sudo apt install -y ruby-xapian
       - name: Clone Redmine
         # Get the latest stable Redmine
         run: svn export http://svn.redmine.org/redmine/branches/5.0-stable/ /opt/redmine
@@ -108,7 +113,7 @@ jobs:
         run: |
           cd /opt/redmine
           echo "gem \"webrick\"" > Gemfile.local          
-          bundle config set --local without 'rmagick development xapian'
+          bundle config set --local without 'rmagick development'
           bundle install
           bundle exec rake generate_secret_token
           bundle exec rake db:migrate
