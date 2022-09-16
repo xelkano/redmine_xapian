@@ -111,12 +111,12 @@ jobs:
       - name: Install Redmine
         # Install Redmine
         run: |
-          cd /opt/redmine
-          echo "gem \"webrick\"" > Gemfile.local          
+          cd /opt/redmine                    
           bundle config set --local without 'rmagick development'
           bundle install
           bundle exec rake generate_secret_token
           bundle exec rake db:migrate
+          ls -l
           bundle exec rake redmine:plugins:migrate
           bundle exec rake redmine:load_default_data
         env:
