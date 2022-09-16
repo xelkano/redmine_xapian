@@ -77,11 +77,11 @@ jobs:
       RAILS_ENV: test
       NAME: redmine_xapian
     steps:
-      - - name: Install dependencies
-          # Install necessary packages
-          run: |
-            sudo apt update
-            sudo apt install -y ruby-xapian
+      - name: Install dependencies
+        # Install necessary packages
+        run: |
+          sudo apt update
+          sudo apt install -y ruby-xapian
       - name: Clone Redmine
         # Get the latest stable Redmine
         run: svn export http://svn.redmine.org/redmine/branches/5.0-stable/ /opt/redmine
