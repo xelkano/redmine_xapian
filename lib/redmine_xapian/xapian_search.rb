@@ -88,11 +88,12 @@ module RedmineXapian
       Rails.logger.debug "Matches 1-#{matchset.size} records:"
       Rails.logger.debug "Searching for #{(xapian_file == 'Repofile') ? 'repofiles' : 'attachments'}"
       i = 0
+      p = URI::Parser.new
 
       matchset.matches.each do |m|
         if xapian_file == 'Repofile'
           if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
-            dochash = { date: $1, sample: $2, url: URI.unescape($3) }
+            dochash = { date: $1, sample: $2, url: p.unescape($3) }
             repo_file = process_repo_file(projects_to_search, dochash, user, i)
             if repo_file
               xpattachments << repo_file
@@ -103,7 +104,7 @@ module RedmineXapian
           end
         elsif xapian_file == 'Attachment'
           if m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type|caption|modtime|size)=/
-            dochash = { :url => URI.unescape($1), :sample => $2 }
+            dochash = { url: p.unescape($1), sample: $2 }
             attachment = process_attachment(projects_to_search, dochash, user)
             if attachment
               xpattachments << attachment
