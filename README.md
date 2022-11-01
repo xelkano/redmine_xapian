@@ -1,7 +1,7 @@
-Redmine Xapian search plugin 3.0.2 devel
-========================================
+Redmine Xapian search plugin 3.0.2
+==================================
 
-[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=devel)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
+[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=master)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
 [![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
 
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
@@ -219,3 +219,13 @@ An example of displaying the parent folder of the searched document in DMSF plug
 
     end
 ```
+
+### 1.4. Uninstalling
+
+Before uninstalling the Xapian plugin, please ensure that the Redmine instance is stopped.
+
+1. `cd [redmine-install-dir]`
+2. `rake redmine:plugins:migrate NAME=redmine_xapian VERSION=0 RAILS_ENV=production`
+3. `rm -rf plugins/redmine_xapian`
+
+After these steps, re-start your instance of Redmine.

@@ -1,13 +1,17 @@
 Changelog for Redmine Xapian
 ==========================
 
-3.0.2 *????-??-??*
+3.0.2 *2022-11-01*
 ------------------
+
+    Ruby 3.0
+
+* Bug: #130 - NoMethodError (undefined method 'unescape' for URI:Module)
 
 3.0.1 *2022-09-20*
 ------------------
 
-    GutHub CI
+    GitHub CI
 
 3.0.0 *2022-04-28*
 ------------------
