@@ -14,7 +14,7 @@ A copy of the plugin can be downloaded from  Github at https://github.com/xelkan
 
 ### 1.1. Required packages
 
-Redmine >= 4.1
+Redmine >= 4.2
 
 To use the full-text search engine you must install ruby-xapian and xapian-omega packages. In case of using of Bitnami 
 stack or Ruby installed via RVM it might be necessary to install Xapian bindings from sources.  See https://xapian.org
