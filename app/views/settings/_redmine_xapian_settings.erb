@@ -64,9 +64,9 @@
 
   <p>
     <%= content_tag :label, l(:label_default_stemming_strategy) %>
-    <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', checked: true %> <%= l(:label_stem_none) %> (<%= l(:label_default) %>)<br/>
-    <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME' %> <%= l(:label_stem_some) %><br/>
-    <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL' %> <%= l(:label_stem_all) %><br/>
+    <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_NONE', @settings['stemming_strategy'] == 'STEM_NONE', checked: true %> <%= l(:label_stem_none) %> (<%= l(:label_default) %>)<br>
+    <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_SOME', @settings['stemming_strategy'] == 'STEM_SOME' %> <%= l(:label_stem_some) %><br>
+    <%= radio_button_tag 'settings[stemming_strategy]', 'STEM_ALL', @settings['stemming_strategy'] == 'STEM_ALL' %> <%= l(:label_stem_all) %><br>
     <em class="info">
       <%= l(:text_stemming_info) %>
     </em>
