@@ -73,6 +73,7 @@ UNRTF = '/usr/bin/unrtf -t text 2>/dev/null'
 
 ENVIRONMENT = File.join(REDMINE_ROOT, 'config/environment.rb')
 
+onlyocr = nil
 onlyfiles = nil
 onlyrepos = nil
 env = 'production'
@@ -126,7 +127,7 @@ optparse = OptionParser.new do |opts|
   opts.on('-s', '--stemming_lang a,b,c', Array,
           'Comma separated list of stemming languages for indexing') { |s| stem_langs = s }
   opts.on('-v', '--verbose', 'verbose') { verbose = true }
-  opts.on('-o', '--ocr', 'Only index Redmine OCR') { $onlyocr = 1 }
+  opts.on('-o', '--ocr', 'Only index Redmine OCR') { onlyocr = 1 }
   opts.on('-f', '--files', 'Only index Redmine attachments') { onlyfiles = 1 }
   opts.on('-r', '--repositories', 'Only index Redmine repositories') { onlyrepos = 1 }
   opts.on('-e', '--environment ENV',
@@ -479,18 +480,17 @@ end
 my_log "Redmine environment [RAILS_ENV=#{env}] correctly loaded ...", verbose
 
 # Indexing OCR
-if $onlyocr
+if onlyocr
   filespath = Redmine::Configuration['attachments_storage_path'] || Rails.root.join('files')
   Dir.glob("#{filespath}/**/*") do |file|
-    if file.last(4) == ".png" || file.last(4) == ".jpg"
+    if file.last(4) == '.png' || file.last(4) == '.jpg'
       my_log "OCR #{file} scanned", verbose
-      file_txt = file + ".txt"
-      if File.exist?(file_txt)
-        next
-      end
+      file_txt = "#{file}.txt"
+      next if File.exist?(file_txt)
+
       image = RTesseract.new(file, lang: 'chi_sim+chi_tra')
       text = image.to_s
-      File.open(file_txt, 'w') { |ft| ft.write(text) }
+      File.write(file_txt, text)
     end
   end
   my_log 'Redmine OCR indexed', verbose
