@@ -38,6 +38,9 @@ FILES = 'files'
 SCRIPTINDEX = '/usr/bin/scriptindex'
 
 # omindex binary path
+# To index "non-text" files, use omindex filters
+# e.g.: tesseract OCR engine as a filter for PNG files
+#OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
 OMINDEX = '/usr/bin/omindex'
 
 # Directory containing Xapian databases for omindex (Attachments indexing)
@@ -479,10 +482,6 @@ my_log "Redmine environment [RAILS_ENV=#{env}] correctly loaded ...", verbose
 
 # Indexing files
 unless onlyrepos
-  unless File.exist?(OMINDEX)
-    my_log "#{OMINDEX} does not exist, exiting...", true
-    exit 1
-  end
   stem_langs.each do |lang|
     filespath = File.join(REDMINE_ROOT, FILES)
     unless File.directory?(filespath)

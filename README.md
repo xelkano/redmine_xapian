@@ -21,7 +21,7 @@ stack or Ruby installed via RVM it might be necessary to install Xapian bindings
  for details. To index some files with omindex you may have to install some other packages like xpdf, antiword, ...
  
 ```
-sudo apt-get install xapian-omega ruby-xapian
+sudo apt install xapian-omega ruby-xapian
 ```
 
 To index some files with omega you may have to install some other packages like
@@ -66,9 +66,15 @@ From "Omega documentation":https://xapian.org/docs/omega/overview.html:
 On Debian you can use following command to install some of the required indexing tools:
 
 ```
-sudo apt-get install xapian-omega libxapian-dev poppler-utils \
+sudo apt install xapian-omega libxapian-dev poppler-utils \
     antiword unzip catdoc libwpd-tools libwps-tools gzip unrtf catdvi \
     djview djview3 uuid uuid-dev xz-utils libemail-outlook-message-perl
+```
+
+To index images you will need an OCR engine, e.g. Tesseract.
+
+```
+sudo apt install tesseract-ocr
 ```
 
 ### 1.2. Plugin installation
@@ -93,12 +99,12 @@ Ruby installed" If you see this message, please make sure that a Xapian search e
 
 ### 1.3. Setup
 
-First at all, go to the Redmine interface and in the plugins section configure the plugin. It's very important to set up 
+First of all, go to the Redmine interface and in the plugins section configure the plugin. It's very important to set up 
 correctly the directory that will contain the Xapian databases.
 
 To use stemmed languages in searches, Xapian needs to generate stemmed forms for each language and store them in a database.
 Before you can use the plugin, you have to populate the Xapian databases for each stemmed language you want to use. 
-From plugin version 1.6 a new script (xapian_indexer.rb) is included in the extra directory that is use to populate Xapian
+From plugin version 1.6 a new script (extra/xapian_indexer.rb) is included in the extra directory that is use to populate Xapian
 databases. This script is a wrapper for omindex binary, so omindex should not to be used anymore.
 
 First edit the script file and configure the required variables, they are self-explanatory and most of them can be 
@@ -144,6 +150,15 @@ Indexing repositories of some projects (valid for repositories indexing only):
 
 ```
 xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
+```
+
+**Indexing pictures**
+
+Omindex supports usage of filters to index binary files. In order to index images containing text, modify the OMINDEX 
+variable in the script as follows. E.g. parse PNG files using tesseract OCR engine:
+
+```
+OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
 ```
 
 **Configure a cron task for an automatic indexing**
