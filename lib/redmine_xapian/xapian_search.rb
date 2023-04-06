@@ -99,7 +99,11 @@ module RedmineXapian
           end
         when 'Attachment'
           if m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type|caption|modtime|size)=/
-            dochash = { url: URI::DEFAULT_PARSER.unescape($1), sample: $2 }
+            url = URI::DEFAULT_PARSER.unescape($1)
+            if url.include?("png.txt") || url.include?("jpg.txt")
+              url = url.chomp(".txt")
+            end
+            dochash = { url: url, sample: $2 }
             attachment = process_attachment(projects_to_search, dochash, user)
             xpattachments << attachment if attachment
           else
