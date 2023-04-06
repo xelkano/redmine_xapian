@@ -483,7 +483,7 @@ if $onlyocr
   filespath = Redmine::Configuration['attachments_storage_path'] || Rails.root.join('files')
   Dir.glob("#{filespath}/**/*") do |file|
     if file.last(4) == ".png" || file.last(4) == ".jpg"
-      my_log "OCR #{file} scanned"
+      my_log "OCR #{file} scanned", verbose
       file_txt = file + ".txt"
       if File.exist?(file_txt)
         next
@@ -493,7 +493,7 @@ if $onlyocr
       File.open(file_txt, 'w') { |ft| ft.write(text) }
     end
   end
-  my_log 'Redmine OCR indexed'
+  my_log 'Redmine OCR indexed', verbose
 end
 
 # Indexing files
