@@ -99,7 +99,6 @@ MIME_TYPES = {
   'application/javascript' => 'js'
 }.freeze
 
-
 FORMAT_HANDLERS = {
   'pdf' => $pdftotext,
   'doc' => $catdoc,
@@ -460,6 +459,12 @@ end
 
 my_log "Redmine environment [RAILS_ENV=#{$env}] correctly loaded ..."
 
+path_to_attachment = File.join(
+  Redmine::Configuration['attachments_storage_path'] || 
+  File.join(Rails.root, "files")
+)
+puts "path_to_attachment = #{path_to_attachment}"
+
 # Indexing files
 unless $onlyrepos
   unless File.exist?($omindex)
@@ -467,7 +472,7 @@ unless $onlyrepos
     exit 1
   end
   $stem_langs.each do | lang |
-    filespath = File.join($redmine_root, $files)
+    filespath = path_to_attachment
     unless File.directory?(filespath)
       my_log "An error while accessing #{filespath}, exiting...", true
       exit 1

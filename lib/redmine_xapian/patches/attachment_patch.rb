@@ -26,9 +26,9 @@ module RedmineXapian
     
       def self.included(base)
         base.class_eval do
-           Attachment.acts_as_searchable columns: ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
-             project_key: 'project_id',
-             date_column: 'created_on'
+          Attachment.acts_as_searchable :columns      =>  ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
+                                        :project_key  =>  'project_id',
+                                        :date_column  =>  'created_on'
        end
       end
 
