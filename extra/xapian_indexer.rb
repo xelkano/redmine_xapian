@@ -40,7 +40,7 @@ SCRIPTINDEX = '/usr/bin/scriptindex'
 # omindex binary path
 # To index "non-text" files, use omindex filters
 # e.g.: tesseract OCR engine as a filter for PNG files
-#OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
+# OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
 OMINDEX = '/usr/bin/omindex'
 
 # Directory containing Xapian databases for omindex (Attachments indexing)
