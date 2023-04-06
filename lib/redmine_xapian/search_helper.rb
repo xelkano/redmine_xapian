@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -21,26 +20,22 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module RedmineXapian
+  # Search helper
   module SearchHelper
-    
     def link_to_container(attachment)
-      link = ''
-      case attachment.container_type        
-        when 'Message'
-          link = link_to("#{l(:label_message)}: #{attachment.container.subject}".truncate(255),
-            board_message_path(attachment.container.board, attachment.container))
-        when 'WikiPage'
-          link = link_to("#{l(:label_wiki)}: #{attachment.container.title}".truncate(255),
-            wiki_page_path(attachment.container))
-        when 'Issue'
-          link = link_to("#{l(:label_issue)}: #{attachment.container.subject}".truncate(255),
-            issue_path(attachment.container))        
-        when 'Project'
-          link = link_to("#{l(:label_file_plural)}",
-            project_files_path(attachment.container))
+      case attachment.container_type
+      when 'Message'
+        link_to "#{l(:label_message)}: #{attachment.container.subject}".truncate(255),
+                board_message_path(attachment.container.board, attachment.container)
+      when 'WikiPage'
+        link_to "#{l(:label_wiki)}: #{attachment.container.title}".truncate(255),
+                wiki_page_path(attachment.container)
+      when 'Issue'
+        link_to "#{l(:label_issue)}: #{attachment.container.subject}".truncate(255),
+                issue_path(attachment.container)
+      when 'Project'
+        link_to l(:label_file_plural), project_files_path(attachment.container)
       end
-      link + ' / '
-    end  
-    
+    end
   end
 end

@@ -1,6 +1,4 @@
 <%
-# encoding: utf-8
-#
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010     Xabier Elkano
@@ -26,10 +24,7 @@
 <%= form_tag({}, :method => :get, :id => 'search-form') do %>
 <div class="box">
 <%= label_tag "search-input", l(:description_search), :class => "hidden-for-sighted" %>
-<p><%= text_field_tag 'q', @question, :size => 60, :id => 'search-input',
-                  :data => {
-                      :auto_complete => true
-                  } %>
+<p><%= text_field_tag 'q', @question, :size => 60, :id => 'search-input', :data => { :auto_complete => true } %>
 <%= project_select_tag %>
 <%= hidden_field_tag 'all_words', '', :id => nil %>
 <label><%= check_box_tag 'all_words', 1, @all_words %> <%= l(:label_all_words) %></label>
@@ -74,52 +69,52 @@
 <% end %>
 
 <% if @results %>
-    <div id="search-results-counts">
-      <%= render_results_by_type(@result_count_by_type) unless @scope.size == 1 %>
-    </div>
-    <h3><%= l(:label_result_plural) %> (<%= @result_count %>)</h3>
-    <dl id="search-results">
-      <% @results.each do |e| %>
-          <dt class="<%= e.event_type %> icon icon-<%= e.event_type %>">
-          <% # Plugin change start %>
-          <%#= content_tag('span', e.project, :class => 'project') unless @project == e.project %>
-          <%= content_tag('span', link_to(e.project, project_path(e.project)), class: 'project') unless @project == e.project  %>
-          <% if e.event_type == 'attachment' %>
-              <%= link_to_container e %>
-          <% else %>
-              <%= call_hook :view_search_index_container, object: e %>
-          <% end %>
-          <%= content_tag('span', h(e.format_identifier), class: 'identifier') if defined?(e.format_identifier) && !e.format_identifier.empty? %>
-          <% # end %>
-          <%= link_to(highlight_tokens(e.event_title.truncate(255), @tokens), e.event_url) %>
-        </dt>
-        <dd><span class="description"><%= highlight_tokens(e.event_description, @tokens) %></span>
-        <span class="author"><%= format_time(e.event_datetime) %></span></dd>
-      <% end %>
-    </dl>
+  <div id="search-results-counts">
+    <%= render_results_by_type(@result_count_by_type) unless @scope.size == 1 %>
+  </div>
+  <h3><%= l(:label_result_plural) %> (<%= @result_count %>)</h3>
+  <dl id="search-results">
+    <% @results.each do |e| %>
+        <dt class="<%= e.event_type %> icon icon-<%= e.event_type %>">
+        <% # Plugin change start %>
+        <%#= content_tag('span', e.project, :class => 'project') unless @project == e.project %>
+        <%= content_tag('span', link_to(e.project, project_path(e.project)), class: 'project') unless @project == e.project  %>
+        <% if e.event_type == 'attachment' %>
+            <%= link_to_container e %> /
+        <% else %>
+            <%= call_hook :view_search_index_container, object: e %>
+        <% end %>
+        <%= content_tag('span', h(e.format_identifier), class: 'identifier') if defined?(e.format_identifier) && !e.format_identifier.empty? %>
+        <% # end %>
+        <%= link_to(highlight_tokens(e.event_title.truncate(255), @tokens), e.event_url) %>
+      </dt>
+      <dd><span class="description"><%= highlight_tokens(e.event_description, @tokens) %></span>
+      <span class="author"><%= format_time(e.event_datetime) %></span></dd>
+    <% end %>
+  </dl>
 <% end %>
 
 <% if @result_pages %>
   <span class="pagination"><%= pagination_links_full @result_pages, @result_count, :per_page_links => false %></span>
 <% end %>
 
-<% html_title(l(:label_search)) -%>
+<% html_title(l(:label_search)) %>
 
 <%= javascript_tag do %>
-$("#search-types a").click(function(e){
-  e.preventDefault();
-  $("#search-types input[type=checkbox]").prop('checked', false);
-  $(this).siblings("input[type=checkbox]").prop('checked', true);
-  if ($("#search-input").val() != "") {
-    $("#search-form").submit();
-  }
-});
+  $("#search-types a").click(function(e){
+    e.preventDefault();
+    $("#search-types input[type=checkbox]").prop('checked', false);
+    $(this).siblings("input[type=checkbox]").prop('checked', true);
+    if ($("#search-input").val() != "") {
+      $("#search-form").submit();
+    }
+  });
 
-$("#search-form").submit(function(){
-  $("#show-options").val($("#options-content").is(":visible") ? '1' : '0');
-});
+  $("#search-form").submit(function(){
+    $("#show-options").val($("#options-content").is(":visible") ? '1' : '0');
+  });
 
-<% if params[:options] == '1' %>
-toggleFieldset($("#options-content"));
-<% end %>
+  <% if params[:options] == '1' %>
+    toggleFieldset($("#options-content"));
+  <% end %>
 <% end %>

@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -22,14 +21,16 @@
 
 module RedmineXapian
   module Patches
+    # Attachment module patch
     module AttachmentPatch
-    
       def self.included(base)
         base.class_eval do
-           Attachment.acts_as_searchable columns: ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
-             project_key: 'project_id',
-             date_column: 'created_on'
-       end
+          Attachment.acts_as_searchable(
+            columns: ["#{Attachment.table_name}.filename", "#{Attachment.table_name}.description"],
+            project_key: 'project_id',
+            date_column: 'created_on'
+          )
+        end
       end
 
       def self.prepended(base)
@@ -39,8 +40,8 @@ module RedmineXapian
         end
       end
 
+      # Event methods module
       module EventMethods
-
         def event_description
           desc = Redmine::Search.cache_store.fetch("Attachment-#{id}")
           if desc
@@ -48,19 +49,18 @@ module RedmineXapian
           else
             desc = description
           end
-          desc.force_encoding('UTF-8') if desc
+          desc&.force_encoding('UTF-8')
         end
-
       end
 
+      # Search methods module
       module SearchMethods
-
         def search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})
           r = search(tokens, user, projects, options)
-          r.map{ |x| [x[0].to_i, x[1]] }
+          r.map { |x| [x[0].to_i, x[1]] }
         end
 
-      private
+        private
 
         def search(tokens, user, projects = nil, options = {})
           Rails.logger.debug 'Attachment::search'
@@ -70,103 +70,113 @@ module RedmineXapian
           search_results.concat search_for_wiki_page_attachments(user, search_data)
           search_results.concat search_for_project_files(user, search_data)
           unless options[:titles_only]
-            Rails.logger.debug "Call xapian search service for #{name}"
+            Rails.logger.debug { "Call xapian search service for #{name}" }
             xapian_results = XapianSearchService.search(search_data)
-            search_results.concat xapian_results unless xapian_results.blank?
-            Rails.logger.debug "Call xapian search service for #{name} completed"
+            search_results.concat(xapian_results) if xapian_results.present?
+            Rails.logger.debug { "Call xapian search service for #{name} completed" }
           end
           search_results
         end
 
         def search_for_issues_attachments(user, search_data)
           results = []
-          sql = +"#{Attachment.table_name}.container_type = 'Issue' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_issues)}"
+          sql = +%(
+            #{Attachment.table_name}.container_type = 'Issue' AND
+            #{Project.table_name}.status = ? AND
+            #{Project.allowed_to_condition(user, :view_issues)}
+          )
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
           Attachment.joins("JOIN #{Issue.table_name} ON #{Attachment.table_name}.container_id = #{Issue.table_name}.id")
-            .joins("JOIN #{Project.table_name} ON #{Issue.table_name}.project_id = #{Project.table_name}.id")
-              .where(sql, Project::STATUS_ACTIVE).scoping do
-                where(tokens_condition(search_data)).scoping do
-                  results = where(search_data.limit_options)
-                    .distinct
-                    .pluck(searchable_options[:date_column], :id)
-                end
-              end
+                    .joins("JOIN #{Project.table_name} ON #{Issue.table_name}.project_id = #{Project.table_name}.id")
+                    .where(sql, Project::STATUS_ACTIVE).scoping do
+                      where(tokens_condition(search_data)).scoping do
+                        results = where(search_data.limit_options).distinct.pluck(searchable_options[:date_column], :id)
+                      end
+                    end
           results
         end
 
         def search_for_message_attachments(user, search_data)
           results = []
-          sql = +"#{Attachment.table_name}.container_type = 'Message' AND #{Project.table_name}.status = ?"
+          sql = +%(
+            #{Attachment.table_name}.container_type = 'Message' AND
+            #{Project.table_name}.status = ? AND
+            #{Project.allowed_to_condition(user, :view_messages)}
+          )
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
-          Attachment.joins("JOIN #{Message.table_name} ON #{Attachment.table_name}.container_id = #{Message.table_name}.id")
+          Attachment
+            .joins("JOIN #{Message.table_name} ON #{Attachment.table_name}.container_id = #{Message.table_name}.id")
             .joins("JOIN #{Board.table_name} ON #{Board.table_name}.id = #{Message.table_name}.board_id")
-              .joins("JOIN #{Project.table_name} ON #{Board.table_name}.project_id = #{Project.table_name}.id")
-                .where(sql, Project::STATUS_ACTIVE).scoping do
-                  where(tokens_condition(search_data)).scoping do
-                    results = where(search_data.limit_options)
-                      .distinct
-                      .pluck(searchable_options[:date_column], :id)
-                  end
-                end
+            .joins("JOIN #{Project.table_name} ON #{Board.table_name}.project_id = #{Project.table_name}.id")
+            .where(sql, Project::STATUS_ACTIVE).scoping do
+              where(tokens_condition(search_data)).scoping do
+                results = where(search_data.limit_options).distinct.pluck(searchable_options[:date_column], :id)
+              end
+            end
           results
         end
 
         def search_for_wiki_page_attachments(user, search_data)
           results = []
-          sql = +"#{Attachment.table_name}.container_type = 'WikiPage' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_wiki_pages)}"
+          sql = +%(
+            #{Attachment.table_name}.container_type = 'WikiPage' AND
+            #{Project.table_name}.status = ? AND
+            #{Project.allowed_to_condition(user, :view_wiki_pages)}
+          )
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
-          Attachment.joins("JOIN #{WikiPage.table_name} ON #{Attachment.table_name}.container_id = #{WikiPage.table_name}.id")
+          Attachment
+            .joins("JOIN #{WikiPage.table_name} ON #{Attachment.table_name}.container_id = #{WikiPage.table_name}.id")
             .joins("JOIN #{Wiki.table_name} ON #{Wiki.table_name}.id = #{WikiPage.table_name}.wiki_id")
-              .joins("JOIN #{Project.table_name} ON #{Wiki.table_name}.project_id = #{Project.table_name}.id")
-                .where(sql, Project::STATUS_ACTIVE).scoping do
-                  where(tokens_condition(search_data)).scoping do
-                    results = where(search_data.limit_options)
-                      .distinct
-                      .pluck(searchable_options[:date_column], :id)
-                  end
-                end
+            .joins("JOIN #{Project.table_name} ON #{Wiki.table_name}.project_id = #{Project.table_name}.id")
+            .where(sql, Project::STATUS_ACTIVE).scoping do
+              where(tokens_condition(search_data)).scoping do
+                results = where(search_data.limit_options).distinct.pluck(searchable_options[:date_column], :id)
+              end
+            end
           results
         end
 
         def search_for_project_files(user, search_data)
           results = []
-          sql = +"container_type = 'Project' AND #{Project.table_name}.status = ? AND #{Project.allowed_to_condition(user, :view_files)}"
+          sql = +%(
+            container_type = 'Project' AND
+            #{Project.table_name}.status = ? AND
+            #{Project.allowed_to_condition(user, :view_files)}
+          )
           sql << " AND #{search_data.project_conditions}" if search_data.project_conditions
           Attachment.joins("JOIN #{Project.table_name} ON #{Project.table_name}.id = container_id")
-            .where(sql, Project::STATUS_ACTIVE).scoping do
-                where(tokens_condition(search_data)).scoping do
-                  results = where(search_data.limit_options)
-                    .distinct
-                    .pluck(searchable_options[:date_column], :id)
-                end
-              end
+                    .where(sql, Project::STATUS_ACTIVE).scoping do
+                      where(tokens_condition(search_data)).scoping do
+                        results = where(search_data.limit_options).distinct.pluck(searchable_options[:date_column], :id)
+                      end
+                    end
           results
         end
 
         def container_url
-          if container.is_a? Issue
+          case container.is_a?
+          when Issue
             issue_path id: container[:id]
-          elsif container.is_a? WikiPage
+          when WikiPage
             wiki_path project_id: container.project.identifier, id: container[:title]
-          elsif container.is_a? Message
+          when Message
             message_path board_id: container[:board_id], id: container[:id]
-          elsif container.is_a? Version
+          when Version
             attachment_path project_id: container[:project_id]
           end
         end
 
         def container_name
-          container_name = +': '
-          if container.is_a? Issue
-            container_name += container[:subject].to_s
-          elsif container.is_a? WikiPage
-            container_name += container[:title].to_s
-          elsif container.is_a? Message
-            container_name += container[:subject].to_s
-          elsif container.is_a? Version
-            container_name += container[:name].to_s
+          case container.is_a?
+          when Issue, Message
+            ": #{container[:subject]}"
+          when WikiPage
+            ": #{container[:title]}"
+          when Version
+            ": #{container[:name]}"
+          else
+            ': '
           end
-          container_name
         end
 
         def search_options(search_data, search_joins_query)
@@ -178,16 +188,14 @@ module RedmineXapian
           columns = search_data.columns
           tokens = search_data.tokens
           columns = columns[0..0] if options[:titles_only]
-          token_clauses = columns.collect {|column| "(LOWER(#{column}) LIKE ?)"}
-          sql = (['(' + token_clauses.join(' OR ') + ')'] * tokens.size).join(options[:all_words] ? ' AND ' : ' OR ')
-          [sql, * (tokens.collect {|w| "%#{w.downcase}%"} * token_clauses.size).sort]
+          token_clauses = columns.collect { |column| "(LOWER(#{column}) LIKE ?)" }
+          sql = (["(#{token_clauses.join(' OR ')})"] * tokens.size).join(options[:all_words] ? ' AND ' : ' OR ')
+          [sql, * (tokens.collect { |w| "%#{w.downcase}%" } * token_clauses.size).sort]
         end
-
       end
-
     end
   end
 end
 
-Attachment.send :include, RedmineXapian::Patches::AttachmentPatch
-Attachment.send :prepend, RedmineXapian::Patches::AttachmentPatch
+Attachment.include RedmineXapian::Patches::AttachmentPatch
+Attachment.prepend RedmineXapian::Patches::AttachmentPatch

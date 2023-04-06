@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -23,17 +22,14 @@
 module RedmineXapian
   module Hooks
     module Views
-
+      # Base view's hooks
       class BaseViewHooks < Redmine::Hook::ViewListener
+        def view_layouts_base_html_head(context = {})
+          return unless context[:controller].instance_of?(SearchController)
 
-        def view_layouts_base_html_head(context={})
-          if context[:controller].class.name == 'SearchController'
-            "\n".html_safe + stylesheet_link_tag('redmine_xapian', plugin: :redmine_xapian)
-          end
+          "\n".html_safe + stylesheet_link_tag('redmine_xapian', plugin: :redmine_xapian)
         end
-
       end
-
     end
   end
 end

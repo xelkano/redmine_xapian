@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -20,15 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require 'simplecov'
-
-SimpleCov.start do
-  add_group 'Models', 'plugins/redmine_xapian/app/models'
-  add_group 'Views', 'plugins/redmine_xapian/app/views'
-  add_group 'Config', 'plugins/redmine_xapian/config'
-  add_group 'Library', 'plugins/redmine_xapian/lib'
-  add_group 'Test', 'plugins/redmine_xapian/test'
+# Application record class
+class ApplicationRecord < ActiveRecord::Base
+  self.abstract_class = true
 end
-
-# Load the normal Rails helper
-require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')

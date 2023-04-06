@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -19,32 +18,32 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-desc <<-END_DESC
-Xapian set repository identifiers task
+desc <<~END_DESC
+  Xapian set repository identifiers task
   Set a default identifier for repositories that haven't got one
 
-Available options:
-  identifier - A text to be set as the identifier
-  dry_run - test, no changes to the database
+  Available options:
+    identifier - A text to be set as the identifier
+    dry_run - test, no changes to the database
 
-Example:
-  bundle exec rake redmine:xapian_set_identifiers RAILS_ENV="production"
-  bundle exec rake redmine:xapian_set_identifiers identifier='main' RAILS_ENV="production"
-  bundle exec rake redmine:xapian_set_identifiers identifier='main' dry_run=1 RAILS_ENV="production"
+  Example:
+    bundle exec rake redmine:xapian_set_identifiers RAILS_ENV="production"
+    bundle exec rake redmine:xapian_set_identifiers identifier='main' RAILS_ENV="production"
+   bundle exec rake redmine:xapian_set_identifiers identifier='main' dry_run=1 RAILS_ENV="production"
 END_DESC
 
 namespace :redmine do
-  task :xapian_set_identifiers => :environment do
+  task xapian_set_identifiers: :environment do
     m = XapianRepositoryIdentifier.new
     m.set_identifier
   end
 end
 
+# Xapian Repository Identifier class
 class XapianRepositoryIdentifier
-
   def initialize
     @dry_run = ENV['dry_run']
-    @identifier = ENV['identifier'].blank? ? 'main' : ENV['identifier']
+    @identifier = ENV['identifier'].presence || 'main'
   end
 
   def set_identifier
@@ -62,5 +61,4 @@ class XapianRepositoryIdentifier
     # Result
     puts "#{i} of #{Repository.count} repositories have been updated."
   end
-
 end

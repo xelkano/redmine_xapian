@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -20,12 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-class Indexinglog < ActiveRecord::Base
-
+# Indexing log module
+class Indexinglog < ApplicationRecord
   belongs_to :repository
   belongs_to :changeset
-
-  validates :repository_id, presence: true
-  # validates :changeset_id, presence: true
-
 end

@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -21,20 +20,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module RedmineXapian
-
+  # Xapian search service
   class XapianSearchService
     extend XapianSearch
 
     class << self
-
       def search(search_data)
         Rails.logger.debug 'XapianSearch::search'
-        xapian_search(search_data.tokens, search_data.limit_options, search_data.projects,
-                      search_data.options[:all_words], search_data.user, search_data.element
-        )
+        xapian_search search_data.tokens, search_data.projects, search_data.options[:all_words], search_data.user,
+                      search_data.element
       end
-
     end
   end
-
 end

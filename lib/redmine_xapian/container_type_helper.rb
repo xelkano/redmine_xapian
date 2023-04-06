@@ -1,4 +1,3 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
@@ -21,24 +20,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module RedmineXapian
-
+  # Container Type Helper module
   module ContainerTypeHelper
-
     class << self
       # Convert container type name to view_permission symbol
       # WikiPage -> :view_wiki_pages
       def to_permission(container_type)
         case container_type
-          when 'Version'
-            :view_files
-          when 'Project'
-            :view_project
-          else
-            ('view_' + container_type.pluralize.underscore).to_sym
+        when 'Version'
+          :view_files
+        when 'Project'
+          :view_project
+        else
+          "view_#{container_type.pluralize.underscore}".to_sym
         end
       end
     end
-
   end
-
 end
