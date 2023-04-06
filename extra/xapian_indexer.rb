@@ -130,6 +130,7 @@ optparse = OptionParser.new do |opts|
   opts.on('-s', '--stemming_lang a,b,c', Array,
           'Comma separated list of stemming languages for indexing') { |s| $stem_langs = s }
   opts.on('-v', '--verbose',            'verbose') {$verbose += 1}
+  opts.on('-o', '--ocr',                'Only index Redmine OCR') { $onlyocr = 1 }
   opts.on('-f', '--files',              'Only index Redmine attachments') { $onlyfiles = 1 }
   opts.on('-r', '--repositories',       'Only index Redmine repositories') { $onlyrepos = 1 }
   opts.on('-e', '--environment ENV',
@@ -460,6 +461,24 @@ end
 
 my_log "Redmine environment [RAILS_ENV=#{$env}] correctly loaded ..."
 
+# Indexing OCR
+if $onlyocr
+  filespath = Redmine::Configuration['attachments_storage_path'] || Rails.root.join('files')
+  Dir.glob("#{filespath}/**/*") do |file|
+    if file.last(4) == ".png" || file.last(4) == ".jpg"
+      my_log "OCR #{file} scanned"
+      file_txt = file + ".txt"
+      if File.exist?(file_txt)
+        next
+      end
+      image = RTesseract.new(file, lang: 'chi_sim+chi_tra')
+      text = image.to_s
+      File.open(file_txt, 'w') { |ft| ft.write(text) }
+    end
+  end
+  my_log 'Redmine OCR indexed'
+end
+
 # Indexing files
 unless $onlyrepos
   unless File.exist?($omindex)
@@ -467,7 +486,7 @@ unless $onlyrepos
     exit 1
   end
   $stem_langs.each do | lang |
-    filespath = File.join($redmine_root, $files)
+    filespath = Redmine::Configuration['attachments_storage_path'] || Rails.root.join('files')
     unless File.directory?(filespath)
       my_log "An error while accessing #{filespath}, exiting...", true
       exit 1

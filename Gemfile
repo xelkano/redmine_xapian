@@ -21,5 +21,7 @@
 
 source 'https://rubygems.org' do
 
+gem 'rtesseract'
+
 end
 

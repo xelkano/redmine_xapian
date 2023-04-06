@@ -140,6 +140,12 @@ Only index repositories:
 xapian_indexer.rb -v -r
 ```
 
+Only index OCR:
+
+```
+xapian_indexer.rb -v -o
+```
+
 Indexing repositories of some projects (valid for repositories indexing only):
 
 ```
