@@ -28,11 +28,8 @@ module RedmineXapian
     def initialize(context, tokens, projects, options, user, element)
       @context = context
       @tokens = tokens
-      if projects.is_a?(Project) || projects.nil?
-        @projects = []
-        @projects << projects
-      else
-        @projects = projects
+      if projects.is_a?(Project)
+        @projects = projects.is_a?(Project) ? projects.to_a : projects
       end
       @options = options
       @columns = searchable_options[:columns]
