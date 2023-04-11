@@ -445,7 +445,7 @@ end
 
 def my_log(text, verbose, error: false)
   if error
-    $stderr.warn text
+    warn text
   elsif verbose
     $stdout.puts text
   end
