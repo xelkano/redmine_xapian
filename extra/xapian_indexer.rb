@@ -483,7 +483,7 @@ my_log "Redmine environment [RAILS_ENV=#{env}] correctly loaded ...", verbose
 # Indexing files
 unless onlyrepos
   stem_langs.each do |lang|
-    filespath = File.join(REDMINE_ROOT, FILES)
+    filespath = Redmine::Configuration['attachments_storage_path'] || File.join(REDMINE_ROOT, FILES)
     unless File.directory?(filespath)
       my_log "An error while accessing #{filespath}, exiting...", true
       exit 1
