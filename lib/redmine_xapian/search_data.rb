@@ -29,7 +29,7 @@ module RedmineXapian
       @context = context
       @tokens = tokens
       if projects.is_a?(Project)
-        @projects = projects.is_a?(Project) ? projects.to_a : projects
+        @projects = projects.is_a?(Project) ? [projects] : projects
       end
       @options = options
       @columns = searchable_options[:columns]
