@@ -1,10 +1,9 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
-# Copyright © 2015-22 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2015-23 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,13 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # Libraries
-require File.dirname(__FILE__) + '/redmine_xapian/search_data'
-require File.dirname(__FILE__) + '/redmine_xapian/xapian_search_service'
+require "#{File.dirname(__FILE__)}/redmine_xapian/search_data"
+require "#{File.dirname(__FILE__)}/redmine_xapian/xapian_search_service"
 
 # Patches
-require File.dirname(__FILE__) + '/redmine_xapian/patches/attachment_patch'
-require File.dirname(__FILE__) + '/redmine_xapian/patches/search_controller_patch'
+require "#{File.dirname(__FILE__)}/redmine_xapian/patches/attachment_patch"
+require "#{File.dirname(__FILE__)}/redmine_xapian/patches/search_controller_patch"
 
 # Hooks
 # Views
-require File.dirname(__FILE__) + '/redmine_xapian/hooks/views/base_view_hooks'
+require "#{File.dirname(__FILE__)}/redmine_xapian/hooks/views/base_view_hooks"

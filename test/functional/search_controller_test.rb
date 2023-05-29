@@ -1,10 +1,9 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
-# Copyright © 2015-22 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2015-23 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,14 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-require File.dirname(__FILE__) + '/../test_helper'
+# Load the normal Rails helper
+require Rails.root.join('test/test_helper')
 
+# Search controller tests
 class SearchControllerTest < Redmine::ControllerTest
   tests SearchController
-  fixtures :attachments, :changesets, :documents, :issues, :messages, :news, 
-    :wiki_pages, :projects, :users
+  fixtures :attachments, :changesets, :documents, :issues, :messages, :news, :wiki_pages, :projects, :users
 
-  def setup    
+  def setup
     attachment = Attachment.find_by(id: 1)
     @xapian_data = attachment ? [[attachment.created_on, attachment.id]] : []
   end
@@ -42,6 +42,5 @@ class SearchControllerTest < Redmine::ControllerTest
     RedmineXapian::XapianSearchService.expects(:search).never
     get :index, params: { q: 'xyz', attachments: true, titles_only: true }
     assert_response :success
-  end 
-
+  end
 end

@@ -1,10 +1,9 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
-# Copyright © 2015-22 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2015-23 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,29 +19,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+# Repository module
 class Repofile
   include RedmineXapian
   include ActiveModel::Model
   include ActiveRecord::Reflection
   include Redmine::Acts::Searchable
 
-  acts_as_searchable columns: ['filename', 'description'],
-                     permission: :browse_repository, date_column: :created_on, project_key: :project_id
+  acts_as_searchable columns: %w[filename description], permission: :browse_repository, date_column: :created_on,
+                     project_key: :project_id
 
-  attr_accessor :id
-  attr_accessor :description
-  attr_accessor :created_on
-  attr_accessor :project_id
-  attr_accessor :filename
-  attr_accessor :repository_id   
-  attr_accessor :url 
-  attr_accessor :revision
+  attr_accessor :id, :description, :created_on, :project_id, :filename, :repository_id, :url, :revision
 
-  def event_title    
+  def event_title
     filename.force_encoding 'UTF-8'
   end
 
-  def event_datetime    
+  def event_datetime
     created_on
   end
 
@@ -53,74 +46,73 @@ class Repofile
   def event_description
     description.force_encoding 'UTF-8'
   end
-	 
+
   def event_type
     repo_type
   end
 
   def repo_type
     repository.type.split('::')[1].downcase
-  end 
-  
-  def project    
-    @project = Project.find_by(id: project_id) unless @project
-    @project
   end
-  
+
+  def project
+    @project ||= Project.find_by(id: project_id)
+  end
+
   def repository
-    @repository = Repository.find_by(id: repository_id) unless @repository
-    @repository
+    @repository ||= Repository.find_by(id: repository_id)
   end
-  
+
   def identifier
     revision.to_s
-  end  
+  end
 
   def format_identifier
     identifier
   end
 
-  def self.search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})      
+  def self.search_result_ranks_and_ids(tokens, user = User.current, projects = nil, options = {})
     r = search tokens, user, projects, options
-    r.map{ |x| [x[0].to_i, x[1]] }
+    r.map { |x| [x[0].to_i, x[1]] }
   end
-  
-  def self.search_results_from_ids(ids)    
+
+  def self.search_results_from_ids(ids)
     results = []
     ids.each do |id|
       key = "Repofile-#{id}"
       value = Redmine::Search.cache_store.fetch key
-      if value
-        attributes = eval value
-        repofile = Repofile.new        
-        repofile.id = id
-        repofile.filename = attributes[:filename]
-        repofile.created_on = attributes[:created_on].to_datetime
-        repofile.project_id = attributes[:project_id]
-        repofile.description = attributes[:description]
-        repofile.repository_id = attributes[:repository_id]
-        repofile.url = attributes[:url]
-        repofile.revision = attributes[:revision]
-        results << repofile
-        Redmine::Search.cache_store.delete key
-      end
-    end  
+      next unless value
+
+      attributes = JSON.parse(value.gsub(/:([a-zA-z]+)/, '"\\1"').gsub('=>', ': ')).symbolize_keys
+      repofile = Repofile.new
+      repofile.id = id
+      repofile.filename = attributes[:filename]
+      repofile.created_on = attributes[:created_on].to_datetime
+      repofile.project_id = attributes[:project_id]
+      repofile.description = attributes[:description]
+      repofile.repository_id = attributes[:repository_id]
+      repofile.url = attributes[:url]
+      repofile.revision = attributes[:revision]
+      results << repofile
+      Redmine::Search.cache_store.delete key
+    end
     results
   end
-  
-  private
-  
-  def self.search(tokens, user, projects, options)     
-    Rails.logger.debug 'Repository::search'
-    search_data = SearchData.new self, tokens, projects, options, user, name
-    search_results = []
-    unless options[:titles_only]
-      Rails.logger.debug "Call xapian search service for #{name.inspect}"          
-      xapian_results = XapianSearchService.search search_data
-      search_results.concat xapian_results unless xapian_results.blank?
-      Rails.logger.debug "Call xapian search service for  #{name.inspect} completed"          
-    end
-    search_results
-  end           
 
+  class << self
+    private
+
+    def search(tokens, user, projects, options)
+      Rails.logger.debug 'Repository::search'
+      search_data = RedmineXapian::SearchData.new self, tokens, projects, options, user, name
+      search_results = []
+      unless options[:titles_only]
+        Rails.logger.debug { "Call xapian search service for #{name.inspect}" }
+        xapian_results = RedmineXapian::XapianSearchService.search search_data
+        search_results.concat xapian_results if xapian_results.present?
+        Rails.logger.debug { "Call xapian search service for  #{name.inspect} completed" }
+      end
+      search_results
+    end
+  end
 end

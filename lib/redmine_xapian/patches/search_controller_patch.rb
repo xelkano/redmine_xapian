@@ -1,10 +1,9 @@
-# encoding: utf-8
 # frozen_string_literal: true
 #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010   Xabier Elkano
-# Copyright © 2015-22 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2015-23 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,15 +21,15 @@
 
 module RedmineXapian
   module Patches
+    # Search controller patch
     module SearchControllerPatch
-
       SearchController.helper ::RedmineXapian::SearchHelper
 
       def index
-        @question = params[:q]&.strip || ""
+        @question = params[:q]&.strip || ''
         # Plugin change do
-        #@all_words = params[:all_words] ? params[:all_words].present? : true
-        #@titles_only = params[:titles_only] ? params[:titles_only].present? : false
+        # @all_words = params[:all_words] ? params[:all_words].present? : true
+        # @titles_only = params[:titles_only] ? params[:titles_only].present? : false
         if Setting.plugin_redmine_xapian['save_search_scope']
           if params[:all_words]
             @all_words = params[:all_words].present?
@@ -59,23 +58,19 @@ module RedmineXapian
         else
           @offset = nil
           @limit = Setting.search_results_per_page.to_i
-          @limit = 10 if @limit == 0
+          @limit = 10 if @limit.zero?
         end
 
         # quick jump to an issue
-        if (m = @question.match(/^#?(\d+)$/)) && (issue = Issue.visible.find_by_id(m[1].to_i))
-          redirect_to issue_path(issue)
-          return
+        if (m = @question.match(/^#?(\d+)$/)) && (issue = Issue.visible.find_by(id: m[1].to_i))
+          return redirect_to(issue_path(issue))
         end
 
         # Plugin change do
         # A hook allowing plugins to implement a quick jump to an object
         ret = call_hook(:controller_search_quick_jump, { question: @question })
         ret.each do |path|
-          if path
-            redirect_to path
-            return
-          end
+          return redirect_to(path) if path
         end
         # Plugin change end
 
@@ -86,7 +81,7 @@ module RedmineXapian
           when 'my_projects'
             User.current.projects
           when 'subprojects'
-            @project ? (@project.self_and_descendants.to_a) : nil
+            @project ? @project.self_and_descendants.to_a : nil
           else
             @project
           end
@@ -97,14 +92,14 @@ module RedmineXapian
           @object_types.delete('projects')
           # only show what the user is allowed to view
           # Plugin change do
-          #@object_types = @object_types.select {|o| User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)}
+          # @object_types = @object_types.select {|o| User.current.allowed_to?("view_#{o}".to_sym, projects_to_search)}
           @object_types = @object_types.select do |o|
             case o
             when 'attachments'
               # Files/Attachments option is always visible
               true
             when 'repofiles'
-              User.current.allowed_to? 'browse_repository'.to_sym, projects_to_search
+              User.current.allowed_to? :browse_repository, projects_to_search
             else
               User.current.allowed_to? "view_#{o}".to_sym, projects_to_search
             end
@@ -112,13 +107,12 @@ module RedmineXapian
           # end
         end
 
-        @scope = @object_types.select {|t| params[t]}
+        @scope = @object_types.select { |t| params[t] }
         # Plugin change do
-        # TODO: Setting.plugin_redmine_xapian doesn't work in GitHub Actions
         if Setting.plugin_redmine_xapian['save_search_scope']
           if @scope.empty?
             pref = User.current.pref[:xapian_search_scope]
-            @scope =  pref & @object_types if pref
+            @scope = (pref & @object_types) if pref
           else
             User.current.pref[:xapian_search_scope] = @scope
             User.current.pref.save!
@@ -129,29 +123,30 @@ module RedmineXapian
 
         fetcher = Redmine::Search::Fetcher.new(
           @question, User.current, @scope, projects_to_search,
-          :all_words => @all_words, :titles_only => @titles_only, :attachments => @search_attachments, :open_issues => @open_issues,
-          :cache => params[:page].present?, :params => params.to_unsafe_hash
+          all_words: @all_words, titles_only: @titles_only, attachments: @search_attachments, open_issues: @open_issues,
+          cache: params[:page].present?, params: params.to_unsafe_hash
         )
 
         if fetcher.tokens.present?
           @result_count = fetcher.result_count
           @result_count_by_type = fetcher.result_count_by_type
           @tokens = fetcher.tokens
-
           @result_pages = Redmine::Pagination::Paginator.new @result_count, @limit, params['page']
           @offset ||= @result_pages.offset
           @results = fetcher.results(@offset, @result_pages.per_page)
         else
-          @question = ""
+          @question = ''
         end
         respond_to do |format|
-          format.html { render :layout => false if request.xhr? }
-          format.api  { @results ||= []; render :layout => false }
+          format.html { render layout: false if request.xhr? }
+          format.api do
+            @results ||= []
+            render layout: false
+          end
         end
       end
-
     end
   end
 end
 
-SearchController.send(:prepend, RedmineXapian::Patches::SearchControllerPatch)
+SearchController.prepend RedmineXapian::Patches::SearchControllerPatch

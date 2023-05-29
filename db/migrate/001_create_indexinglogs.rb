@@ -1,9 +1,9 @@
-# encoding: utf-8
-#
+# frozen_string_literal: true
+# #
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
-# Copyright © 2015-22 Karel Pičman <karel.picman@kontron.com>
+# Copyright © 2015-23 Karel Pičman <karel.picman@kontron.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,17 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+# Create Index log table
 class CreateIndexinglogs < ActiveRecord::Migration[4.2]
-
   def change
     create_table :indexinglogs do |t|
-      t.column :repository_id, :integer
-      t.column :changeset_id, :integer
-      t.column :status, :integer
-      t.column :message, :string
-      t.column :created_at, :timestamp
-      t.column :updated_at, :timestamp
+      t.integer :repository_id
+      t.integer :changeset_id
+      t.integer :status
+      t.string :message
+      t.datetime :created_at, default: -> { 'CURRENT_TIMESTAMP' }
+      t.timestamp :updated_at, :timestamp
     end
   end
-
 end

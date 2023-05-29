@@ -21,9 +21,9 @@
 name: "GitHub CI"
 on:
   push:
-    branches: ["master"]
+    branches: ["devel"]
   pull_request:
-    branches: ["master"]
+    branches: ["devel"]
 jobs:
   plugin_tests:
     strategy:
@@ -127,6 +127,11 @@ jobs:
           cd /opt/redmine
           bundle exec rake redmine:plugins:test:units
           bundle exec rake redmine:plugins:test:functionals
+      - name: Rubocop
+        # Run the Rubocop tests
+        run: |
+          cd /opt/redmine                    
+          bundle exec rubocop -c plugins/redmine_xapian/.rubocop.yml plugins/redmine_xapian/
       - name: Cleanup
         # Rollback plugin's changes to the database
         # Stop the database engine
