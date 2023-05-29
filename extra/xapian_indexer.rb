@@ -367,7 +367,7 @@ def convert_to_text(fpath, type, tempdir)
   when 'pdf'
     text = `#{FORMAT_HANDLERS[type]} #{fpath} -`
   when /(xlsx|docx|odt|pptx)/i
-    system "#{UNZIP} -d #{tempdir}/temp #{fpath} > /dev/null", out: '/dev/null'
+    system "#{UNZIP} -d #{$tempdir}/temp \"#{fpath}\" > /dev/null", out: '/dev/null'
     case type
     when 'xlsx'
       fouts = ["#{tempdir}/temp/xl/sharedStrings.xml"]
