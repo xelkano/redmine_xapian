@@ -16,12 +16,10 @@ A copy of the plugin can be downloaded from  Github at https://github.com/xelkan
 
 Redmine >= 4.2
 
-To use the full-text search engine you must install ruby-xapian and xapian-omega packages. In case of using of Bitnami 
-stack or Ruby installed via RVM it might be necessary to install Xapian bindings from sources.  See https://xapian.org
- for details. To index some files with omindex you may have to install some other packages like xpdf, antiword, ...
+To use the full-text search engine you must install `xapian-omega` package. To index some files with `omindex` you may have to install some other packages like `xpdf`, `antiword`, ...
  
 ```
-sudo apt install xapian-omega ruby-xapian
+sudo apt install xapian-omega
 ```
 
 To index some files with omega you may have to install some other packages like
@@ -111,20 +109,10 @@ First edit the script file and configure the required variables, they are self-e
 specified and overwritten through the command line.
 
 To view command line help simply run `xapian_index.rb -h`. To view the complete process you can run it using verbose 
-flag (-v).
+flag `-v`.
 
 Note, that the first time you index a repository it can take a long time. After the first indexation the process is much 
 faster.
-You have to take into account that the script needs a defined repository identifier for all repositories that will be 
-indexed. The repository identifier is not required in redmine and can have null value for some of the repositories, so 
-before indexing a repository you have to be sure that the repository has a defined identifier, otherwise the script 
-will ignore it.
-
-There is a rake task for setting up a default identifier for your repositories:
-
-```
-bundle exec rake redmine:xapian_set_identifiers identifier='main' RAILS_ENV="production"
-```
 
 Examples running the script:
 

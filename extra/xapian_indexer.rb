@@ -1,7 +1,7 @@
 #!/usr/bin/ruby -W0
 
 # frozen_string_literal: true
-#
+
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
@@ -354,9 +354,13 @@ def indexing_diff_by_changesets(databasepath, indexconf, project, repository, di
 end
 
 def generate_uri(project, repository, identifier, path)
-  Rails.application.routes.url_helpers.url_for controller: 'repositories', action: 'entry', id: project.identifier,
-                                               repository_id: repository.identifier, rev: identifier,
-                                               path: repository.relative_path(path), only_path: true
+  Rails.application.routes.url_helpers.url_for controller: 'repositories',
+                                               action: 'entry',
+                                               id: project.identifier,
+                                               repository_id: repository.identifier.presence || repository.id,
+                                               rev: identifier,
+                                               path: repository.relative_path(path),
+                                               only_path: true
 end
 
 def convert_to_text(fpath, type, tempdir)
@@ -414,7 +418,7 @@ def add_or_update_index(databasepath, indexconf, project, repository, identifier
   my_log "Indexing: #{path}", verbose
   begin
     itext = Tempfile.new('filetoindex.tmp', tempdir)
-    itext.write("url=#{uri}\n")
+    itext.write "url=#{uri}\n"
     if action == DELETE
       my_log "Path: #{path} should be deleted", verbose
     else

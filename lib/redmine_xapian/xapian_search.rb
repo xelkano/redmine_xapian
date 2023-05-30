@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-#
+
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 require 'uri'
+require 'xapian'
 
 # Redmine Xapian module
 module RedmineXapian
@@ -43,7 +44,7 @@ module RedmineXapian
       begin
         database = Xapian::Database.new(databasepath)
       rescue StandardError => e
-        Rails.logger.error { "Can't open Xapian database #{databasepath} - #{e.inspect}" }
+        Rails.logger.error "Can't open Xapian database #{databasepath} - #{e.inspect}"
         return nil
       end
 
@@ -88,22 +89,29 @@ module RedmineXapian
         case xapian_file
         when 'Repofile'
           if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
-            dochash = { date: $1, sample: $2, url: URI::DEFAULT_PARSER.unescape($3) }
+            dochash = {
+              date: Regexp.last_match(1),
+              sample: Regexp.last_match(2),
+              url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(3))
+            }
             repo_file = process_repo_file(projects_to_search, dochash, user, i)
             if repo_file
               xpattachments << repo_file
               i += 1
             end
           else
-            Rails.logger.error { "Wrong format of document data: #{m.document.data}" }
+            Rails.logger.error "Wrong format of document data: #{m.document.data}"
           end
         when 'Attachment'
           if m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type|caption|modtime|size)=/
-            dochash = { url: URI::DEFAULT_PARSER.unescape($1), sample: $2 }
+            dochash = {
+              url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(1)),
+              sample: Regexp.last_match(2)
+            }
             attachment = process_attachment(projects_to_search, dochash, user)
             xpattachments << attachment if attachment
           else
-            Rails.logger.error { "Wrong format of document data: #{m.document.data}" }
+            Rails.logger.error "Wrong format of document data: #{m.document.data}"
           end
         end
       end
@@ -155,25 +163,30 @@ module RedmineXapian
       Rails.logger.debug { "Repository sample field: #{dochash[:sample]}" }
       repository_attachment = nil
       rur = Redmine::Utils.relative_url_root
-      regexp = /
-        ^#{rur}\/projects\/(.+)\/repository\/(?:revisions\/(.*)\/|([a-z0-9_\-]*)\/)?(?:revisions\/(.*))?\/?entry\/
-        (?:(?:branches|tags)\/(.+?)\/)?(.+?)(?:\?rev=(.*))?$
-      /x
+      regexp = %r{
+        ^#{rur}/projects/(.+)/repository/(?:revisions/(.*)/|([a-z0-9_\-]*)/)?(?:revisions/(.*))?/?entry/
+        (?:(?:branches|tags)/(.+?)/)?(.+?)(?:\?rev=(.*))?$
+      }x
       if dochash[:url] =~ regexp
-        repo_project_identifier = $1
+        repo_project_identifier = Regexp.last_match(1)
         Rails.logger.debug { "Project identifier: #{repo_project_identifier}" }
-        repo_identifier = $3
+        repo_identifier = Regexp.last_match(3)
         Rails.logger.debug { "Repository identifier: #{repo_identifier}" }
-        repo_filename = $6
+        repo_filename = Regexp.last_match(6)
         Rails.logger.debug { "Repository file: #{repo_filename}" }
-        repo_revision = ($2.nil? ? '' : $2) + ($4.nil? ? '' : $4) + ($5.nil? ? '' : $5) + ($7.nil? ? '' : $7)
+        repo_revision = (Regexp.last_match(2) || '') +
+                        (Regexp.last_match(4) || '') +
+                        (Regexp.last_match(5) || '') +
+                        (Regexp.last_match(7) || '')
         Rails.logger.debug { "Repository revision: #{repo_revision}" }
         project = Project.where(identifier: repo_project_identifier).first
         if project
           repository = if repo_identifier == ''
                          Repository.where(project_id: project.id).first
                        else
-                         Repository.where(project_id: project.id, identifier: repo_identifier).first
+                         Repository.where(project_id: project.id, identifier: repo_identifier)
+                                   .or(Repository.where(project_id: project.id, id: repo_identifier))
+                                   .first
                        end
           if repository
             Rails.logger.debug { "Repository found #{repository.identifier}" }
@@ -216,7 +229,7 @@ module RedmineXapian
             Rails.logger.error 'Repository not found'
           end
         else
-          Rails.logger.error { "Project #{repo_project_identifier} not found" }
+          Rails.logger.error "Project #{repo_project_identifier} not found"
         end
       else
         Rails.logger.error 'Wrong format of the URL'

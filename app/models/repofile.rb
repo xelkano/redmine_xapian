@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-#
+
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010    Xabier Elkano
@@ -83,7 +83,7 @@ class Repofile
       value = Redmine::Search.cache_store.fetch key
       next unless value
 
-      attributes = JSON.parse(value.gsub(/:([a-zA-z]+)/, '"\\1"').gsub('=>', ': ')).symbolize_keys
+      attributes = instance_eval value
       repofile = Repofile.new
       repofile.id = id
       repofile.filename = attributes[:filename]

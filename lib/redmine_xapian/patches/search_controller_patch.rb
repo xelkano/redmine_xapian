@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-#
+
 # Redmine Xapian is a Redmine plugin to allow attachments searches by content.
 #
 # Copyright © 2010   Xabier Elkano
