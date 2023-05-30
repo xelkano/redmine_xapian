@@ -156,7 +156,7 @@ module RedmineXapian
       repository_attachment = nil
       rur = Redmine::Utils.relative_url_root
       regexp = /
-        ^#{rur}\/projects\/(.+)\/repository\/(?:revisions\/(.*)\/|([a-zA-Z_0-9]*)\/)?(?:revisions\/(.*))?\/?entry\/
+        ^#{rur}\/projects\/(.+)\/repository\/(?:revisions\/(.*)\/|([a-z0-9_\-]*)\/)?(?:revisions\/(.*))?\/?entry\/
         (?:(?:branches|tags)\/(.+?)\/)?(.+?)(?:\?rev=(.*))?$
       /x
       if dochash[:url] =~ regexp
