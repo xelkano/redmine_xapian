@@ -83,7 +83,7 @@ class Repofile
       value = Redmine::Search.cache_store.fetch key
       next unless value
 
-      attributes = JSON.parse(value.gsub(/:([a-zA-z]+)/, '"\\1"').gsub('=>', ': ')).symbolize_keys
+      attributes = JSON.parse(value.gsub(/:([a-zA-z]+)=>/, '"\\1":')).symbolize_keys
       repofile = Repofile.new
       repofile.id = id
       repofile.filename = attributes[:filename]
