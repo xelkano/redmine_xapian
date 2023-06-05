@@ -1,6 +1,9 @@
 Changelog for Redmine Xapian
 ============================
 
+3.0.4 *????-??-??*
+------------------
+
 3.0.3 *2023-06-05*
 ------------------
     Repository identifiers are no more required for indexing repositories. Reindex your database to have correct URLs for repositories without an identifier
