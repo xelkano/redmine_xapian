@@ -1,8 +1,12 @@
 Changelog for Redmine Xapian
 ============================
 
-3.0.4 *????-??-??*
+3.0.4 *2023-07-14*
 ------------------
+
+    Visibility of the option Search open issues only
+
+* Bug: #143 - Redmine Xapian package removes search "opened issues only" option in Redmine.
 
 3.0.3 *2023-06-05*
 ------------------
