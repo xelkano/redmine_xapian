@@ -23,24 +23,25 @@
 require Rails.root.join('test/test_helper')
 
 # Search controller tests
-class SearchControllerTest < Redmine::ControllerTest
-  tests SearchController
-  fixtures :attachments, :changesets, :documents, :issues, :messages, :news, :wiki_pages, :projects, :users
+class SearchControllerTest < ActionDispatch::IntegrationTest
+  fixtures :attachments, :changesets, :documents, :issues, :messages, :news, :wiki_pages, :projects, :users,
+           :email_addresses
 
   def setup
     attachment = Attachment.find_by(id: 1)
     @xapian_data = attachment ? [[attachment.created_on, attachment.id]] : []
+    post '/login', params: { username: 'jsmith', password: 'jsmith' }
   end
 
   def test_search_with_xapian
     RedmineXapian::XapianSearchService.expects(:search).returns(@xapian_data).once
-    get :index, params: { q: 'xyz', attachments: true, titles_only: '' }
+    get '/search', params: { q: 'xyz', attachments: true, titles_only: '' }
     assert_response :success
   end
 
   def test_search_without_xapian
     RedmineXapian::XapianSearchService.expects(:search).never
-    get :index, params: { q: 'xyz', attachments: true, titles_only: true }
+    get '/search', params: { q: 'xyz', attachments: true, titles_only: true }
     assert_response :success
   end
 end

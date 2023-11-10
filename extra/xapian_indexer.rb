@@ -173,7 +173,7 @@ def indexing(databasepath, project, repository, tempdir, verbose)
   repository.fetch_changesets
   repository.reload.changesets.reload
   latest_changeset = repository.changesets.first
-  revision = latest_changeset ? latest_changeset.revision : nil
+  revision = latest_changeset&.revision
   my_log("Latest revision: #{project.name} - #{repo_name(repository)} - #{revision}", verbose) if revision
   latest_indexed = Indexinglog.where(repository_id: repository.id, status: STATUS_SUCCESS).last
   my_log "Latest indexed: #{latest_indexed.inspect}", verbose
@@ -286,7 +286,7 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets,
   my_log "Walking into #{changesets.inspect}", verbose
   return unless changesets || changesets.size <= 0
 
-  changesets.sort! { |a, b| a.id <=> b.id }
+  changesets.sort_by!(&:id)
   actions = {}
   # SCM actions
   #   * A - Add

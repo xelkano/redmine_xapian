@@ -80,6 +80,8 @@ module RedmineXapian
             nil
           when 'my_projects'
             User.current.projects
+          when 'bookmarks'
+            Project.where(id: User.current.bookmarked_project_ids)
           when 'subprojects'
             @project ? @project.self_and_descendants.to_a : nil
           else
