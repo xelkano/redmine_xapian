@@ -19,7 +19,7 @@
 # Rubocop configuration
 
 AllCops:
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.1
   TargetRailsVersion: 6.1
 
   NewCops: enable
@@ -63,4 +63,7 @@ Metrics/ParameterLists:
 Lint/ScriptPermission:
   Exclude:
     - extra/xapian_indexer.rb
+
+Style/HashSyntax:
+  Enabled: false
 
