@@ -1,8 +1,11 @@
 Changelog for Redmine Xapian
 ============================
 
-3.0.5 *????-??-??*
+3.0.5 *2023-11-15*
 ------------------
+
+    Issue filter in the search view
+    Redmine 5.1 compatibility 
 
 3.0.4 *2023-07-14*
 ------------------
