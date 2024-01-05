@@ -76,12 +76,12 @@ UNRTF = '/usr/bin/unrtf -t text 2>/dev/null'
 
 ENVIRONMENT = File.join(REDMINE_ROOT, 'config/environment.rb')
 
-onlyfiles = nil
-onlyrepos = nil
+only_files = false
+only_repos = false
 env = 'production'
-resetlog = nil
-retryfailed = nil
-resetdatabase = nil
+reset_log = false
+retry_failed = false
+reset_database = false
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -115,7 +115,7 @@ FORMAT_HANDLERS = {
   'rtf' => UNRTF
 }.freeze
 
-VERSION = '0.2'
+VERSION = '0.3'
 
 optparse = OptionParser.new do |opts|
   opts.banner = 'Usage: xapian_indexer.rb [OPTIONS...]'
@@ -129,13 +129,13 @@ optparse = OptionParser.new do |opts|
   opts.on('-s', '--stemming_lang a,b,c', Array,
           'Comma separated list of stemming languages for indexing') { |s| stem_langs = s }
   opts.on('-v', '--verbose', 'verbose') { verbose = true }
-  opts.on('-f', '--files', 'Only index Redmine attachments') { onlyfiles = 1 }
-  opts.on('-r', '--repositories', 'Only index Redmine repositories') { onlyrepos = 1 }
+  opts.on('-f', '--files', 'Only index Redmine attachments') { only_files = true }
+  opts.on('-r', '--repositories', 'Only index Redmine repositories') { only_repos = true }
   opts.on('-e', '--environment ENV',
           'Rails ENVIRONMENT (development, testing or production), default production') { |e| env = e }
   opts.on('-t', '--temp-dir PATH', 'Temporary directory for indexing') { |t| tempdir = t }
-  opts.on('-x', '--resetlog', 'Reset index log') { resetlog = 1 }
-  opts.on('-X', '--reset-database', 'Reset database') { resetdatabase = 1 }
+  opts.on('-x', '--reset_log', 'Reset index log') { reset_log = true }
+  opts.on('-X', '--reset-database', 'Reset database') { reset_database = true }
   opts.on('-V', '--version', 'show version and exit') do
     puts VERSION
     exit
@@ -144,11 +144,11 @@ optparse = OptionParser.new do |opts|
     puts opts
     exit
   end
-  opts.on('-R', '--retry-failed', 'retry files which omindex failed to extract text') { retryfailed = 1 }
+  opts.on('-R', '--retry-failed', 'retry files which omindex failed to extract text') { retry_failed = true }
   opts.separator('')
   opts.separator('Examples:')
-  opts.separator('  xapian_indexer.rb -f -s english,italian -v')
-  opts.separator('  xapian_indexer.rb -p project_identifier -x -t /tmpfs -v')
+  opts.separator(' xapian_indexer.rb -f -s english,italian -v')
+  opts.separator(' xapian_indexer.rb -p project_identifier -x -t /tmpfs -v')
   opts.separator('')
   opts.summary_width = 25
 end
@@ -457,9 +457,9 @@ end
 
 def system_or_raise(command, verbose)
   if verbose
-    raise StandardError, "\"#{command}\" failed" unless system(command)
+    system command, exception: true
   else
-    raise StandardError, "\"#{command}\" failed" unless system(command, out: '/dev/null')
+    system command, out: '/dev/null', exception: true
   end
 end
 
@@ -477,79 +477,68 @@ my_log "Trying to load Redmine environment <<#{ENVIRONMENT}>>...", verbose
 
 begin
   require ENVIRONMENT
+  my_log "Redmine environment [RAILS_ENV=#{env}] correctly loaded ...", verbose
+
+  # Indexing files
+  unless only_repos
+    stem_langs.each do |lang|
+      filespath = Redmine::Configuration['attachments_storage_path'] || File.join(REDMINE_ROOT, FILES)
+      unless File.directory?(filespath)
+        my_log "An error while accessing #{filespath}, exiting...", true
+        exit 1
+      end
+      databasepath = File.join(DBROOTPATH, lang)
+      FileUtils.rm_rf(databasepath) if File.directory?(databasepath) && reset_database
+      unless File.directory?(databasepath)
+        my_log "#{databasepath} does not exist, creating ...", verbose
+        FileUtils.mkdir_p databasepath
+      end
+      cmd = +"#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}"
+      cmd << ' -v' if verbose
+      cmd << ' --retry-failed' if retry_failed
+      my_log cmd, verbose
+      system_or_raise cmd, verbose
+    end
+    my_log 'Redmine files indexed', verbose
+  end
+
+  # Indexing repositories
+  unless only_files
+    unless File.exist?(SCRIPTINDEX)
+      my_log "#{SCRIPTINDEX} does not exist, exiting...", true
+      exit 1
+    end
+    databasepath = File.join(DBROOTPATH.rstrip, 'repodb')
+    FileUtils.rm_rf(databasepath) if File.directory?(databasepath) && reset_database
+    unless File.directory?(databasepath)
+      my_log "Db directory #{databasepath} does not exist, creating...", verbose
+      FileUtils.mkdir_p databasepath
+    end
+    projects = Project.active.has_module(:repository).pluck(:identifier) if projects.blank?
+    projects.each do |identifier|
+      project = Project.active.has_module(:repository).where(identifier: identifier).preload(:repository).first
+      if project
+        my_log "- Indexing repositories for #{project}...", verbose
+        repositories = project.repositories.select(&:supports_cat?)
+        repositories.each do |repository|
+          delete_log(repository, verbose) if reset_log
+          indexing databasepath, project, repository, tempdir, verbose
+        end
+      else
+        my_log "Project identifier #{identifier} not found or repository module not enabled, ignoring...", verbose
+      end
+    end
+    if reset_log
+      existing_repo_ids = Repository.all.to_a.map(&:id)
+      zombied_repo_ids = Indexinglog.where.not(repository_id: existing_repo_ids).to_a.map(&:repository_id).uniq
+      zombied_repo_ids.each do |zombied_repo_id|
+        delete_log_by_repo_id zombied_repo_id, verbose
+      end
+    end
+  end
 rescue LoadError => e
   my_log e.message, true
   exit 1
-end
-
-my_log "Redmine environment [RAILS_ENV=#{env}] correctly loaded ...", verbose
-
-# Indexing files
-unless onlyrepos
-  stem_langs.each do |lang|
-    filespath = Redmine::Configuration['attachments_storage_path'] || File.join(REDMINE_ROOT, FILES)
-    unless File.directory?(filespath)
-      my_log "An error while accessing #{filespath}, exiting...", true
-      exit 1
-    end
-    databasepath = File.join(DBROOTPATH, lang)
-    FileUtils.rm_rf(databasepath) if File.directory?(databasepath) && resetdatabase
-    unless File.directory?(databasepath)
-      my_log "#{databasepath} does not exist, creating ...", verbose
-      begin
-        FileUtils.mkdir_p databasepath
-      rescue StandardError => e
-        my_log e.message, true
-        exit 1
-      end
-    end
-    cmd = +"#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}"
-    cmd << ' -v' if verbose
-    cmd << ' --retry-failed' if retryfailed
-    my_log cmd, verbose
-    system_or_raise cmd, verbose
-  end
-  my_log 'Redmine files indexed', verbose
-end
-
-# Indexing repositories
-unless onlyfiles
-  unless File.exist?(SCRIPTINDEX)
-    my_log "#{SCRIPTINDEX} does not exist, exiting...", true
-    exit 1
-  end
-  databasepath = File.join(DBROOTPATH.rstrip, 'repodb')
-  FileUtils.rm_rf(databasepath) if File.directory?(databasepath) && resetdatabase
-  unless File.directory?(databasepath)
-    my_log "Db directory #{databasepath} does not exist, creating...", verbose
-    begin
-      FileUtils.mkdir_p databasepath
-    rescue StandardError => e
-      my_log e.message, true
-      exit 1
-    end
-  end
-  projects = Project.active.has_module(:repository).pluck(:identifier) if projects.blank?
-  projects.each do |identifier|
-    project = Project.active.has_module(:repository).where(identifier: identifier).preload(:repository).first
-    if project
-      my_log "- Indexing repositories for #{project}...", verbose
-      repositories = project.repositories.select(&:supports_cat?)
-      repositories.each do |repository|
-        delete_log(repository, verbose) if resetlog
-        indexing databasepath, project, repository, tempdir, verbose
-      end
-    else
-      my_log "Project identifier #{identifier} not found or repository module not enabled, ignoring...", verbose
-    end
-  end
-  if resetlog
-    existing_repo_ids = Repository.all.to_a.map(&:id)
-    zombied_repo_ids = Indexinglog.where.not(repository_id: existing_repo_ids).to_a.map(&:repository_id).uniq
-    zombied_repo_ids.each do |zombied_repo_id|
-      delete_log_by_repo_id zombied_repo_id, verbose
-    end
-  end
 end
 
 exit 0
