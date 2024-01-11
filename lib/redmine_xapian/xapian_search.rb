@@ -144,7 +144,7 @@ module RedmineXapian
             if dochash[:sample]
               Redmine::Search.cache_store.write(
                 "Attachment-#{attachment.id}",
-                dochash[:sample].force_encoding('UTF-8')
+                dochash[:sample].encode('UTF-8', invalid: :replace, undef: :replace)
               )
             end
             return attachment

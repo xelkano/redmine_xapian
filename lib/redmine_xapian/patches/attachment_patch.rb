@@ -48,7 +48,7 @@ module RedmineXapian
           else
             desc = description
           end
-          desc&.force_encoding('UTF-8')
+          desc
         end
       end
 
