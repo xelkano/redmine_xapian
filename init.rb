@@ -28,7 +28,7 @@ Redmine::Plugin.register :redmine_xapian do
   author_url 'https://github.com/xelkano/redmine_xapian/graphs/contributors'
 
   description 'With this plugin you will be able to do searches by file name and by strings inside your documents'
-  version '3.0.6 devel'
+  version '3.0.6'
   requires_redmine version_or_higher: '5.1.0'
 
   languages = %w[danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann

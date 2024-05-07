@@ -1,8 +1,12 @@
 Changelog for Redmine Xapian
 ============================
 
-3.0.6 *????-??-??*
+3.0.6 *2024-05-07*
 ------------------
+
+    Invalid characters in PDF
+
+* Bug: #145 - HTTP 500 when indexing files with non-UTF-8 characters
 
 3.0.5 *2023-11-15*
 ------------------
