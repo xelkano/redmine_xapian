@@ -492,7 +492,7 @@ begin
         my_log "#{databasepath} does not exist, creating ...", verbose
         FileUtils.mkdir_p databasepath
       end
-      cmd = +"#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}"
+      cmd = +"#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
       cmd << ' -v' if verbose
       cmd << ' --retry-failed' if retry_failed
       my_log cmd, verbose
