@@ -21,7 +21,7 @@
 module RedmineXapian
   # Xapian search service
   class XapianSearchService
-    extend XapianSearch
+    extend RedmineXapian::XapianSearch
 
     class << self
       def search(search_data)

@@ -20,6 +20,8 @@
 
 # Libraries
 require "#{File.dirname(__FILE__)}/redmine_xapian/search_data"
+require "#{File.dirname(__FILE__)}/redmine_xapian/xapian_search"
+require "#{File.dirname(__FILE__)}/redmine_xapian/container_type_helper"
 require "#{File.dirname(__FILE__)}/redmine_xapian/xapian_search_service"
 
 # Patches
