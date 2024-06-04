@@ -1,8 +1,12 @@
 Changelog for Redmine Xapian
 ============================
 
-3.0.7 *????-??-??*
+3.0.7 *2024-06-04*
 ------------------
+
+    Ruby requirements and dependencies
+
+* Bug: #146 - LoadError: cannot load such file -- redmine_xapian/search_data
 
 3.0.6 *2024-05-07*
 ------------------
