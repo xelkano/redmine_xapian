@@ -64,6 +64,9 @@ Lint/ScriptPermission:
   Exclude:
     - extra/xapian_indexer.rb
 
+Style/ExpandPathArguments:
+  Enabled: false
+
 Style/HashSyntax:
   EnforcedShorthandSyntax: either
 
