@@ -79,7 +79,7 @@ module RedmineXapian
 
         def search_for_issues_attachments(user, search_data)
           results = []
-          sql = +%(
+          sql = %(
             #{Attachment.table_name}.container_type = 'Issue' AND
             #{Project.table_name}.status = ? AND
             #{Project.allowed_to_condition(user, :view_issues)}
@@ -97,7 +97,7 @@ module RedmineXapian
 
         def search_for_message_attachments(user, search_data)
           results = []
-          sql = +%(
+          sql = %(
             #{Attachment.table_name}.container_type = 'Message' AND
             #{Project.table_name}.status = ? AND
             #{Project.allowed_to_condition(user, :view_messages)}
@@ -117,7 +117,7 @@ module RedmineXapian
 
         def search_for_wiki_page_attachments(user, search_data)
           results = []
-          sql = +%(
+          sql = %(
             #{Attachment.table_name}.container_type = 'WikiPage' AND
             #{Project.table_name}.status = ? AND
             #{Project.allowed_to_condition(user, :view_wiki_pages)}
@@ -137,7 +137,7 @@ module RedmineXapian
 
         def search_for_project_files(user, search_data)
           results = []
-          sql = +%(
+          sql = %(
             container_type = 'Project' AND
             #{Project.table_name}.status = ? AND
             #{Project.allowed_to_condition(user, :view_files)}

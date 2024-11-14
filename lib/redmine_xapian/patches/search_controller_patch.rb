@@ -102,7 +102,7 @@ module RedmineXapian
             when 'repofiles'
               User.current.allowed_to? :browse_repository, projects_to_search
             else
-              User.current.allowed_to? "view_#{o}".to_sym, projects_to_search
+              User.current.allowed_to? :"view_#{o}", projects_to_search
             end
           end
           # end

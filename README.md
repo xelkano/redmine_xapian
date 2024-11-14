@@ -1,4 +1,4 @@
-Redmine Xapian search plugin 3.0.8 devel
+Redmine Xapian search plugin 4.0.0 devel
 ========================================
 
 [![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=devel)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
@@ -14,7 +14,7 @@ A copy of the plugin can be downloaded from  Github at https://github.com/xelkan
 
 ### 1.1. Required packages
 
-Redmine >= 5.1
+Redmine >= 6.0
 
 To use the full-text search engine you must install `xapian-omega` package. To index some files with `omindex` you may have to install some other packages like `xpdf`, `antiword`, ...
  

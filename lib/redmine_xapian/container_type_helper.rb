@@ -31,7 +31,7 @@ module RedmineXapian
         when 'Project'
           :view_project
         else
-          "view_#{container_type.pluralize.underscore}".to_sym
+          :"view_#{container_type.pluralize.underscore}"
         end
       end
     end

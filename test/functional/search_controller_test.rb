@@ -19,7 +19,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # Load the normal Rails helper
-require Rails.root.join('test/test_helper')
+require File.expand_path('../../../../../test/test_helper', __FILE__)
 
 # Search controller tests
 class SearchControllerTest < ActionDispatch::IntegrationTest

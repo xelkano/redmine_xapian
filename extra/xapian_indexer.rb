@@ -49,7 +49,7 @@ DBROOTPATH = File.expand_path('file_index', REDMINE_ROOT)
 verbose = false
 
 # Define stemmed languages to index attachments Eg. [ 'english', 'italian', 'spanish' ]
-# Repository database will be always indexed in english
+# Repository database will always be indexed in english
 # Available languages are danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann lovins
 # norwegian porter portuguese romanian russian spanish swedish turkish:
 stem_langs	= ['english']
@@ -492,7 +492,7 @@ begin
         my_log "#{databasepath} does not exist, creating ...", verbose
         FileUtils.mkdir_p databasepath
       end
-      cmd = +"#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
+      cmd = "#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
       cmd << ' -v' if verbose
       cmd << ' --retry-failed' if retry_failed
       my_log cmd, verbose

@@ -134,7 +134,7 @@ module RedmineXapian
           can_view_container = user.allowed_to?(container_permission, project)
           if container_type == 'Issue'
             issue = Issue.find_by(id: attachment[:container_id])
-            allowed = can_view_container && issue && issue.visible?
+            allowed = can_view_container && issue&.visible?
           else
             allowed = can_view_container
           end
