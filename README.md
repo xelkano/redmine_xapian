@@ -19,7 +19,7 @@ Redmine >= 6.0
 To use the full-text search engine you must install `xapian-omega` package. To index some files with `omindex` you may have to install some other packages like `xpdf`, `antiword`, ...
  
 ```
-sudo apt install xapian-omega
+apt install xapian-omega
 ```
 
 To index some files with omega you may have to install some other packages like
@@ -64,7 +64,7 @@ From "Omega documentation":https://xapian.org/docs/omega/overview.html:
 On Debian you can use following command to install some of the required indexing tools:
 
 ```
-sudo apt install xapian-omega libxapian-dev poppler-utils \
+apt install xapian-omega libxapian-dev poppler-utils \
     antiword unzip catdoc libwpd-tools libwps-tools gzip unrtf catdvi \
     djview djview3 uuid uuid-dev xz-utils libemail-outlook-message-perl
 ```
@@ -72,7 +72,7 @@ sudo apt install xapian-omega libxapian-dev poppler-utils \
 To index images you will need an OCR engine, e.g. Tesseract.
 
 ```
-sudo apt install tesseract-ocr
+apt install tesseract-ocr
 ```
 
 ### 1.2. Plugin installation
@@ -84,8 +84,9 @@ cd redmine/plugins
 git clone https://github.com/xelkano/redmine_xapian.git
 cd ..
 bundle install
-RAILS_ENV=production bundle exec rake db:migrate
-RAILS_ENV=production bundle exec rake redmine:plugins:migrate NAME=redmine_xapian 
+RAILS_ENV=production bundle exec rake redmine:plugins:migrate NAME=redmine_xapian
+RAILS_ENV=production bundle exec rake assets:precompile` 
+chown -R www-data:www-data redmine
 ```
 
 And after that restart the application server, e.g. `systemctl restart apache2`
@@ -140,7 +141,7 @@ Indexing repositories of some projects (valid for repositories indexing only):
 xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
 ```
 
-**Indexing pictures**
+## Indexing pictures
 
 Omindex supports usage of filters to index binary files. In order to index images containing text, modify the OMINDEX 
 variable in the script as follows. E.g. parse PNG files using tesseract OCR engine:
@@ -149,7 +150,7 @@ variable in the script as follows. E.g. parse PNG files using tesseract OCR engi
 OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
 ```
 
-**Configure a cron task for an automatic indexing**
+## Configure a cron task for an automatic indexing
 
 Once you have tested the script functionality, you can configure it for running every day at nights keeping your Xapian
 database up to date, for example:
@@ -164,11 +165,11 @@ To perform searches in a particular module such as Files, Documents,... it is
 mandatory to enable these modules in your projects and to have corresponding
 permissions view_*; Be sure it is checked.
 
-### Hooks
+## Hooks
 
 There are a few hooks to customize the Xapian search plugin behaviour in your own plugin:
 
-#### Quick jump to an object
+### Quick jump to an object
 
 ```
 :controller_search_quick_jump
@@ -193,7 +194,7 @@ An example of a direct jump to a document by entering D{ID} in DMSF plugin
     end
 ```
 
-#### Parent container in searched results
+### Parent container in searched results
 
 ```
 :view_search_index_container
@@ -223,7 +224,7 @@ An example of displaying the parent folder of the searched document in DMSF plug
     end
 ```
 
-### 1.4. Uninstalling
+## 1.4. Uninstalling
 
 Before uninstalling the Xapian plugin, please ensure that the Redmine instance is stopped.
 
@@ -231,4 +232,4 @@ Before uninstalling the Xapian plugin, please ensure that the Redmine instance i
 2. `rake redmine:plugins:migrate NAME=redmine_xapian VERSION=0 RAILS_ENV=production`
 3. `rm -rf plugins/redmine_xapian`
 
-After these steps, re-start your instance of Redmine.
+After these steps, restart your instance of Redmine.
