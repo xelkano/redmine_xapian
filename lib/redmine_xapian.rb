@@ -26,11 +26,7 @@ module RedmineXapian
   class << self
     def enable
       value = Setting.plugin_redmine_xapian['enable']
-      if value.is_a?(TrueClass) || value.is_a?(FalseClass)
-        value
-      else
-        value.to_i.positive?
-      end
+      value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value : value.to_i.positive?
     end
 
     def index_database
@@ -63,20 +59,12 @@ module RedmineXapian
 
     def save_search_scope
       value = Setting.plugin_redmine_xapian['save_search_scope']
-      if value.is_a?(TrueClass) || value.is_a?(FalseClass)
-        value
-      else
-        value.to_i.positive?
-      end
+      value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value : value.to_i.positive?
     end
 
     def enable_cjk_ngrams
       value = Setting.plugin_redmine_xapian['enable_cjk_ngrams']
-      if value.is_a?(TrueClass) || value.is_a?(FalseClass)
-        value
-      else
-        value.to_i.positive?
-      end
+      value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value : value.to_i.positive?
     end
   end
 end
