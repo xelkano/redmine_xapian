@@ -24,9 +24,9 @@ module RedmineXapian
                  lovins norwegian porter portuguese romanian russian spanish swedish turkish].freeze
   # Settings
   class << self
-    def enable
+    def enable?
       value = Setting.plugin_redmine_xapian['enable']
-      value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value : value.to_i.positive?
+      value.to_i.positive? || value == 'true'
     end
 
     def index_database
@@ -57,14 +57,14 @@ module RedmineXapian
       Setting.plugin_redmine_xapian['languages'].presence || LANGUAGES
     end
 
-    def save_search_scope
+    def save_search_scope?
       value = Setting.plugin_redmine_xapian['save_search_scope']
-      value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value : value.to_i.positive?
+      value.to_i.positive? || value == 'true'
     end
 
-    def enable_cjk_ngrams
+    def enable_cjk_ngrams?
       value = Setting.plugin_redmine_xapian['enable_cjk_ngrams']
-      value.is_a?(TrueClass) || value.is_a?(FalseClass) ? value : value.to_i.positive?
+      value.to_i.positive? || value == 'true'
     end
   end
 end
