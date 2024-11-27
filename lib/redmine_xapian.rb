@@ -18,6 +18,69 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+# Main module
+module RedmineXapian
+  LANGUAGES = %w[danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
+                 lovins norwegian porter portuguese romanian russian spanish swedish turkish].freeze
+  # Settings
+  class << self
+    def enable
+      value = Setting.plugin_redmine_xapian['enable']
+      if value.is_a?(TrueClass) || value.is_a?(FalseClass)
+        value
+      else
+        value.to_i.positive?
+      end
+    end
+
+    def index_database
+      if Setting.plugin_redmine_xapian['index_database'].present?
+        Setting.plugin_redmine_xapian['index_database'].strip
+      else
+        File.expand_path 'file_index', Rails.root
+      end
+    end
+
+    def stemming_lang
+      if Setting.plugin_redmine_xapian['stemming_lang'].present?
+        Setting.plugin_redmine_xapian['stemming_lang'].strip
+      else
+        'english'
+      end
+    end
+
+    def stemming_strategy
+      if Setting.plugin_redmine_xapian['stemming_strategy'].present?
+        Setting.plugin_redmine_xapian['stemming_strategy'].strip
+      else
+        'STEM_SOME'
+      end
+    end
+
+    def languages
+      Setting.plugin_redmine_xapian['languages'].presence || LANGUAGES
+    end
+
+    def save_search_scope
+      value = Setting.plugin_redmine_xapian['save_search_scope']
+      if value.is_a?(TrueClass) || value.is_a?(FalseClass)
+        value
+      else
+        value.to_i.positive?
+      end
+    end
+
+    def enable_cjk_ngrams
+      value = Setting.plugin_redmine_xapian['enable_cjk_ngrams']
+      if value.is_a?(TrueClass) || value.is_a?(FalseClass)
+        value
+      else
+        value.to_i.positive?
+      end
+    end
+  end
+end
+
 # Libraries
 require "#{File.dirname(__FILE__)}/redmine_xapian/search_data"
 require "#{File.dirname(__FILE__)}/redmine_xapian/xapian_search"

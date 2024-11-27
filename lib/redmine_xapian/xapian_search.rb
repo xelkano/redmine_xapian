@@ -30,12 +30,12 @@ module RedmineXapian
     def xapian_search(tokens, projects_to_search, all_words, user, xapian_file)
       Rails.logger.debug 'XapianSearch::xapian_search'
       xpattachments = []
-      return nil unless Setting.plugin_redmine_xapian['enable']
+      return nil unless RedmineXapian.enable
 
       Rails.logger.debug { "Global settings dump #{Setting.plugin_redmine_xapian.inspect}" }
-      stemming_lang = Setting.plugin_redmine_xapian['stemming_lang'].rstrip
+      stemming_lang = RedmineXapian.stemming_lang
       Rails.logger.debug { "stemming_lang: #{stemming_lang}" }
-      stemming_strategy = Setting.plugin_redmine_xapian['stemming_strategy'].rstrip
+      stemming_strategy = RedmineXapian.stemming_strategy
       Rails.logger.debug { "stemming_strategy: #{stemming_strategy}" }
       databasepath = get_database_path(xapian_file)
       Rails.logger.debug { "databasepath: #{databasepath}" }
@@ -69,7 +69,7 @@ module RedmineXapian
       end
       qp.default_op = all_words ? Xapian::Query::OP_AND : Xapian::Query::OP_OR
       flags = Xapian::QueryParser::FLAG_WILDCARD
-      flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if Setting.plugin_redmine_xapian['enable_cjk_ngrams']
+      flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if RedmineXapian.enable_cjk_ngrams
       query = qp.parse_query(query_string, flags)
       Rails.logger.debug { "query_string is: #{query_string}" }
       Rails.logger.debug { "Parsed query is: #{query.description}" }
@@ -238,10 +238,9 @@ module RedmineXapian
 
     def get_database_path(xapian_file)
       if xapian_file == 'Repofile'
-        File.join Setting.plugin_redmine_xapian['index_database'].rstrip, 'repodb'
+        File.join RedmineXapian.index_database, 'repodb'
       else
-        File.join Setting.plugin_redmine_xapian['index_database'].rstrip,
-                  Setting.plugin_redmine_xapian['stemming_lang'].rstrip
+        File.join RedmineXapian.index_database, RedmineXapian.stemming_lang
       end
     end
   end

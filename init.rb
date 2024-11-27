@@ -31,16 +31,13 @@ Redmine::Plugin.register :redmine_xapian do
   version '4.0.0 devel'
   requires_redmine version_or_higher: '6.0.0'
 
-  languages = %w[danish dutch english finnish french german german2 hungarian italian kraaij_pohlmann
-                 lovins norwegian porter portuguese romanian russian spanish swedish turkish]
-
   settings partial: 'settings/redmine_xapian_settings',
            default: {
              'enable' => true,
              'index_database' => File.expand_path('file_index', Rails.root),
              'stemming_lang' => 'english',
              'stemming_strategy' => 'STEM_SOME',
-             'stem_langs' => languages,
+             'stem_langs' => RedmineXapian::LANGUAGES,
              'save_search_scope' => false,
              'enable_cjk_ngrams' => false
            }
