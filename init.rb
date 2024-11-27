@@ -33,13 +33,13 @@ Redmine::Plugin.register :redmine_xapian do
 
   settings partial: 'settings/redmine_xapian_settings',
            default: {
-             'enable' => true,
+             'enable' => '1',
              'index_database' => File.expand_path('file_index', Rails.root),
              'stemming_lang' => 'english',
              'stemming_strategy' => 'STEM_SOME',
              'stem_langs' => RedmineXapian::LANGUAGES,
-             'save_search_scope' => false,
-             'enable_cjk_ngrams' => false
+             'save_search_scope' => '0',
+             'enable_cjk_ngrams' => '0'
            }
 end
 
