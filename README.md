@@ -1,7 +1,7 @@
-Redmine Xapian search plugin 4.0.0 devel
-========================================
+Redmine Xapian search plugin 4.0.0
+==================================
 
-[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=devel)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
+[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=master)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
 [![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
 
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
