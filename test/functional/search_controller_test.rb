@@ -43,4 +43,20 @@ class SearchControllerTest < ActionDispatch::IntegrationTest
     get '/search', params: { q: 'xyz', attachments: true, titles_only: true }
     assert_response :success
   end
+
+  def test_search_index_stem
+    with_settings plugin_redmine_xapian: { 'stem_langs' => %w[english german] } do
+      get '/search'
+      assert_response :success
+      assert_select 'select#xapian_stem_langs', id: 'xapian_stem_langs'
+    end
+  end
+
+  def test_search_index_no_stem
+    with_settings plugin_redmine_xapian: { 'stem_langs' => ['english'] } do
+      get '/search'
+      assert_response :success
+      assert_select 'select#xapian_stem_langs', id: 'xapian_stem_langs', count: 0
+    end
+  end
 end

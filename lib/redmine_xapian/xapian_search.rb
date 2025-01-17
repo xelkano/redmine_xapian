@@ -27,90 +27,92 @@ module RedmineXapian
 
   # Xapian search
   module XapianSearch
-    def xapian_search(tokens, projects_to_search, all_words, user, xapian_file)
+    def xapian_search(tokens, projects_to_search, all_words, user, xapian_file, stemming_langs)
       Rails.logger.debug 'XapianSearch::xapian_search'
       xpattachments = []
       return nil unless RedmineXapian.enable?
 
+      stemming_langs = stemming_langs.presence || ['english']
       Rails.logger.debug { "Global settings dump #{Setting.plugin_redmine_xapian.inspect}" }
-      stemming_lang = RedmineXapian.stemming_lang
-      Rails.logger.debug { "stemming_lang: #{stemming_lang}" }
-      stemming_strategy = RedmineXapian.stemming_strategy
-      Rails.logger.debug { "stemming_strategy: #{stemming_strategy}" }
-      databasepath = get_database_path(xapian_file)
-      Rails.logger.debug { "databasepath: #{databasepath}" }
+      stemming_langs.each do |stemming_lang|
+        Rails.logger.debug { "stemming_lang: #{stemming_lang}" }
+        stemming_strategy = RedmineXapian.stemming_strategy
+        Rails.logger.debug { "stemming_strategy: #{stemming_strategy}" }
+        databasepath = get_database_path(xapian_file, stemming_lang)
+        Rails.logger.debug { "databasepath: #{databasepath}" }
 
-      begin
-        database = Xapian::Database.new(databasepath)
-      rescue StandardError => e
-        Rails.logger.error "Can't open Xapian database #{databasepath} - #{e.inspect}"
-        return nil
-      end
+        begin
+          database = Xapian::Database.new(databasepath)
+        rescue StandardError => e
+          Rails.logger.error "Can't open Xapian database #{databasepath} - #{e.inspect}"
+          next
+        end
 
-      # Start an enquire session.
-      enquire = Xapian::Enquire.new(database)
+        # Start an enquire session.
+        enquire = Xapian::Enquire.new(database)
 
-      # Combine the rest of the command line arguments with spaces between
-      # them, so that simple queries don't have to be quoted at the shell
-      # level.
-      query_string = tokens.map { |x| x[-1, 1].eql?('*') ? x : "#{x}*" }.join(' ')
-      # Parse the query string to produce a Xapian::Query object.
-      qp = Xapian::QueryParser.new
-      stemmer = Xapian::Stem.new(stemming_lang)
-      qp.stemmer = stemmer
-      qp.database = database
-      case stemming_strategy
-      when 'STEM_NONE'
-        qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
-      when 'STEM_SOME'
-        qp.stemming_strategy = Xapian::QueryParser::STEM_SOME
-      when 'STEM_ALL'
-        qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
-      end
-      qp.default_op = all_words ? Xapian::Query::OP_AND : Xapian::Query::OP_OR
-      flags = Xapian::QueryParser::FLAG_WILDCARD
-      flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if RedmineXapian.enable_cjk_ngrams?
-      query = qp.parse_query(query_string, flags)
-      Rails.logger.debug { "query_string is: #{query_string}" }
-      Rails.logger.debug { "Parsed query is: #{query.description}" }
+        # Combine the rest of the command line arguments with spaces between
+        # them, so that simple queries don't have to be quoted at the shell
+        # level.
+        query_string = tokens.map { |x| x[-1, 1].eql?('*') ? x : "#{x}*" }.join(' ')
+        # Parse the query string to produce a Xapian::Query object.
+        qp = Xapian::QueryParser.new
+        stemmer = Xapian::Stem.new(stemming_lang)
+        qp.stemmer = stemmer
+        qp.database = database
+        case stemming_strategy
+        when 'STEM_NONE'
+          qp.stemming_strategy = Xapian::QueryParser::STEM_NONE
+        when 'STEM_SOME'
+          qp.stemming_strategy = Xapian::QueryParser::STEM_SOME
+        when 'STEM_ALL'
+          qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
+        end
+        qp.default_op = all_words ? Xapian::Query::OP_AND : Xapian::Query::OP_OR
+        flags = Xapian::QueryParser::FLAG_WILDCARD
+        flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if RedmineXapian.enable_cjk_ngrams?
+        query = qp.parse_query(query_string, flags)
+        Rails.logger.debug { "query_string is: #{query_string}" }
+        Rails.logger.debug { "Parsed query is: #{query.description}" }
 
-      # Find the top 100 results for the query.
-      enquire.query = query
-      matchset = enquire.mset(0, 1000)
+        # Find the top 100 results for the query.
+        enquire.query = query
+        matchset = enquire.mset(0, 1000)
 
-      return nil if matchset.nil?
+        return nil if matchset.nil?
 
-      # Display the results.
-      Rails.logger.debug { "Matches 1-#{matchset.size} records:" }
-      Rails.logger.debug { "Searching for #{xapian_file == 'Repofile' ? 'repofiles' : 'attachments'}" }
-      i = 0
-      matchset.matches.each do |m|
-        case xapian_file
-        when 'Repofile'
-          if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
-            dochash = {
-              date: Regexp.last_match(1),
-              sample: Regexp.last_match(2),
-              url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(3))
-            }
-            repo_file = process_repo_file(projects_to_search, dochash, user, i)
-            if repo_file
-              xpattachments << repo_file
-              i += 1
+        # Display the results.
+        Rails.logger.debug { "Matches 1-#{matchset.size} records:" }
+        Rails.logger.debug { "Searching for #{xapian_file == 'Repofile' ? 'repofiles' : 'attachments'}" }
+        i = 0
+        matchset.matches.each do |m|
+          case xapian_file
+          when 'Repofile'
+            if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
+              dochash = {
+                date: Regexp.last_match(1),
+                sample: Regexp.last_match(2),
+                url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(3))
+              }
+              repo_file = process_repo_file(projects_to_search, dochash, user, i)
+              if repo_file
+                xpattachments << repo_file
+                i += 1
+              end
+            else
+              Rails.logger.error "Wrong format of document data: #{m.document.data}"
             end
-          else
-            Rails.logger.error "Wrong format of document data: #{m.document.data}"
-          end
-        when 'Attachment'
-          if m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type|caption|modtime|size)=/
-            dochash = {
-              url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(1)),
-              sample: Regexp.last_match(2)
-            }
-            attachment = process_attachment(projects_to_search, dochash, user)
-            xpattachments << attachment if attachment
-          else
-            Rails.logger.error "Wrong format of document data: #{m.document.data}"
+          when 'Attachment'
+            if m.document.data =~ /^url=(.+)\W+sample=(.+)\W+(author|type|caption|modtime|size)=/
+              dochash = {
+                url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(1)),
+                sample: Regexp.last_match(2)
+              }
+              attachment = process_attachment(projects_to_search, dochash, user)
+              xpattachments << attachment if attachment
+            else
+              Rails.logger.error "Wrong format of document data: #{m.document.data}"
+            end
           end
         end
       end
@@ -236,11 +238,11 @@ module RedmineXapian
       repository_attachment
     end
 
-    def get_database_path(xapian_file)
+    def get_database_path(xapian_file, stemming_lang)
       if xapian_file == 'Repofile'
         File.join RedmineXapian.index_database, 'repodb'
       else
-        File.join RedmineXapian.index_database, RedmineXapian.stemming_lang
+        File.join RedmineXapian.index_database, stemming_lang
       end
     end
   end

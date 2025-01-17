@@ -507,7 +507,7 @@ begin
       my_log "#{SCRIPTINDEX} does not exist, exiting...", true
       exit 1
     end
-    databasepath = File.join(DBROOTPATH.rstrip, 'repodb')
+    databasepath = File.join(DBROOTPATH, 'repodb')
     FileUtils.rm_rf(databasepath) if File.directory?(databasepath) && reset_database
     unless File.directory?(databasepath)
       my_log "Db directory #{databasepath} does not exist, creating...", verbose

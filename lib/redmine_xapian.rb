@@ -45,6 +45,10 @@ module RedmineXapian
       end
     end
 
+    def stem_langs
+      Setting.plugin_redmine_xapian['stem_langs'].presence || ['english']
+    end
+
     def stemming_strategy
       if Setting.plugin_redmine_xapian['stemming_strategy'].present?
         Setting.plugin_redmine_xapian['stemming_strategy'].strip
@@ -82,3 +86,4 @@ require "#{File.dirname(__FILE__)}/redmine_xapian/patches/search_controller_patc
 # Hooks
 # Views
 require "#{File.dirname(__FILE__)}/redmine_xapian/hooks/views/base_view_hooks"
+require "#{File.dirname(__FILE__)}/redmine_xapian/hooks/views/search_view_hooks"

@@ -19,15 +19,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module RedmineXapian
-  # Xapian search service
-  class XapianSearchService
-    extend RedmineXapian::XapianSearch
+  module Hooks
+    module Views
+      # Base view's hooks
+      class SearchViewHooks < Redmine::Hook::ViewListener
+        def view_search_index_options_content_bottom(context = {})
+          # If there is just one language configured, there is no need to offer it to the user for selection.
+          return if RedmineXapian.stem_langs.size < 2
 
-    class << self
-      def search(search_data)
-        Rails.logger.debug 'XapianSearch::search'
-        xapian_search search_data.tokens, search_data.projects, search_data.options[:all_words], search_data.user,
-                      search_data.element, search_data.options[:params][:xapian_stem_langs]
+          context[:controller].send :render_to_string,
+                                    { partial: 'hooks/view_search_index_options_content_bottom', locals: context }
+        end
       end
     end
   end

@@ -37,7 +37,7 @@ Redmine::Plugin.register :redmine_xapian do
              'index_database' => File.expand_path('file_index', Rails.root),
              'stemming_lang' => 'english',
              'stemming_strategy' => 'STEM_SOME',
-             'stem_langs' => RedmineXapian::LANGUAGES,
+             'stem_langs' => ['english'],
              'save_search_scope' => '0',
              'enable_cjk_ngrams' => '0'
            }
