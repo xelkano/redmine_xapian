@@ -81,6 +81,7 @@ env = 'production'
 reset_log = false
 retry_failed = false
 reset_database = false
+max_size = ''
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -144,6 +145,9 @@ optparse = OptionParser.new do |opts|
     exit
   end
   opts.on('-R', '--retry-failed', 'retry files which omindex failed to extract text') { retry_failed = true }
+  opts.on('-m', '--max-size SIZE', "maximum size of file to index(e.g.: '5M', '1G',...)") do |m|
+    max_size = m
+  end
   opts.separator('')
   opts.separator('Examples:')
   opts.separator(' xapian_indexer.rb -f -s english,italian -v')
@@ -495,6 +499,7 @@ begin
       cmd = "#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
       cmd << ' -v' if verbose
       cmd << ' --retry-failed' if retry_failed
+      cmd << " -m #{max_size}" if max_size.present?
       my_log cmd, verbose
       system_or_raise cmd, verbose
     end
