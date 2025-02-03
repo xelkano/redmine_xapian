@@ -9,7 +9,7 @@ Changelog for Redmine Xapian
 
     Stemming language as an extended search option
 
-* New #148 - Stem-languageas a search option
+* New #148 - Stem-languages a search option
 
 4.0.0 *2024-12-06*
 ------------------
