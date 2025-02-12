@@ -1,10 +1,14 @@
 Changelog for Redmine Xapian
 ============================
 
-4.0.2 *????-??-??*
+4.0.2 *2025-02-12*
 ------------------
 
-4.0.1 *2024-01-17*
+    Maximum size of files to index
+
+* New #149 - Maximum size of files to index
+
+4.0.1 *2025-01-17*
 ------------------
 
     Stemming language as an extended search option
