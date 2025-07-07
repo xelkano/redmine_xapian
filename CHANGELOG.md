@@ -1,8 +1,12 @@
 Changelog for Redmine Xapian
 ============================
 
-4.0.3 *????-??-??*
+4.0.3 *2025-07-07*
 ------------------
+
+    Change of the license from GNU GPL v2 to v3
+    
+* New #150 - GNU GPL v2 -> v3
 
 4.0.2 *2025-02-12*
 ------------------
