@@ -22,8 +22,6 @@ require File.expand_path('../../../../../test/test_helper', __FILE__)
 
 # Search controller tests
 class SearchControllerTest < ActionDispatch::IntegrationTest
-  fixtures :attachments, :changesets, :documents, :issues, :messages, :news, :wiki_pages, :projects, :users,
-           :email_addresses
 
   def setup
     attachment = Attachment.find_by(id: 1)
