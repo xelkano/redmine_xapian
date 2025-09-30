@@ -271,12 +271,10 @@ def indexing_diff_by_time(databasepath, indexconf, project, repository, time_las
       walk databasepath, indexconf, project, repository, nil, repository.entries(nil, nil), time_last_indexed,
            tempdir, verbose
     end
-    if repository&.tags
-      repository.tags.each do |tag|
-        my_log "Walking in tag: #{repo_name(repository)} - #{tag}", verbose
-        walk databasepath, indexconf, project, repository, tag, repository.entries(nil, tag), time_last_indexed,
-             tempdir, verbose
-      end
+    repository&.tags&.each do |tag|
+      my_log "Walking in tag: #{repo_name(repository)} - #{tag}", verbose
+      walk databasepath, indexconf, project, repository, tag, repository.entries(nil, tag), time_last_indexed,
+           tempdir, verbose
     end
   rescue StandardError => e
     my_log "#{repo_name(repository)} encountered an error and will be skipped: #{e.message}", true

@@ -22,7 +22,6 @@ require File.expand_path('../../../../../test/test_helper', __FILE__)
 
 # Attachment unit test
 class AttachmentTest < ActiveSupport::TestCase
-
   def setup
     @admin = User.active.where(admin: true).first
     @projects_to_search = Project.active.all
