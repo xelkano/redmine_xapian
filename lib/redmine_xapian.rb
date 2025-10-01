@@ -81,6 +81,7 @@ require "#{File.dirname(__FILE__)}/redmine_xapian/xapian_search_service"
 # Patches
 require "#{File.dirname(__FILE__)}/redmine_xapian/patches/attachment_patch"
 require "#{File.dirname(__FILE__)}/redmine_xapian/patches/search_controller_patch"
+require "#{File.dirname(__FILE__)}/redmine_xapian/patches/search_helper_patch"
 
 # Hooks
 # Views

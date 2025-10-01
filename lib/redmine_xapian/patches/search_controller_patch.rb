@@ -21,9 +21,6 @@ module RedmineXapian
   module Patches
     # Search controller patch
     module SearchControllerPatch
-      SearchController.helper ::RedmineXapian::SearchHelper
-      SearchController.helper :application
-
       def index
         @question = params[:q]&.strip || ''
         # Plugin change do
