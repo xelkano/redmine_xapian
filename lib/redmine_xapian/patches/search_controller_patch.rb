@@ -22,7 +22,7 @@ module RedmineXapian
     # Search controller patch
     module SearchControllerPatch
       SearchController.helper ::RedmineXapian::SearchHelper
-      SearchController.helper ::ApplicationHelper
+      SearchController.helper :application
 
       def index
         @question = params[:q]&.strip || ''
