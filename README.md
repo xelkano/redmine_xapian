@@ -1,7 +1,7 @@
 Redmine Xapian search plugin 4.0.4
 ==================================
 
-[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=devel)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
+[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=master)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
 [![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
 
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
@@ -14,7 +14,7 @@ A copy of the plugin can be downloaded from  GitHub at https://github.com/xelkan
 
 ### 1.1. Required packages
 
-Redmine >= 6.0
+Redmine >= 6.1
 
 To use the full-text search engine you must install `xapian-omega` package. To index some files with `omindex` you may have to install some other packages like `xpdf`, `antiword`, ...
  
