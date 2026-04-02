@@ -1,18 +1,17 @@
-Redmine Xapian search plugin 4.0.5
-==================================
+## Redmine Xapian search plugin 4.0.6 devel
 
-[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=master)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
+[![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=devel)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
 [![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
 
 With this plugin you will be able to make searches by file name and by strings inside your attachments through the [Xapian 
 search engine](https://xapian.org). This plugin can also index the files located in your repositories. This plugin 
 replaces search controller, its view and search methods.
 
-## 1.  Installation and Setup
+### 1.  Installation and Setup
 
 A copy of the plugin can be downloaded from  GitHub at https://github.com/xelkano/redmine_xapian/downloads.
 
-### 1.1. Required packages
+#### 1.1. Required packages
 
 Redmine >= 6.1
 
@@ -75,7 +74,7 @@ To index images you will need an OCR engine, e.g. Tesseract.
 apt install tesseract-ocr
 ```
 
-### 1.2. Plugin installation
+#### 1.2. Plugin installation
 
 Install redmine_xapian into the plugins directory with:
 
@@ -96,7 +95,7 @@ by file name and its contents. Xapian plugin checks for ruby bindings before its
 it is not activated and the following message is going to appear in Redmine log “No Xapian search engine interface for 
 Ruby installed" If you see this message, please make sure that a Xapian search engine interface is installed.
 
-### 1.3. Setup
+#### 1.3. Setup
 
 First of all, go to the Redmine interface and in the plugins section configure the plugin. It's very important to set up 
 correctly the directory that will contain the Xapian databases.
@@ -141,7 +140,7 @@ Indexing repositories of some projects (valid for repositories indexing only):
 xapian_indexer.rb -v -r -p project_identifier1,project_identifier2
 ```
 
-## Indexing pictures
+### Indexing pictures
 
 Omindex supports usage of filters to index binary files. In order to index images containing text, modify the OMINDEX 
 variable in the script as follows. E.g. parse PNG files using tesseract OCR engine:
@@ -150,7 +149,7 @@ variable in the script as follows. E.g. parse PNG files using tesseract OCR engi
 OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
 ```
 
-## Configure a cron task for an automatic indexing
+### Configure a cron task for an automatic indexing
 
 Once you have tested the script functionality, you can configure it for running every day at nights keeping your Xapian
 database up to date, for example:
@@ -165,7 +164,7 @@ To perform searches in a particular module such as Files, Documents,... it is
 mandatory to enable these modules in your projects and to have corresponding
 permissions view_*; Be sure it is checked.
 
-## Hooks
+### Hooks
 
 There are a few hooks to customize the Xapian search plugin behaviour in your own plugin:
 
@@ -224,7 +223,7 @@ An example of displaying the parent folder of the searched document in DMSF plug
     end
 ```
 
-## 1.4. Uninstalling
+### 1.4. Uninstalling
 
 Before uninstalling the Xapian plugin, please ensure that the Redmine instance is stopped.
 
