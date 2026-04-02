@@ -39,6 +39,8 @@ SCRIPTINDEX = '/usr/bin/scriptindex'
 # To index "non-text" files, use omindex filters
 # e.g.: tesseract OCR engine as a filter for PNG files
 # OMINDEX = "/usr/bin/omindex --filter=image/png:'tesseract %f -'"
+# You can tell omindex to use catdoc instead of antiword for *.doc documents
+# OMINDEX = "/usr/bin/omindex --filter=application/msword:'catdoc -dutf-8 -w'"
 OMINDEX = '/usr/bin/omindex'
 
 # Directory containing Xapian databases for omindex (Attachments indexing)
@@ -183,7 +185,7 @@ def indexing(databasepath, project, repository, tempdir, verbose)
     indexconf = Tempfile.new('index.conf', tempdir)
     indexconf.write "url : field boolean=Q unique=Q\n"
     indexconf.write "body : index truncate=400 field=sample\n"
-    indexconf.write "date: field=date\n"
+    indexconf.write "date : field=date\n"
     indexconf.close
     if latest_changeset && latest_indexed
       my_log "Repository #{repo_name(repository)} indexed, indexing diff", verbose
