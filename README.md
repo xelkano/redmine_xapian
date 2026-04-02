@@ -1,4 +1,4 @@
-Redmine Xapian search plugin 4.0.4
+Redmine Xapian search plugin 4.0.5
 ==================================
 
 [![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=master)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)

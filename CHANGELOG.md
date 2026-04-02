@@ -1,6 +1,14 @@
 Changelog for Redmine Xapian
 ============================
 
+4.0.5 *2026-04-02*
+------------------
+
+    Correct permission for Version container type
+
+New: #83 - Error: not a Word DocumentQuestion
+Bug: #151 - Fix incorrect permission symbol for 'Version' container type
+
 4.0.4 *2025-10-03*
 ------------------
 
