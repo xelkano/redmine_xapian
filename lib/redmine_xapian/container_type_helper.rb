@@ -26,7 +26,7 @@ module RedmineXapian
       def to_permission(container_type)
         case container_type
         when 'Version'
-          :view_files
+          :view_versions
         when 'Project'
           :view_project
         else
