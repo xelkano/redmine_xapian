@@ -208,7 +208,7 @@ def indexing(databasepath, project, repository, tempdir, verbose)
   end
 end
 
-def supported_mime_type(entry)
+def supported_mime_type?(entry)
   mtype = Redmine::MimeType.of(entry)
   MIME_TYPES.include?(mtype) || Redmine::MimeType.is_type?('text', entry)
 end
@@ -252,7 +252,7 @@ def walk(databasepath, indexconf, project, repository, identifier, entries, time
       walk databasepath, indexconf, project, repository, identifier, repository.entries(entry.path, identifier),
            time_last_indexed, tempdir, verbose
     elsif entry.is_file? && !entry.lastrev.nil? && (time_last_indexed.nil? || entry.lastrev.time > time_last_indexed) &&
-          supported_mime_type(entry.path)
+          supported_mime_type?(entry.path)
       add_or_update_index databasepath, indexconf, project, repository, identifier, entry.path, entry.lastrev,
                           ADD_OR_UPDATE, MIME_TYPES[Redmine::MimeType.of(entry.path)], tempdir, verbose
     end
@@ -315,7 +315,7 @@ def walkin(databasepath, indexconf, project, repository, identifier, changesets,
     end
     my_log "Entry to index #{entry.inspect}", verbose
     lastrev = entry.lastrev if entry
-    if supported_mime_type(path) || (action == DELETE)
+    if supported_mime_type?(path) || (action == DELETE)
       add_or_update_index databasepath, indexconf, project, repository, identifier, path, lastrev, action,
                           MIME_TYPES[Redmine::MimeType.of(path)], tempdir, verbose
     end
