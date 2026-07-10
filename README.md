@@ -1,4 +1,4 @@
-## Redmine Xapian search plugin 4.1.6
+## Redmine Xapian search plugin 4.1.0
 
 [![GitHub CI](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml/badge.svg?branch=master)](https://github.com/xelkano/redmine_xapian/actions/workflows/rubyonrails.yml)
 [![Support Ukraine Badge](https://bit.ly/support-ukraine-now)](https://github.com/support-ukraine/support-ukraine)
