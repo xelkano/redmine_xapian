@@ -25,8 +25,7 @@ module RedmineXapian
     class << self
       def search(search_data)
         Rails.logger.debug 'XapianSearch::search'
-        xapian_search search_data.tokens, search_data.projects, search_data.options[:all_words], search_data.user,
-                      search_data.element, search_data.options[:params][:xapian_stem_langs]
+        xapian_search search_data
       end
     end
   end

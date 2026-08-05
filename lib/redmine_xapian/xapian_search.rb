@@ -26,18 +26,18 @@ module RedmineXapian
 
   # Xapian search
   module XapianSearch
-    def xapian_search(tokens, projects_to_search, all_words, user, xapian_file, stemming_langs)
+    def xapian_search(search_data)
       Rails.logger.debug 'XapianSearch::xapian_search'
       xpattachments = []
       return nil unless RedmineXapian.enable?
 
-      stemming_langs = stemming_langs.presence || ['english']
+      stemming_langs = search_data.options[:params][:xapian_stem_langs].presence || ['english']
       Rails.logger.debug { "Global settings dump #{Setting.plugin_redmine_xapian.inspect}" }
       stemming_langs.each do |stemming_lang|
         Rails.logger.debug { "stemming_lang: #{stemming_lang}" }
         stemming_strategy = RedmineXapian.stemming_strategy
         Rails.logger.debug { "stemming_strategy: #{stemming_strategy}" }
-        databasepath = get_database_path(xapian_file, stemming_lang)
+        databasepath = get_database_path(search_data.element, stemming_lang)
         Rails.logger.debug { "databasepath: #{databasepath}" }
 
         begin
@@ -53,7 +53,7 @@ module RedmineXapian
         # Combine the rest of the command line arguments with spaces between
         # them, so that simple queries don't have to be quoted at the shell
         # level.
-        query_string = tokens.map { |x| x[-1, 1].eql?('*') ? x : "#{x}*" }.join(' ')
+        query_string = search_data.tokens.map { |x| x[-1, 1].eql?('*') ? x : "#{x}*" }.join(' ')
         # Parse the query string to produce a Xapian::Query object.
         qp = Xapian::QueryParser.new
         stemmer = Xapian::Stem.new(stemming_lang)
@@ -67,7 +67,7 @@ module RedmineXapian
         when 'STEM_ALL'
           qp.stemming_strategy = Xapian::QueryParser::STEM_ALL
         end
-        qp.default_op = all_words ? Xapian::Query::OP_AND : Xapian::Query::OP_OR
+        qp.default_op = search_data.options[:all_words] ? Xapian::Query::OP_AND : Xapian::Query::OP_OR
         flags = Xapian::QueryParser::FLAG_WILDCARD
         flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if RedmineXapian.enable_cjk_ngrams?
         query = qp.parse_query(query_string, flags)
@@ -82,10 +82,10 @@ module RedmineXapian
 
         # Display the results.
         Rails.logger.debug { "Matches 1-#{matchset.size} records:" }
-        Rails.logger.debug { "Searching for #{xapian_file == 'Repofile' ? 'repofiles' : 'attachments'}" }
+        Rails.logger.debug { "Searching for #{search_data.element == 'Repofile' ? 'repofiles' : 'attachments'}" }
         i = 0
         matchset.matches.each do |m|
-          case xapian_file
+          case search_data.element
           when 'Repofile'
             if m.document.data =~ /^date=(.+)\W+sample=(.+)\W+url=(.+)\W/
               dochash = {
@@ -93,7 +93,7 @@ module RedmineXapian
                 sample: Regexp.last_match(2),
                 url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(3))
               }
-              repo_file = process_repo_file(projects_to_search, dochash, user, i)
+              repo_file = process_repo_file(search_data.projects, dochash, search_data.user, i)
               if repo_file
                 xpattachments << repo_file
                 i += 1
@@ -107,8 +107,7 @@ module RedmineXapian
                 url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(1)),
                 sample: Regexp.last_match(2)
               }
-              attachment = process_attachment(projects_to_search, dochash, user)
-              xpattachments << attachment if attachment
+              xpattachments.concat process_attachments(search_data, dochash)
             else
               Rails.logger.error "Wrong format of document data: #{m.document.data}"
             end
@@ -121,9 +120,9 @@ module RedmineXapian
 
     private
 
-    def process_attachment(projects, dochash, user)
-      attachment = Attachment.where(disk_filename: dochash[:url].split('/').last).first
-      if attachment
+    def process_attachments(search_data, dochash)
+      attachments = []
+      Attachment.where(disk_filename: dochash[:url].split('/')).find_each do |attachment|
         Rails.logger.debug { "Attachment created on #{attachment.created_on}" }
         Rails.logger.debug { "Attachment's project #{attachment.project}" }
         Rails.logger.debug { "Attachment's docattach not nil..:  #{attachment}" }
@@ -132,15 +131,16 @@ module RedmineXapian
           project = attachment.project
           container_type = attachment[:container_type]
           container_permission = ContainerTypeHelper.to_permission(container_type)
-          can_view_container = user.allowed_to?(container_permission, project)
+          can_view_container = search_data.user.allowed_to?(container_permission, project)
           if container_type == 'Issue'
-            issue = Issue.find_by(id: attachment[:container_id])
+            scope = Issue.where(id: attachment[:container_id])
+            scope = scope.open if search_data.options[:open_issues]
+            issue = scope.first
             allowed = can_view_container && issue&.visible?
           else
             allowed = can_view_container
           end
-          projects = [] << projects if projects.is_a?(Project)
-          project_ids = projects.collect(&:id) if projects
+          project_ids = search_data.projects&.collect(&:id)
           if allowed && (project_ids.blank? || (attachment.project && project_ids.include?(attachment.project.id)))
             if dochash[:sample]
               Redmine::Search.cache_store.write(
@@ -148,13 +148,13 @@ module RedmineXapian
                 dochash[:sample].encode('UTF-8', invalid: :replace, undef: :replace)
               )
             end
-            return attachment
+            attachments << attachment
           else
             Rails.logger.warn 'User without permissions'
           end
         end
       end
-      nil
+      attachments
     end
 
     def process_repo_file(projects, dochash, user, id)

@@ -54,11 +54,15 @@ class Repofile
   end
 
   def project
-    @project ||= Project.find_by(id: project_id)
+    return @project if defined?(@project)
+
+    @project = Project.find_by(id: project_id)
   end
 
   def repository
-    @repository ||= Repository.find_by(id: repository_id)
+    return @repository if defined?(@repository)
+
+    @repository = Repository.find_by(id: repository_id)
   end
 
   def identifier
