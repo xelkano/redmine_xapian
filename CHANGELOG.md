@@ -1,8 +1,11 @@
 Changelog for Redmine Xapian
 ============================
 
-4.1.1 *????-??-??*
+4.1.1 *2026-08-11*
 ------------------
+    Bug fixing
+
+Bug: #152 - Search by attachment content does not work correctly with Redmine attachment deduplication
 
 4.1.0 *2026-07-10*
 ------------------
