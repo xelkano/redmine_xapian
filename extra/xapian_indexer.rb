@@ -48,6 +48,15 @@ OMINDEX = '/usr/bin/omindex'
 DOCX_FILTER = "--filter='application/vnd.openxmlformats-officedocument.wordprocessingml.document:" \
               'unzip -p %f word/document.xml | sed -e "s/<\\/w:p>/ /g; s/<[^>]*>//g"\''
 
+# With --ocr, text in images is read with Tesseract (apt install tesseract-ocr tesseract-ocr-<lang>
+# imagemagick). OCR runs twice and both texts are indexed: on the image as it is (best for sharp
+# screenshots with small text) and on a grey, de-noised copy made by ImageMagick (best for photos).
+OCR_COMMAND = '{ tesseract %f - 2>/dev/null; convert %f -colorspace Gray -median 3 png:- 2>/dev/null | ' \
+              'tesseract stdin - 2>/dev/null; }'
+OCR_FILTERS = %w[image/png image/jpeg image/tiff image/gif image/bmp].map do |mime|
+  "--filter='#{mime}:#{OCR_COMMAND}'"
+end.freeze
+
 # Directory containing Xapian databases for omindex (Attachments indexing)
 DBROOTPATH = File.expand_path('file_index', REDMINE_ROOT)
 
@@ -89,6 +98,7 @@ retry_failed = false
 reset_database = false
 max_size = ''
 docx_filter = true
+ocr = false
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -155,6 +165,7 @@ optparse = OptionParser.new do |opts|
   opts.on('-m', '--max-size SIZE', "maximum size of file to index(e.g.: '5M', '1G',...)") do |m|
     max_size = m
   end
+  opts.on('-o', '--ocr', 'read text in images with Tesseract OCR (png, jpeg, tiff, gif, bmp)') { ocr = true }
   opts.on('--no-docx-filter', "use omindex's own .docx reader instead of unzip + sed") { docx_filter = false }
   opts.separator('')
   opts.separator('Examples:')
@@ -504,6 +515,7 @@ begin
       end
       filters = []
       filters << DOCX_FILTER if docx_filter
+      filters.concat(OCR_FILTERS) if ocr
       cmd = "#{OMINDEX} #{filters.join(' ')} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
       cmd << ' -v' if verbose
       cmd << ' --retry-failed' if retry_failed
