@@ -50,10 +50,7 @@ module RedmineXapian
         # Start an enquire session.
         enquire = Xapian::Enquire.new(database)
 
-        # Combine the rest of the command line arguments with spaces between
-        # them, so that simple queries don't have to be quoted at the shell
-        # level.
-        query_string = search_data.tokens.map { |x| x[-1, 1].eql?('*') ? x : "#{x}*" }.join(' ')
+        query_string = search_data.tokens.join(' ')
         # Parse the query string to produce a Xapian::Query object.
         qp = Xapian::QueryParser.new
         stemmer = Xapian::Stem.new(stemming_lang)
@@ -70,7 +67,7 @@ module RedmineXapian
         qp.default_op = search_data.options[:all_words] ? Xapian::Query::OP_AND : Xapian::Query::OP_OR
         flags = Xapian::QueryParser::FLAG_WILDCARD
         flags |= Xapian::QueryParser::FLAG_CJK_NGRAM if RedmineXapian.enable_cjk_ngrams?
-        query = qp.parse_query(query_string, flags)
+        query = build_query(qp, search_data.tokens, flags, qp.default_op)
         Rails.logger.debug { "query_string is: #{query_string}" }
         Rails.logger.debug { "Parsed query is: #{query.description}" }
 
@@ -119,6 +116,22 @@ module RedmineXapian
     end
 
     private
+
+    # Each word matches its stemmed form (e.g. "calibrate" also finds "calibration") OR any word
+    # starting with it ("calib" finds "calibration"). Appending "*" to every word, as before,
+    # turned all words into wildcards, and Xapian does not stem wildcards, so word forms were not
+    # found. A word the user ends with "*" stays a pure wildcard.
+    def build_query(query_parser, tokens, flags, default_op)
+      subqueries = tokens.map do |token|
+        if token.end_with?('*')
+          query_parser.parse_query(token, flags)
+        else
+          Xapian::Query.new(Xapian::Query::OP_OR,
+                            [query_parser.parse_query(token, flags), query_parser.parse_query("#{token}*", flags)])
+        end
+      end
+      subqueries.one? ? subqueries.first : Xapian::Query.new(default_op, subqueries)
+    end
 
     def process_attachments(search_data, dochash)
       attachments = []
