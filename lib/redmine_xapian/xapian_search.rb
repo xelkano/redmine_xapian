@@ -136,7 +136,8 @@ module RedmineXapian
             scope = Issue.where(id: attachment[:container_id])
             scope = scope.open if search_data.options[:open_issues]
             issue = scope.first
-            allowed = can_view_container && issue&.visible?
+            allowed = can_view_container && issue&.visible?(search_data.user) &&
+                      issue_details_visible?(issue, search_data.user)
           else
             allowed = can_view_container
           end
@@ -155,6 +156,15 @@ module RedmineXapian
         end
       end
       attachments
+    end
+
+    # Plugins such as redmine_view_issue_description let some users see an issue in lists but not
+    # open its details (description, notes, attachments). The search must not show them the
+    # attachment's name or a sample of its text either.
+    def issue_details_visible?(issue, user)
+      return true unless issue.respond_to?(:detail_access_granted?)
+
+      issue.detail_access_granted?(user)
     end
 
     def process_repo_file(projects, dochash, user, id)
