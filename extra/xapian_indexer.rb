@@ -43,6 +43,11 @@ SCRIPTINDEX = '/usr/bin/scriptindex'
 # OMINDEX = "/usr/bin/omindex --filter=application/msword:'catdoc -dutf-8 -w'"
 OMINDEX = '/usr/bin/omindex'
 
+# Some omindex builds (e.g. Debian's xapian-omega 1.4.29) extract no text at all from .docx files,
+# so by default Word documents are read with unzip + sed instead (--no-docx-filter turns this off).
+DOCX_FILTER = "--filter='application/vnd.openxmlformats-officedocument.wordprocessingml.document:" \
+              'unzip -p %f word/document.xml | sed -e "s/<\\/w:p>/ /g; s/<[^>]*>//g"\''
+
 # Directory containing Xapian databases for omindex (Attachments indexing)
 DBROOTPATH = File.expand_path('file_index', REDMINE_ROOT)
 
@@ -83,6 +88,7 @@ reset_log = false
 retry_failed = false
 reset_database = false
 max_size = ''
+docx_filter = true
 
 MIME_TYPES = {
   'application/pdf' => 'pdf',
@@ -149,6 +155,7 @@ optparse = OptionParser.new do |opts|
   opts.on('-m', '--max-size SIZE', "maximum size of file to index(e.g.: '5M', '1G',...)") do |m|
     max_size = m
   end
+  opts.on('--no-docx-filter', "use omindex's own .docx reader instead of unzip + sed") { docx_filter = false }
   opts.separator('')
   opts.separator('Examples:')
   opts.separator(' xapian_indexer.rb -f -s english,italian -v')
@@ -495,7 +502,9 @@ begin
         my_log "#{databasepath} does not exist, creating ...", verbose
         FileUtils.mkdir_p databasepath
       end
-      cmd = "#{OMINDEX} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
+      filters = []
+      filters << DOCX_FILTER if docx_filter
+      cmd = "#{OMINDEX} #{filters.join(' ')} -s #{lang} --db #{databasepath} #{filespath}  --url / --depth-limit=0"
       cmd << ' -v' if verbose
       cmd << ' --retry-failed' if retry_failed
       cmd << " -m #{max_size}" if max_size.present?
