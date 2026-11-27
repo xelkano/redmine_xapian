@@ -1,8 +1,17 @@
 Changelog for Redmine Xapian
 ============================
 
-4.1.1 *????-??-??*
+4.1.2 *2026-11-27*
 ------------------
+    
+    Indexing & Searching enhancement
+
+* New: #157 - Search: load matching attachments in batches
+* New: #156 - Search: match word forms as well as word beginnings
+* New: #155 - Indexer: --ocr option to make text in images searchable
+* New: #154 - Search: check attachments against the searching user
+* New: #153 - Indexer: read .docx files with unzip + sed
+* Bug: #152 - Search by attachment content does not work correctly with Redmine attachment deduplication
 
 4.1.1 *2026-08-11*
 ------------------
