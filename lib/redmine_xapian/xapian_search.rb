@@ -81,6 +81,7 @@ module RedmineXapian
         Rails.logger.debug { "Matches 1-#{matchset.size} records:" }
         Rails.logger.debug { "Searching for #{search_data.element == 'Repofile' ? 'repofiles' : 'attachments'}" }
         i = 0
+        attachment_hits = []
         matchset.matches.each do |m|
           case search_data.element
           when 'Repofile'
@@ -104,12 +105,13 @@ module RedmineXapian
                 url: URI::DEFAULT_PARSER.unescape(Regexp.last_match(1)),
                 sample: Regexp.last_match(2)
               }
-              xpattachments.concat process_attachments(search_data, dochash)
+              attachment_hits << dochash
             else
               Rails.logger.error "Wrong format of document data: #{m.document.data}"
             end
           end
         end
+        xpattachments.concat process_attachments(search_data, attachment_hits) if attachment_hits.any?
       end
       Rails.logger.debug 'Xapian searched'
       xpattachments.map { |a| [a.created_on, a.id] }
@@ -133,42 +135,62 @@ module RedmineXapian
       subqueries.one? ? subqueries.first : Xapian::Query.new(default_op, subqueries)
     end
 
-    def process_attachments(search_data, dochash)
-      attachments = []
-      Attachment.where(disk_filename: dochash[:url].split('/')).find_each do |attachment|
-        Rails.logger.debug { "Attachment created on #{attachment.created_on}" }
-        Rails.logger.debug { "Attachment's project #{attachment.project}" }
-        Rails.logger.debug { "Attachment's docattach not nil..:  #{attachment}" }
-        if attachment.container
-          Rails.logger.debug 'Adding attachment'
-          project = attachment.project
-          container_type = attachment[:container_type]
-          container_permission = ContainerTypeHelper.to_permission(container_type)
-          can_view_container = search_data.user.allowed_to?(container_permission, project)
-          if container_type == 'Issue'
-            scope = Issue.where(id: attachment[:container_id])
-            scope = scope.open if search_data.options[:open_issues]
-            issue = scope.first
-            allowed = can_view_container && issue&.visible?(search_data.user) &&
-                      issue_details_visible?(issue, search_data.user)
-          else
-            allowed = can_view_container
-          end
-          project_ids = search_data.projects&.collect(&:id)
-          if allowed && (project_ids.blank? || (attachment.project && project_ids.include?(attachment.project.id)))
-            if dochash[:sample]
-              Redmine::Search.cache_store.write(
-                "Attachment-#{attachment.id}",
-                dochash[:sample].encode('UTF-8', invalid: :replace, undef: :replace)
-              )
-            end
-            attachments << attachment
-          else
-            Rails.logger.warn 'User without permissions'
-          end
+    # Turns the Xapian hits into the attachments the user may see. Everything is loaded in batches
+    # (attachments, their issues and projects) and permissions are checked once per project or
+    # issue, instead of several queries per hit (with 1,000 hits that was 4,000-7,000 queries).
+    def process_attachments(search_data, dochashes)
+      user = search_data.user
+      names = dochashes.flat_map { |dochash| dochash[:url].split('/') }.uniq
+      attachments = Attachment.where(disk_filename: names).to_a
+      return [] if attachments.empty?
+
+      samples = {}
+      dochashes.each { |dochash| dochash[:url].split('/').each { |name| samples[name] ||= dochash[:sample] } }
+      issue_ids = attachments.select { |a| a.container_type == 'Issue' }.map(&:container_id)
+      issue_scope = Issue.where(id: issue_ids).preload(:project, :status)
+      issue_scope = issue_scope.open if search_data.options[:open_issues]
+      issues = issue_scope.index_by(&:id)
+      ActiveRecord::Associations::Preloader.new(records: attachments.reject { |a| a.container_type == 'Issue' },
+                                                associations: :container).call
+      project_ids = search_data.projects&.collect(&:id)
+      container_allowed = {}
+      issue_allowed = {}
+      result = []
+      attachments.each do |attachment|
+        if attachment.container_type == 'Issue'
+          issue = issues[attachment.container_id]
+          next unless issue
+
+          attachment.container = issue
         end
+        next unless attachment.container
+
+        project = attachment.project
+        container_type = attachment[:container_type]
+        permission = ContainerTypeHelper.to_permission(container_type)
+        key = [permission, project&.id]
+        container_allowed[key] = user.allowed_to?(permission, project) unless container_allowed.key?(key)
+        allowed = container_allowed[key]
+        if allowed && container_type == 'Issue'
+          unless issue_allowed.key?(issue.id)
+            issue_allowed[issue.id] = issue.visible?(user) && issue_details_visible?(issue, user)
+          end
+          allowed = issue_allowed[issue.id]
+        end
+        unless allowed && (project_ids.blank? || (project && project_ids.include?(project.id)))
+          Rails.logger.warn 'User without permissions'
+          next
+        end
+
+        sample = samples[attachment.disk_filename]
+        if sample
+          Redmine::Search.cache_store.write(
+            "Attachment-#{attachment.id}", sample.encode('UTF-8', invalid: :replace, undef: :replace)
+          )
+        end
+        result << attachment
       end
-      attachments
+      result
     end
 
     # Plugins such as redmine_view_issue_description let some users see an issue in lists but not
